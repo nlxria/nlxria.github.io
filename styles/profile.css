@@ -12,7 +12,7 @@ html,body {
     display: flex;
     justify-content: center;
     align-items: flex-start;
-    padding: 12vh 5vmin 5vmin 5vmin; /* header(9vh)に被らないようにする */
+    padding: 5vmin 5vmin 5vmin 5vmin; /* header(9vh)に被らないようにする */
     min-height: 100vh;
     box-sizing: border-box;
 }
@@ -183,7 +183,6 @@ html,body {
     .highlight { font-size: 3.2vmin; padding: 0.5vmin 1.5vmin; margin-right: 2vmin; }
     .profile-link { font-size: 4vmin; padding: 2.5vmin 6vmin; }
     .profile-icon { width: 35vmin; height: 35vmin; }
-    .profile-wrapper { padding-top: 3vh; }
 }
 
 /* PC等大画面の文字サイズ固定化 (vminに過剰依存しない) */
@@ -195,5 +194,4 @@ html,body {
     .profile-section li::before { font-size: 18px; }
     .highlight { font-size: 14px; padding: 2px 8px; margin-right: 12px; }
     .profile-link { font-size: 16px; padding: 12px 28px; }
-    .profile-wrapper { padding-top: 100px; }
 }
