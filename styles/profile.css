@@ -1,5 +1,12 @@
 /* プロフィールページ専用スタイル: グラスモーフィズムとアニメーション */
 
+html,body {
+    background:repeating-linear-gradient(to bottom,transparent,transparent calc(50vmin / 3),#322E7B calc(50vmin / 3),#322E7B calc(50vmin / 3 + 2px)),
+    repeating-linear-gradient(to right,transparent,transparent calc(50vmin / 3),#322E7B calc(50vmin / 3),#322E7B calc(50vmin / 3 + 2px)) #050949;
+    overflow-y:auto;
+    scroll-padding-top:calc(9vh + 6em);
+}
+
 /* レイアウト */
 .profile-wrapper {
     display: flex;
@@ -8,7 +15,6 @@
     padding: 12vh 5vmin 5vmin 5vmin; /* header(9vh)に被らないようにする */
     min-height: 100vh;
     box-sizing: border-box;
-    overflow-y: auto;
 }
 
 /* メインのカード型 - すりガラス風 */
@@ -177,7 +183,7 @@
     .highlight { font-size: 3.2vmin; padding: 0.5vmin 1.5vmin; margin-right: 2vmin; }
     .profile-link { font-size: 4vmin; padding: 2.5vmin 6vmin; }
     .profile-icon { width: 35vmin; height: 35vmin; }
-    .profile-wrapper { padding-top: 15vh; }
+    .profile-wrapper { padding-top: 3vh; }
 }
 
 /* PC等大画面の文字サイズ固定化 (vminに過剰依存しない) */
