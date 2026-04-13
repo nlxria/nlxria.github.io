@@ -1,1 +1,122 @@
-html,body {overflow:hidden;} .full {position:absolute;z-index:0;bottom:0;top:9vh;height:calc(100vh - 9vh);width:100%;}
+/* ウィンドウ全体 */
+.chat-window {
+    position: absolute;
+    top: calc(9vh + 3rem);
+    right: 3rem;
+    z-index: 2;
+    background: #313338;
+    color: #FFFFFF;
+    border-radius: 1.5rem;
+    box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.6);
+    
+    /* --- リサイズ機能の追加 --- */
+    width: 25vw;   /* 初期幅 */
+    height: 75vh;      /* 初期高さ（resizeを使う場合はheight指定が必要） */
+    min-width: 15rem;   /* 最小幅 */
+    min-height: 30rem;  /* 最小高さ */
+    resize: both;       /* 縦横両方のリサイズを許可 */
+    overflow: hidden;   /* resizeを有効にするために必要 */
+    
+    display: flex;
+    flex-direction: column;
+}
+
+/* ヘッダー (高さは固定) */
+.chat-header {
+    flex: none; /* 伸縮しない */
+    padding: 1.0rem;
+    cursor: move;
+    user-select: none;
+    border-bottom: 1px solid #393A40;
+    display: flex;
+    align-items: center;
+}
+
+/* コメントエリア (ここが伸縮する) */
+.comment-list {
+    flex: 1; /* 親要素の余ったスペースをすべて占有する */
+    padding: 1.0rem;
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+    border-bottom: 1px solid #393A40;
+}
+
+.comment-list::-webkit-scrollbar {
+    display: none;
+}
+
+/* --- 以下、装飾パーツ（変更なし） --- */
+
+.comment-list>div {
+    display: flex;
+    align-items: baseline;
+    margin-top: 1.0rem;
+}
+
+.comment-list>div b {
+    font-size: 1.0rem;
+    white-space: nowrap;
+    margin-right: 0.5rem;
+}
+
+.comment-list>div span {
+    color: #949BA4;
+    font-size: 0.75rem;
+}
+
+.comment-list>p {
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+    font-size: 1.0rem;
+    line-height: 1.5;
+    margin: 0.5rem 0 0 0;
+}
+
+/* 入力エリア (高さは固定) */
+.chat-input-wrapper {
+    flex: none; /* 伸縮しない */
+    background: #383a40;
+    display: flex;
+    align-items: center;
+    border-radius: 1.0rem;
+    margin: 0.75rem 1.0rem;
+    padding: 0.125rem 0.5rem;
+}
+
+.color-picker {
+    background: none;
+    appearance: none;
+    outline: none;
+    border: none;
+    width: 1.25rem;
+    height: 1.25rem;
+    padding: 0;
+    margin-right: 0.5rem;
+    cursor: pointer;
+}
+
+.color-picker::-webkit-color-swatch {
+    border: none;
+    border-radius: 50%;
+}
+
+.color-picker::-webkit-color-swatch-wrapper {
+    padding: 0;
+}
+
+.chat-input {
+    background: none;
+    color: #FFFFFF;
+    outline: none;
+    border: none;
+    width: 100%;
+    font-size: 1.0rem;
+    padding: 0.25rem 0;
+}
+
+.chat-input::placeholder {
+    color: #87898f;
+}
