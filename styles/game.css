@@ -87,12 +87,13 @@
 .chat-input-wrapper {
     flex: none;
     /* 伸縮しない */
-    background: #FFFFFF;
+    background: none;
     display: flex;
     align-items: center;
     border-radius: 1.0rem;
     margin: 0.75rem 1.0rem;
     padding: 0.125rem 0.5rem;
+    border: 0.125rem solid #FFFFFF;
 }
 
 .color-picker {
