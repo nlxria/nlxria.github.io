@@ -35,7 +35,7 @@
 /* コメントエリア (ここが伸縮する) */
 .comment-list {
     flex: 1; /* 親要素の余ったスペースをすべて占有する */
-    padding: 1.0rem;
+    padding: 0 1.0rem;
     overflow-x: hidden;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
