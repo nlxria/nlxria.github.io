@@ -1,0 +1,1 @@
+html,body {overflow:hidden;} .full {position:absolute;z-index:0;bottom:0;top:9vh;height:calc(100vh - 9vh);width:100%;}

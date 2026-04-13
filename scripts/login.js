@@ -1,4 +1,4 @@
-const version = "β";
+const version = "0.0.1";
 const latest = { "ver": version, "uuid": crypto.randomUUID() };
 function autoStorage(value) { localStorage.setItem("local", JSON.stringify(value)); };
 if (!localStorage.hasOwnProperty("local")) { autoStorage(latest); };
