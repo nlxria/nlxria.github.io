@@ -68,7 +68,7 @@ onSnapshot(q, (snapshot) => {
         // メッセージをラッパーで囲み、data-tag を付与する
         messages += `
         <div class="message-item" data-tag="${tag}">
-            <div class="message-header"><b style="color:${data.color};">${safeName}</b><span>［${tag}］</span></div>
+            <div class="message-header"><b style="color:${data.color};">${safeName}</b><span>[ ${tag} ]</span></div>
             <p>${safeContent}</p>
         </div>`;
     });
