@@ -27,12 +27,12 @@
     </head>
     <body><main>
         <header><a class="back" onclick="history.back()">←</a><a class="title" href="">関数電卓</a></header><div class="head"></div>
-        <div class="chat-window comment-window">
-            <div class="chat-header"><b>＃ 💬｜コメント</b></div>
-            <div class="overflow y comment-list"></div>
+        <div class="chat-window message-window">
+            <div class="chat-header"><b><span id="tab-toggle" style="cursor: pointer; color: yellow;" title="タブを切替">＃ メイン</span></b></div>
+            <div class="overflow y message-list"></div>
             <div class="chat-input-wrapper">
-                <input name="entry.color" class="color-picker" type="color" value="#FFFFFF" title="名前の色を変更">
-                <input name="entry.text" class="chat-input" type="text" placeholder="コメントを投稿" maxlength="2000" required>
+                <input name="entry.color" class="color-picker" type="color" value="#FFFFFF" title="色を変更">
+                <input name="entry.text" class="chat-input" type="text" placeholder="メッセージを入力" maxlength="2000" required>
             </div>
         </div>
         <script src="/scripts/login.js"></script>

@@ -11,17 +11,11 @@
 
     /* --- リサイズ機能の追加 --- */
     width: 25vw;
-    /* 初期幅 */
     height: 75vh;
-    /* 初期高さ（resizeを使う場合はheight指定が必要） */
     min-width: 15rem;
-    /* 最小幅 */
     min-height: 30rem;
-    /* 最小高さ */
     resize: both;
-    /* 縦横両方のリサイズを許可 */
     overflow: hidden;
-    /* resizeを有効にするために必要 */
 
     display: flex;
     flex-direction: column;
@@ -30,7 +24,6 @@
 /* ヘッダー (高さは固定) */
 .chat-header {
     flex: none;
-    /* 伸縮しない */
     padding: 1.0rem;
     cursor: move;
     user-select: none;
@@ -40,9 +33,8 @@
 }
 
 /* コメントエリア (ここが伸縮する) */
-.comment-list {
+.message-list {
     flex: 1;
-    /* 親要素の余ったスペースをすべて占有する */
     padding: 0 1.0rem;
     overflow-x: hidden;
     overflow-y: auto;
@@ -52,41 +44,48 @@
     border-bottom: 0.125rem solid #FFFFFF;
 }
 
-.comment-list::-webkit-scrollbar {
+.message-list::-webkit-scrollbar {
     display: none;
 }
 
-/* --- 以下、装飾パーツ（変更なし） --- */
-
-.comment-list>div {
-    display: flex;
-    align-items: baseline;
+/* --- メッセージの装飾 --- */
+.message-item {
     margin-top: 1.0rem;
 }
 
-.comment-list>div b {
+.message-header {
+    display: flex;
+    align-items: baseline;
+}
+
+.message-header b {
     font-size: 1.0rem;
     white-space: nowrap;
     margin-right: 0.5rem;
 }
 
-.comment-list>div span {
+.message-header span {
     color: #949BA4;
     font-size: 0.75rem;
 }
 
-.comment-list>p {
+.message-item>p {
     white-space: pre-wrap;
     overflow-wrap: break-word;
     font-size: 1.0rem;
-    line-height: 0.5rem;
     margin: 0.5rem 0 0 0;
 }
+
+/* --- フィルターのロジック --- */
+/* info（情報）タブの時、system 以外を隠す */
+.message-list[data-current-filter="info"] .message-item:not([data-tag="system"]) { display: none; }
+/* chat（雑談）タブの時、comment 以外を隠す */
+.message-list[data-current-filter="chat"] .message-item:not([data-tag="comment"]) { display: none; }
+
 
 /* 入力エリア (高さは固定) */
 .chat-input-wrapper {
     flex: none;
-    /* 伸縮しない */
     background: none;
     display: flex;
     align-items: center;
