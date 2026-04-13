@@ -52,7 +52,7 @@ const section = document.querySelector(".comment-list");
 const q = query(collection(db, "messages"), orderBy("createdAt", "asc"));
 
 onSnapshot(q, (snapshot) => {
-    let comment = "<br>";
+    let comment = "";
     snapshot.forEach((doc) => {
         const data = doc.data();
         const date = data.createdAt ? data.createdAt.toDate() : new Date();
