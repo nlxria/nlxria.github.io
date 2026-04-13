@@ -59,7 +59,7 @@ onSnapshot(q, (snapshot) => {
         const timeString = `${date.getFullYear()}/${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getDate().toString().padStart(2, '0')} ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
         const safeName = data.name.replaceAll("<","&lt;").replaceAll(">","&gt;");
         const safeContent = data.content.replaceAll("<","&lt;").replaceAll(">","&gt;");
-        comment += `<div><b style="color:${data.color};">${safeName}</b><span> ${timeString} </span></div><p>${safeContent}</p><br>`;
+        comment += `<div><b style="color:${data.color};">${safeName}</b><span> ${timeString} </span></div><p>${safeContent}</p>`;
     });
 
     if (section.innerHTML != comment) {
