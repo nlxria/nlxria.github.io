@@ -7,41 +7,49 @@
     background: #322E7B;
     color: #FFFFFF;
     border-radius: 1.5rem;
-    border: 1.25rem solid #FFFFFF;
-    
+    border: 0.125rem solid #FFFFFF;
+
     /* --- リサイズ機能の追加 --- */
-    width: 25vw;   /* 初期幅 */
-    height: 75vh;      /* 初期高さ（resizeを使う場合はheight指定が必要） */
-    min-width: 15rem;   /* 最小幅 */
-    min-height: 30rem;  /* 最小高さ */
-    resize: both;       /* 縦横両方のリサイズを許可 */
-    overflow: hidden;   /* resizeを有効にするために必要 */
-    
+    width: 25vw;
+    /* 初期幅 */
+    height: 75vh;
+    /* 初期高さ（resizeを使う場合はheight指定が必要） */
+    min-width: 15rem;
+    /* 最小幅 */
+    min-height: 30rem;
+    /* 最小高さ */
+    resize: both;
+    /* 縦横両方のリサイズを許可 */
+    overflow: hidden;
+    /* resizeを有効にするために必要 */
+
     display: flex;
     flex-direction: column;
 }
 
 /* ヘッダー (高さは固定) */
 .chat-header {
-    flex: none; /* 伸縮しない */
+    flex: none;
+    /* 伸縮しない */
     padding: 1.0rem;
     cursor: move;
     user-select: none;
-    border-bottom: 1.25rem solid #FFFFFF;
+    border-bottom: 0.125rem solid #FFFFFF;
     display: flex;
     align-items: center;
 }
 
 /* コメントエリア (ここが伸縮する) */
 .comment-list {
-    flex: 1; /* 親要素の余ったスペースをすべて占有する */
+    flex: 1;
+    /* 親要素の余ったスペースをすべて占有する */
     padding: 0 1.0rem;
     overflow-x: hidden;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     -ms-overflow-style: none;
     scrollbar-width: none;
-    border-bottom: 1.25rem solid #FFFFFF;
+    border-bottom: 0.125rem solid #FFFFFF;
 }
 
 .comment-list::-webkit-scrollbar {
@@ -77,7 +85,8 @@
 
 /* 入力エリア (高さは固定) */
 .chat-input-wrapper {
-    flex: none; /* 伸縮しない */
+    flex: none;
+    /* 伸縮しない */
     background: #FFFFFF;
     display: flex;
     align-items: center;
