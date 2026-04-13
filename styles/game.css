@@ -4,10 +4,10 @@
     top: calc(9vh + 3rem);
     right: 3rem;
     z-index: 2;
-    background: #313338;
+    background: #322E7B;
     color: #FFFFFF;
     border-radius: 1.5rem;
-    box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.6);
+    border: 1.25rem solid #FFFFFF;
     
     /* --- リサイズ機能の追加 --- */
     width: 25vw;   /* 初期幅 */
@@ -27,7 +27,7 @@
     padding: 1.0rem;
     cursor: move;
     user-select: none;
-    border-bottom: 1px solid #393A40;
+    border-bottom: 1.25rem solid #FFFFFF;
     display: flex;
     align-items: center;
 }
@@ -41,7 +41,7 @@
     -webkit-overflow-scrolling: touch;
     -ms-overflow-style: none;
     scrollbar-width: none;
-    border-bottom: 1px solid #393A40;
+    border-bottom: 1.25rem solid #FFFFFF;
 }
 
 .comment-list::-webkit-scrollbar {
@@ -78,7 +78,7 @@
 /* 入力エリア (高さは固定) */
 .chat-input-wrapper {
     flex: none; /* 伸縮しない */
-    background: #383a40;
+    background: #FFFFFF;
     display: flex;
     align-items: center;
     border-radius: 1.0rem;
@@ -118,5 +118,5 @@
 }
 
 .chat-input::placeholder {
-    color: #87898f;
+    color: #949BA4;
 }
