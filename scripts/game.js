@@ -34,7 +34,7 @@ contentInput.addEventListener("keydown", async (e) => {
         local.color = colorInput.value;
         autoStorage(local);
         contentInput.value = "";
-        
+
         try {
             await addDoc(collection(db, "messages"), {
                 uuid: local.uuid,
@@ -59,16 +59,16 @@ onSnapshot(q, (snapshot) => {
         const data = doc.data();
         const date = data.createdAt ? data.createdAt.toDate() : new Date();
         const timeString = `${date.getFullYear()}/${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getDate().toString().padStart(2, '0')} ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
-        const safeName = data.name.replaceAll("<","&lt;").replaceAll(">","&gt;");
-        const safeContent = data.content.replaceAll("<","&lt;").replaceAll(">","&gt;");
-        
+        const safeName = data.name.replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+        const safeContent = data.content.replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+
         // 過去のログやタグなしデータは "comment" 扱いにする
         const tag = data.tag || "comment";
 
         // メッセージをラッパーで囲み、data-tag を付与する
         messages += `
         <div class="message-item" data-tag="${tag}">
-            <div class="message-header"><b style="color:${data.color};">${safeName}</b><span>[ ${tag} ]</span></div>
+            <div class="message-header"><b style="color:${data.color};">${safeName}</b><span>/ ${tag == "comment" ? "コメント" : "システム"}</span></div>
             <p>${safeContent}</p>
         </div>`;
     });
@@ -115,13 +115,13 @@ tabToggle.onmousedown = (e) => { e.stopPropagation(); };
 tabToggle.onclick = () => {
     // 次のタブへ順番に切り替える
     currentTab = (currentTab + 1) % tabs.length;
-    
+
     // 表示テキストを更新
     tabToggle.textContent = tabs[currentTab].label;
-    
+
     // CSSの表示/非表示を切り替える属性を更新
     section.setAttribute("data-current-filter", tabs[currentTab].id);
-    
+
     // フィルターを切り替えたら一番下へスクロール
     if (section.lastElementChild) { section.lastElementChild.scrollIntoView(); }
 };
