@@ -250,14 +250,24 @@ function renderSheets(sheetsArray, parentElement, isRoot = true) {
         const nestedContainer = document.createElement('div');
         nestedContainer.className = 'nested-field';
 
+        // ▼ ▼ ★ここに追加：子メモが0個なら、枠を消すクラスを付ける★ ▼ ▼
+        if (sheet.field.length === 0) {
+            nestedContainer.classList.add('empty-nested');
+        }
+        // ▲ ▲ ★ここまで★ ▲ ▲
+
         // 子要素を描画（ここでは isRoot を false にする）
         renderSheets(sheet.field, nestedContainer, false);
 
         whiteBox.appendChild(nestedContainer);
         contentContainer.appendChild(whiteBox);
 
-        // パスワード処理
-        if (sheet.pass) {
+        // ▼ ▼ ★ここを追加＆変更★ ▼ ▼
+        // 現在見ているのが「所有者本人」かどうかを判定
+        const isOwner = auth.currentUser && characterData && characterData.data.owner === auth.currentUser.uid;
+
+        // パスワード処理（パスワードが設定されていて、かつ「本人ではない」場合のみロックする）
+        if (sheet.pass && !isOwner) {
             const passContainer = document.createElement('div');
             passContainer.className = 'password-container';
             const passInput = document.createElement('input');
@@ -285,8 +295,10 @@ function renderSheets(sheetsArray, parentElement, isRoot = true) {
                 }
             });
         } else {
+            // パスワードがない、または「本人」の場合は最初から中身を表示する
             details.appendChild(contentContainer);
         }
+        // ▲ ▲ ★ここまで★ ▲ ▲
 
         targetParent.appendChild(details);
     });

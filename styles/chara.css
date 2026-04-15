@@ -181,12 +181,25 @@ header>div {
     margin-bottom: 1em;
 }
 
+/* === メモの中身（親テキストと子メモ） === */
+
+/* ... ( .sheet-text や .text-content はそのまま) ... */
+
 .nested-field {
     background-color: transparent;
     border: 2px solid white;
-    border-radius: 8px;
+    border-radius: 8px; /* 全体の角の丸み */
+    border-bottom-right-radius: 1.5em; /* 右下を大枠と同じサイズに */
+    corner-bottom-right-shape: bevel;  /* 右下を角ばらせる */
     padding: 1em;
     margin-top: 1em;
+}
+
+/* ▼ 追加：子メモが1つもない時は枠線と余白を完全に消す */
+.nested-field.empty-nested {
+    border: none;
+    padding: 0;
+    margin-top: 0;
 }
 
 /* === 編集モード専用のUIとハイライト設定 === */
