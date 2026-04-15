@@ -88,13 +88,13 @@ async function loadCharacterList(uid) {
             card.className = 'chara-list-card';
 
             // 画像URL（空なら灰色のプレースホルダー画像）
-            const iconUrl = data.iconUrl || 'data:image/svg+xml;charset=UTF8,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20width=%2260%22%20height=%2260%22%20style=%22background:%236C757D%22%3E%3C/svg%3E';
+            const iconUrl = data.iconUrl || '/assets/image/chara-image.png';
 
             // メモ（空ならデフォルトテキスト）
             const memoText = data.memo ? data.memo : '設定メモなし';
 
             card.innerHTML = `
-                <img src="${iconUrl}" alt="icon" onerror="this.src='data:image/svg+xml;charset=UTF8,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20width=%2260%22%20height=%2260%22%20style=%22background:%236C757D%22%3E%3C/svg%3E'">
+                <img src="${iconUrl}" alt="icon" onerror="this.src='/assets/image/chara-image.png'">
                 <div class="chara-info">
                     <h4>${data.name || '名前なし'}</h4>
                     <p>${memoText}</p>
