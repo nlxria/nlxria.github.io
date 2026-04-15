@@ -1,6 +1,6 @@
 // 注意: 実際のFirebase設定情報に書き換えてください
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
 import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -148,6 +148,78 @@ editBtn.addEventListener('click', async () => {
             mainElement.classList.add('edit-mode'); // 失敗したら編集モードに戻す
         }
     }
+});
+
+// --- 認証UIの要素を取得 ---
+const loggedOutUI = document.getElementById('logged-out-ui');
+const loggedInUI = document.getElementById('logged-in-ui');
+const emailInput = document.getElementById('email-input');
+const passInput = document.getElementById('pass-input');
+const loginBtn = document.getElementById('login-btn');
+const signupBtn = document.getElementById('signup-btn');
+const logoutBtn = document.getElementById('logout-btn');
+const userEmailDisplay = document.getElementById('user-email-display');
+
+// --- ログイン状態の監視（前回のコードを上書き） ---
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    // ログインしている時のUI切り替え
+    loggedOutUI.style.display = 'none';
+    loggedInUI.style.display = 'flex';
+    userEmailDisplay.textContent = user.email; // メルアドを表示
+
+    // キャラクターの所有者と一致するかチェック
+    if (characterData && characterData.data.owner === user.uid) {
+      editBtn.style.display = 'block'; // 本人なら編集ボタンを表示
+    } else {
+      editBtn.style.display = 'none';  // 他人なら隠す
+    }
+  } else {
+    // ログアウトしている時（未ログイン）のUI切り替え
+    loggedOutUI.style.display = 'flex';
+    loggedInUI.style.display = 'none';
+    editBtn.style.display = 'none'; // 編集ボタンも隠す
+  }
+});
+
+// --- 新規登録ボタンの処理 ---
+signupBtn.addEventListener('click', async () => {
+  const email = emailInput.value;
+  const password = passInput.value;
+  if(!email || !password) return alert("メールアドレスとパスワードを入力してください");
+  
+  try {
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    alert("新規登録が完了しました！\nあなたのUID: " + userCredential.user.uid);
+    // ※お試し用：後でFirestoreに手動でテストデータを作る時のためにUIDを表示しています
+  } catch (error) {
+    alert("エラー: " + error.message);
+  }
+});
+
+// --- ログインボタンの処理 ---
+loginBtn.addEventListener('click', async () => {
+  const email = emailInput.value;
+  const password = passInput.value;
+  if(!email || !password) return alert("メールアドレスとパスワードを入力してください");
+
+  try {
+    await signInWithEmailAndPassword(auth, email, password);
+    alert("ログインしました！");
+  } catch (error) {
+    alert("ログイン失敗: メールアドレスかパスワードが間違っています。");
+  }
+});
+
+// --- ログアウトボタンの処理 ---
+logoutBtn.addEventListener('click', async () => {
+  await signOut(auth);
+  alert("ログアウトしました。");
+  // ログアウト時に強制的に閲覧モードに戻す
+  document.getElementById('app-main').classList.remove('edit-mode');
+  const editableAreas = document.querySelectorAll('.editable-area');
+  editableAreas.forEach(area => area.setAttribute('contenteditable', 'false'));
+  editBtn.textContent = "編集する";
 });
 
 // 実行
