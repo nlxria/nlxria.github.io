@@ -250,7 +250,7 @@ main.edit-mode .editable-title[contenteditable="true"]:focus {
     color: white;
     line-height: 2;
     margin: 3em auto;
-    max-width: 800px;
+    max-width: 80vw;
     /* 見栄えよく中央に寄せるための幅（お好みで調整してください） */
     font-family: ShinMaruGo;
 }
