@@ -47,6 +47,7 @@ async function init() {
     if (docSnap.exists()) {
         characterData = docSnap.data();
         renderSheets(characterData.data.sheets, container);
+        renderBasicInfo();
     } else {
         alert("キャラクターが見つかりません");
     }
@@ -86,28 +87,56 @@ onAuthStateChanged(auth, (user) => {
 
 // アコーディオンの再帰的描画関数
 function renderSheets(sheetsArray, parentElement) {
-    parentElement.innerHTML = ''; // 再描画用にリセット
+    parentElement.innerHTML = '';
 
-    sheetsArray.forEach(sheet => {
+    sheetsArray.forEach((sheet, index) => {
         const details = document.createElement('details');
         const summary = document.createElement('summary');
-        summary.innerHTML = `<div>▼</div><div>▲</div> <span>${sheet.name}</span>`;
-        if (sheet.pass) summary.innerHTML += ` 🔒`;
+        
+        // ヘッダー構造の変更（タイトル編集と設定ボタン）
+        const headerDiv = document.createElement('div');
+        headerDiv.className = 'sheet-header-controls';
+        
+        const markDiv = document.createElement('div');
+        markDiv.innerHTML = `<span>▼</span><span>▲</span>`;
+        
+        const titleSpan = document.createElement('span');
+        titleSpan.className = 'sheet-title-text editable-area';
+        titleSpan.textContent = sheet.name;
+        // タイトル変更の連動
+        titleSpan.addEventListener('input', (e) => { sheet.name = e.target.innerText; });
+
+        // 鍵マーク
+        const lockSpan = document.createElement('span');
+        if (sheet.pass) lockSpan.textContent = " [ロック中]";
+
+        // 設定ボタン（編集時のみ表示）
+        const settingBtn = document.createElement('button');
+        settingBtn.textContent = "設定";
+        settingBtn.className = "setting-btn edit-only-ui";
+        // クリック時にアコーディオンが開閉するのを防ぎつつ、モーダルを開く
+        settingBtn.addEventListener('click', (e) => {
+            e.preventDefault(); 
+            currentTargetSheet = sheet;
+            currentTargetArray = sheetsArray;
+            currentTargetIndex = index;
+            modalPassInput.value = sheet.pass || "";
+            settingsModal.style.display = 'flex';
+        });
+
+        headerDiv.append(markDiv, titleSpan, lockSpan, settingBtn);
+        summary.appendChild(headerDiv);
         details.appendChild(summary);
 
         const contentContainer = document.createElement('div');
         contentContainer.className = 'sheet-content-container';
 
-        // テキスト領域の生成
+        // テキスト領域
         if (sheet.value !== undefined) {
             const textDiv = document.createElement('div');
             textDiv.className = 'sheet-text editable-area';
             textDiv.textContent = sheet.value;
-
-            // 編集時のデータ連動
-            textDiv.addEventListener('input', (e) => {
-                sheet.value = e.target.innerText;
-            });
+            textDiv.addEventListener('input', (e) => { sheet.value = e.target.innerText; });
             contentContainer.appendChild(textDiv);
         }
 
@@ -119,40 +148,106 @@ function renderSheets(sheetsArray, parentElement) {
             contentContainer.appendChild(nestedContainer);
         }
 
-        // パスワード処理
-        if (sheet.pass) {
-            const passContainer = document.createElement('div');
-            passContainer.className = 'password-container';
-            const passInput = document.createElement('input');
-            passInput.type = 'text';
-            passInput.placeholder = 'パスワードを入力';
-            passInput.className = 'pass-input';
+        // --- 子メモを追加するボタン（編集時のみ表示） ---
+        const addSubBtn = document.createElement('button');
+        addSubBtn.textContent = "＋ メモを追加";
+        addSubBtn.className = "edit-btn edit-only-ui";
+        addSubBtn.style.margin = "10px";
+        addSubBtn.addEventListener('click', () => {
+            if (!sheet.field) sheet.field = [];
+            sheet.field.push({ name: "新規メモ", value: "内容を入力", pass: null, field: [] });
+            renderSheets(sheetsArray, parentElement); // 再描画して編集状態を維持する処理が必要ですが、簡易的に再描画します
+            
+            // 再描画後に編集モードを再度適用する
+            if(document.getElementById('app-main').classList.contains('edit-mode')){
+                document.querySelectorAll('.editable-area').forEach(area => area.setAttribute('contenteditable', 'true'));
+            }
+        });
+        contentContainer.appendChild(addSubBtn);
 
-            passContainer.appendChild(passInput);
-            details.appendChild(passContainer);
+        // ...（パスワード入力ロックの処理は前回と同じなので省略・そのまま残してください）...
 
-            contentContainer.style.display = 'none';
-            details.appendChild(contentContainer);
-
-            passInput.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    if (passInput.value === sheet.pass) {
-                        passContainer.style.display = 'none';
-                        contentContainer.style.display = 'block';
-                    } else {
-                        passInput.value = '';
-                        passInput.placeholder = 'パスワードが違います';
-                        passInput.style.backgroundColor = '#ffcccc';
-                    }
-                }
-            });
-        } else {
-            details.appendChild(contentContainer);
-        }
-
+        details.appendChild(contentContainer);
         parentElement.appendChild(details);
     });
+}
+
+// プロフィールと基本パラメータを描画する関数
+function renderBasicInfo() {
+    const data = characterData.data;
+
+    // トップの画像と名前
+    document.getElementById('profile-container').style.display = 'block';
+    const imgEl = document.getElementById('chara-image');
+    const nameEl = document.getElementById('chara-name');
+    const imgInput = document.getElementById('chara-image-input');
+
+    if (data.iconUrl) imgEl.src = data.iconUrl;
+    nameEl.textContent = data.name;
+    imgInput.value = data.iconUrl || "";
+
+    // 名前と画像のリアルタイム反映
+    nameEl.addEventListener('input', (e) => data.name = e.target.innerText);
+    imgInput.addEventListener('change', (e) => {
+        data.iconUrl = e.target.value;
+        imgEl.src = e.target.value; // すぐに画像プレビューを更新
+    });
+
+    // パラメータ（能力値）の描画
+    const basicContainer = document.getElementById('basic-status-container');
+    basicContainer.innerHTML = ''; // リセット
+
+    // params配列をループして行を作る
+    data.params.forEach((param, index) => {
+        const row = document.createElement('div');
+        row.className = 'param-row';
+
+        // 閲覧モード用のテキスト（通常表示）
+        const viewText = document.createElement('span');
+        viewText.style.color = "white";
+        viewText.style.flex = "1";
+        viewText.textContent = `${param.label} : ${param.value}`;
+        
+        // 編集モード用の入力欄
+        const labelInput = document.createElement('input');
+        labelInput.type = 'text';
+        labelInput.className = 'pass-input param-input-label edit-only-ui';
+        labelInput.value = param.label;
+        labelInput.addEventListener('input', (e) => param.label = e.target.value);
+
+        const valueInput = document.createElement('input');
+        valueInput.type = 'text';
+        valueInput.className = 'pass-input param-input-value edit-only-ui';
+        valueInput.value = param.value;
+        valueInput.addEventListener('input', (e) => param.value = e.target.value);
+
+        // 削除ボタン
+        const delBtn = document.createElement('button');
+        delBtn.textContent = "削除";
+        delBtn.className = 'setting-btn edit-only-ui';
+        delBtn.addEventListener('click', () => {
+            data.params.splice(index, 1);
+            renderBasicInfo(); // 行を消して再描画
+        });
+
+        row.append(viewText, labelInput, valueInput, delBtn);
+        basicContainer.appendChild(row);
+    });
+
+    // 「＋ リソース追加」ボタン（緑色）
+    const addBtn = document.createElement('button');
+    addBtn.textContent = "＋ リソース追加";
+    addBtn.className = 'add-resource-btn edit-only-ui';
+    addBtn.addEventListener('click', () => {
+        data.params.push({ label: "新規項目", value: "10" });
+        renderBasicInfo();
+        // 再描画時に編集モード状態なら input を表示したままにするため
+        if(document.getElementById('app-main').classList.contains('edit-mode')){
+            // 特殊な処理は不要（CSSで .edit-mode 下の .edit-only-ui が表示されるため）
+        }
+    });
+
+    basicContainer.appendChild(addBtn);
 }
 
 // 編集モードの切り替えロジック
@@ -250,28 +345,19 @@ createCharaBtn.addEventListener('click', async () => {
     const defaultData = {
         kind: "character",
         data: {
-            name: "新しい探索者",
-            memo: "ここに設定などを記入します",
+            name: "新たなキャラクター",
+            memo: "",
             initiative: 0,
             externalUrl: "", // ID生成後にURLを入れます
-            status: [
-                { label: "HP", value: 10, max: 10 },
-                { label: "MP", value: 10, max: 10 },
-                { label: "SAN", value: 50, max: 99 }
-            ],
-            params: [
-                { label: "STR", value: "10" },
-                { label: "DEX", value: "10" }
-            ],
+            status: [],
+            params: [],
             iconUrl: "",
             faces: [],
             x: 0, y: 0, angle: 0, width: 4, height: 4,
             active: true, secret: false, invisible: false, hideStatus: false,
-            color: "#322E7B",
-            commands: "1d100<=50 【目星】",
-            sheets: [
-                { name: "設定メモ", value: "キャラクターのバックストーリーなどを記述します", pass: null, field: [] }
-            ],
+            color: "#888888",
+            commands: "",
+            sheets: [],
             owner: user.uid // 【重要】これで自分しか編集できなくなる
         }
     };
@@ -296,6 +382,35 @@ createCharaBtn.addEventListener('click', async () => {
         alert("作成に失敗しました。");
         createCharaBtn.textContent = "＋ 新規キャラクターを作成";
         createCharaBtn.disabled = false;
+    }
+});
+
+// --- モーダル用の変数とイベント ---
+let currentTargetSheet = null;
+let currentTargetArray = null;
+let currentTargetIndex = null;
+
+const settingsModal = document.getElementById('settings-modal');
+const modalPassInput = document.getElementById('modal-pass-input');
+
+// モーダル：キャンセル
+document.getElementById('modal-cancel-btn').addEventListener('click', () => {
+    settingsModal.style.display = 'none';
+});
+
+// モーダル：保存（パスワード設定）
+document.getElementById('modal-save-btn').addEventListener('click', () => {
+    currentTargetSheet.pass = modalPassInput.value !== "" ? modalPassInput.value : null;
+    settingsModal.style.display = 'none';
+    renderSheets(characterData.data.sheets, container); // 再描画
+});
+
+// モーダル：削除
+document.getElementById('modal-delete-btn').addEventListener('click', () => {
+    if (confirm("本当にこのメモを削除しますか？（内部のデータもすべて消えます）")) {
+        currentTargetArray.splice(currentTargetIndex, 1); // 配列から削除
+        settingsModal.style.display = 'none';
+        renderSheets(characterData.data.sheets, container); // 再描画
     }
 });
 

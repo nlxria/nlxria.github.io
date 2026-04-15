@@ -48,13 +48,36 @@
             </div>
         </header>
         <div class="head"></div>
+        <div id="profile-container" style="display: none; padding: 2vh 4.5vh; text-align: center;">
+            <div class="profile-image-wrapper">
+                <img id="chara-image" src="" alt="" onerror="this.src='data:image/svg+xml;charset=UTF8,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20width=%22100%22%20height=%22100%22%20style=%22background:%236C757D%22%3E%3C/svg%3E'">
+                <input type="text" id="chara-image-input" class="pass-input edit-only-ui" placeholder="画像URLを入力" style="margin-top: 10px;">
+            </div>
+            <h1 id="chara-name" class="editable-title"></h1>
+        </div>
+        <div id="basic-status-container" style="padding: 0 4.5vh;"></div>
+        <div id="sheets-container"></div>
+        <div id="settings-modal" class="modal-overlay" style="display: none;">
+            <div class="modal-content">
+                <h3>メモの設定</h3>
+                <div style="margin-bottom: 1em;">
+                    <label style="color: white; font-size: 0.9em;">閲覧パスワード（空欄でロックなし）</label>
+                    <input type="text" id="modal-pass-input" class="pass-input" placeholder="パスワードを入力">
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-top: 2em;">
+                    <button id="modal-delete-btn" class="edit-btn" style="background: #e74c3c;">このメモを削除</button>
+                    <div>
+                        <button id="modal-cancel-btn" class="edit-btn" style="background: #6C757D;">キャンセル</button>
+                        <button id="modal-save-btn" class="edit-btn" style="background: #44AEF3;">保存</button>
+                    </div>
+                </div>
+            </div>
+        </div>
         <div id="dashboard-container" style="display: none; text-align: center; margin-top: 15vh;">
             <h2 style="color: white; font-size: 2em; margin-bottom: 1em;">キャラクター管理</h2>
             <button id="create-chara-btn" class="edit-btn" style="font-size: 1.2em; padding: 1em 2em; display: none;">＋ 新規キャラクターを作成</button>
             <p id="create-login-prompt" style="color: lightpink;">※作成するにはログインしてください</p>
         </div>
-        <div id="basic-status-container"></div>
-        <div id="sheets-container"></div>
         <script type="module" src="/scripts/chara.js"></script>
     </main></body>
 </html>

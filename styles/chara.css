@@ -70,3 +70,84 @@ main.edit-mode .sheet-text[contenteditable="true"]:focus {
     outline: 2px solid #44AEF3;
     background-color: white;
 }
+
+/* --- プロフィール画像周り --- */
+.profile-image-wrapper img {
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 2px solid white;
+}
+.editable-title {
+    color: white;
+    font-size: 2em;
+    margin: 0.5em 0;
+    transition: background 0.3s;
+}
+
+/* --- 動的ステータス（STR 10 のような行） --- */
+.param-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+    align-items: center;
+}
+.param-input-label {
+    flex: 1; /* 左側を広く */
+}
+.param-input-value {
+    width: 80px; /* 数字用 */
+}
+/* 画像の緑色の追加ボタン */
+.add-resource-btn {
+    width: 100%;
+    padding: 12px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1.1em;
+    margin-top: 10px;
+}
+
+/* --- アコーディオンのタイトル編集・設定ボタン --- */
+.sheet-header-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+}
+.sheet-title-text {
+    flex: 1;
+}
+.setting-btn {
+    padding: 4px 8px;
+    background: #6C757D;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 0.8em;
+    cursor: pointer;
+}
+
+/* --- モーダル (ポップアップ) --- */
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 100;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.modal-content {
+    background: #322E7B;
+    border: 2px solid white;
+    padding: 2em;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 400px;
+}
+.modal-content h3 { color: white; margin-top: 0; }
