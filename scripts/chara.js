@@ -147,6 +147,8 @@ onAuthStateChanged(auth, (user) => {
 
 // ==== ここまで上書き ====
 
+// chara.js
+
 // アコーディオンの再帰的描画関数
 function renderSheets(sheetsArray, parentElement) {
     parentElement.innerHTML = '';
@@ -155,14 +157,12 @@ function renderSheets(sheetsArray, parentElement) {
         const details = document.createElement('details');
         const summary = document.createElement('summary');
 
-        // CSSの干渉を避けるため、divではなくspanに変更しflexレイアウトを維持
         const headerContainer = document.createElement('span');
         headerContainer.className = 'sheet-header-controls';
         headerContainer.style.display = 'flex';
         headerContainer.style.alignItems = 'center';
         headerContainer.style.width = '100%';
 
-        // 矢印の切り替えをJSで制御
         const markSpan = document.createElement('span');
         markSpan.textContent = '▼ ';
         markSpan.style.marginRight = '8px';
@@ -182,7 +182,7 @@ function renderSheets(sheetsArray, parentElement) {
         settingBtn.textContent = "設定";
         settingBtn.className = "setting-btn edit-only-ui";
         settingBtn.addEventListener('click', (e) => {
-            e.preventDefault();
+            e.preventDefault(); 
             currentTargetSheet = sheet;
             currentTargetArray = sheetsArray;
             currentTargetIndex = index;
@@ -197,21 +197,57 @@ function renderSheets(sheetsArray, parentElement) {
         const contentContainer = document.createElement('div');
         contentContainer.className = 'sheet-content-container';
 
-        if (sheet.value !== undefined) {
-            const textDiv = document.createElement('div');
-            textDiv.className = 'sheet-text editable-area';
-            textDiv.textContent = sheet.value;
-            textDiv.oninput = (e) => { sheet.value = e.target.innerText; };
-            contentContainer.appendChild(textDiv);
-        }
+        // ▼ ★修正箇所：ここから大幅に変更します。
 
+        // 1. 白い背景のテキストボックス (エディタエリア) を生成
+        const textDiv = document.createElement('div');
+        textDiv.className = 'sheet-text editable-area'; // editable-areaは編集用
+
+        // valueがある場合は親メモのテキストを設定
+        if (sheet.value !== undefined && sheet.value !== "") {
+            textDiv.textContent = sheet.value;
+        }
+        // リアルタイム反映イベント
+        textDiv.oninput = (e) => { sheet.value = e.target.innerText; };
+        
+        // 白いボックスを contentContainer に追加
+        contentContainer.appendChild(textDiv);
+
+
+        // 2. 子要素（field）があれば、その白いボックスの中にコンテナを作り再帰呼び出し！
         if (!sheet.field) sheet.field = [];
         const nestedContainer = document.createElement('div');
         nestedContainer.className = 'nested-field';
         renderSheets(sheet.field, nestedContainer);
-        contentContainer.appendChild(nestedContainer);
+        textDiv.appendChild(nestedContainer); // ← ★ここを変更：textDivの中に！
 
-        // パスワード処理
+
+        // ＋ メモを追加 ボタン（子メモ用）
+        const addBtn = document.createElement('button');
+        addBtn.textContent = "＋ メモを追加";
+        addBtn.className = "edit-btn edit-only-ui";
+        addBtn.style.margin = "10px";
+        addBtn.addEventListener('click', () => {
+            sheetsArray.push({ name: "新規メモ", value: "内容を入力してください", pass: null, field: [] });
+            renderSheets(sheetsArray, parentElement); // 再描画
+            
+            const detailsElements = Array.from(parentElement.children).filter(el => el.tagName === 'DETAILS');
+            if (detailsElements.length > 0) {
+                detailsElements[detailsElements.length - 1].open = true;
+            }
+
+            if (document.getElementById('app-main').classList.contains('edit-mode')) {
+                document.querySelectorAll('.editable-area').forEach(area => area.setAttribute('contenteditable', 'true'));
+            }
+            
+            updateSheetsContainerVisibility();
+        });
+        // 画像を見ると、親メモの中（青背景）にボタンがある。
+        // contentContainer（中身全体）の最後（textDivの下）に追加する。
+        contentContainer.appendChild(addBtn); // ← これでOK
+
+        // ... (パスワード処理は contentContainer をdetailsに追加する形でOK) ...
+
         if (sheet.pass) {
             const passContainer = document.createElement('div');
             passContainer.className = 'password-container';
@@ -219,10 +255,10 @@ function renderSheets(sheetsArray, parentElement) {
             passInput.type = 'text';
             passInput.placeholder = 'パスワードを入力';
             passInput.className = 'pass-input';
-
+            
             passContainer.appendChild(passInput);
             details.appendChild(passContainer);
-
+            
             contentContainer.style.display = 'none';
             details.appendChild(contentContainer);
 
@@ -255,7 +291,6 @@ function renderSheets(sheetsArray, parentElement) {
         sheetsArray.push({ name: "新規メモ", value: "内容を入力してください", pass: null, field: [] });
         renderSheets(sheetsArray, parentElement); // 再描画
         
-        // ▼ 追加：新しく作られたメモを自動的に開いた状態にする
         const detailsElements = Array.from(parentElement.children).filter(el => el.tagName === 'DETAILS');
         if (detailsElements.length > 0) {
             detailsElements[detailsElements.length - 1].open = true;
@@ -265,7 +300,6 @@ function renderSheets(sheetsArray, parentElement) {
             document.querySelectorAll('.editable-area').forEach(area => area.setAttribute('contenteditable', 'true'));
         }
         
-        // メモが追加されたので表示状態を更新
         updateSheetsContainerVisibility();
     });
     parentElement.appendChild(addBtn);
