@@ -312,11 +312,11 @@ function renderSheets(sheetsArray, parentElement, isRoot = true) {
 
     if (isRoot) {
         // 一番上の階層の場合は青色の全幅ボタン
-        addBtn.textContent = "追加";
+        addBtn.textContent = "メモを追加";
         addBtn.className = "add-resource-btn edit-only-ui";
     } else {
         // 子階層の場合は通常の青色ボタン
-        addBtn.textContent = "追加";
+        addBtn.textContent = "メモを追加";
         addBtn.className = "edit-btn edit-only-ui";
         addBtn.style.marginTop = "10px";
     }
