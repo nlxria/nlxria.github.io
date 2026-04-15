@@ -91,7 +91,7 @@ async function loadCharacterList(uid) {
             const iconUrl = data.iconUrl || '/assets/image/chara-image.png';
 
             // メモ（空ならデフォルトテキスト）
-            const memoText = data.memo ? data.memo : '設定メモなし';
+            const memoText = data.memo ? data.memo : 'メモなし';
 
             card.innerHTML = `
                 <img src="${iconUrl}" alt="icon" onerror="this.src='/assets/image/chara-image.png'">
@@ -312,17 +312,17 @@ function renderSheets(sheetsArray, parentElement, isRoot = true) {
 
     if (isRoot) {
         // 一番上の階層の場合は青色の全幅ボタン
-        addBtn.textContent = "＋ メモを追加";
+        addBtn.textContent = "追加";
         addBtn.className = "add-resource-btn edit-only-ui";
     } else {
         // 子階層の場合は通常の青色ボタン
-        addBtn.textContent = "＋ メモを追加";
+        addBtn.textContent = "追加";
         addBtn.className = "edit-btn edit-only-ui";
         addBtn.style.marginTop = "10px";
     }
 
     addBtn.addEventListener('click', () => {
-        sheetsArray.push({ name: isRoot ? "メモ" : "メモ", value: "内容を入力してください", pass: null, field: [] });
+        sheetsArray.push({ name: isRoot ? "メモ" : "メモ", value: "", pass: null, field: [] });
 
         // この階層だけを再描画する
         renderSheets(sheetsArray, parentElement, isRoot);
