@@ -49,8 +49,8 @@ header>div {
 
 /* 展開されたテキストボックス */
 .sheet-text {
-    background-color: white;
-    color: black;
+    background-color: #466398;
+    color: white;
     margin: 1em;
     padding: 1em;
     border-radius: 4px;
