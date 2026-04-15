@@ -26,19 +26,27 @@
         <meta name="twitter:description" content="デモ版です。">
     </head>
     <body><main id="app-main">
-        <header><a class="back" onclick="history.back()">←</a><a class="title" href="">関数電卓</a><button id="edit-mode-btn" class="edit-btn" style="display: none;">編集する</button>
-        <div id="auth-container" style="margin-left: auto; display: flex; align-items: center; gap: 10px; padding-right: 2vh;">
-            <form id="logged-out-ui" style="display: flex; gap: 5px;">
-                <input type="email" id="email-input" placeholder="メールアドレス" class="pass-input" style="margin:0; width: 150px; padding: 0.5em;" required autocomplete="email">
-                <input type="password" id="pass-input" placeholder="パスワード" class="pass-input" style="margin:0; width: 120px; padding: 0.5em;" required autocomplete="current-password">
-                <button type="submit" id="login-btn" class="edit-btn" style="margin: 0;">ログイン</button>
-                <button type="button" id="signup-btn" class="edit-btn" style="margin: 0; background: #44AEF3;">新規登録</button>
-            </form>
-            <div id="logged-in-ui" style="display: none; align-items: center; gap: 10px; color: white; font-size: 0.8em;">
-                <span id="user-email-display"></span>
-                <button id="logout-btn" class="edit-btn" style="margin: 0; background: #e74c3c;">ログアウト</button>
+        <header><a class="back" onclick="history.back()">←</a><a class="title" href="">関数電卓</a>
+            <div>        
+                <button id="edit-mode-btn" class="edit-btn" style="display: none;">編集する</button>
+
+                <div id="auth-container" style="display: flex; align-items: center; gap: 10px;">
+                    
+                    <form id="logged-out-ui" style="display: flex; gap: 5px; margin: 0;">
+                        <input type="email" id="email-input" placeholder="メールアドレス" class="pass-input" style="margin:0; width: 150px; padding: 0.5em;" required autocomplete="email">
+                        <input type="password" id="pass-input" placeholder="パスワード" class="pass-input" style="margin:0; width: 120px; padding: 0.5em;" required autocomplete="current-password">
+                        <button type="submit" id="login-btn" class="edit-btn">ログイン</button>
+                        <button type="button" id="signup-btn" class="edit-btn" style="background: #44AEF3;">新規登録</button>
+                    </form>
+                    
+                    <div id="logged-in-ui" style="display: none; align-items: center; gap: 10px; color: #304E72; font-weight: bold; font-size: 0.9em;">
+                        <span id="user-email-display"></span>
+                        <button id="logout-btn" class="edit-btn" style="background: #e74c3c;">ログアウト</button>
+                    </div>
+                    
+                </div>
             </div>
-        </div>
+        </header>
         <div class="head"></div>
         <div id="basic-status-container"></div>
         <div id="sheets-container"></div>
