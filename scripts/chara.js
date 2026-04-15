@@ -33,6 +33,7 @@ const createCharaBtn = document.getElementById('create-chara-btn');
 const createLoginPrompt = document.getElementById('create-login-prompt');
 
 // 初期化処理
+// 初期化処理
 async function init() {
     if (!characterId) {
         // IDがない場合は、アラートを出さずにダッシュボード（作成画面）を表示する
@@ -48,6 +49,11 @@ async function init() {
         characterData = docSnap.data();
         renderSheets(characterData.data.sheets, container);
         renderBasicInfo();
+
+        // ▼ 修正ポイント①：データが届いた直後にも「本人か」をチェックしてボタンを出す
+        if (auth.currentUser && characterData.data.owner === auth.currentUser.uid) {
+            editBtn.style.display = 'block';
+        }
     } else {
         alert("キャラクターが見つかりません");
     }
@@ -65,7 +71,7 @@ onAuthStateChanged(auth, (user) => {
         createLoginPrompt.style.display = 'none';
         createCharaBtn.style.display = 'inline-block';
 
-        // キャラクターの所有者と一致するかチェック（閲覧画面にいる場合）
+        // ▼ 修正ポイント②：Auth状態が変わった時にも、データが既にあればチェックしてボタンを出す
         if (characterData && characterData.data.owner === user.uid) {
             editBtn.style.display = 'block'; 
         } else {
