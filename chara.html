@@ -29,16 +29,15 @@
         <header><a class="back" onclick="history.back()">←</a><a class="title" href="/chara">キャラシ</a>
             <div>
                 <div id="auth-container" style="display: flex; align-items: center; gap: 1em;">
-                    <form id="logged-out-ui" style="display: flex; gap: 1em; margin: 0;">
-                        <input type="email" id="email-input" placeholder="メールアドレス" class="pass-input" style="margin:0; width: 150px; padding: 0.5em;" required autocomplete="email">
-                        <input type="password" id="pass-input" placeholder="パスワード" class="pass-input" style="margin:0; width: 120px; padding: 0.5em;" required autocomplete="current-password">
-                        <button type="submit" id="login-btn" class="edit-btn">ログイン</button>
-                        <button type="button" id="signup-btn" class="edit-btn" style="background: #44AEF3;">新規登録</button>
-                    </form>
-                    <div id="logged-in-ui" style="display: none; align-items: center; gap: 1em; color: #304E72;">
+                <div id="auth-container" style="display: flex; align-items: center; gap: 1em;">
+                    <div id="logged-out-ui" style="display: flex; gap: 1em; margin: 0;">
+                        <button id="google-login-btn" class="edit-btn" style="background: #4285F4;">ログイン</button>
+                    </div>
+                    <div id="logged-in-ui" style="display: none; align-items: center; gap: 1em; color: #304E72; font-weight: bold; font-size: 0.9em;">
                         <span id="user-email-display"></span>
                         <button id="logout-btn" class="edit-btn" style="background: #e74c3c;">ログアウト</button>
                     </div>
+                </div>
                 </div>
                 <button id="edit-mode-btn" class="edit-btn" style="display: none;">編集</button>
             </div>

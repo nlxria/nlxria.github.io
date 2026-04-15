@@ -1,6 +1,7 @@
 // 注意: 実際のFirebase設定情報に書き換えてください
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+// ▼ 変更：Google認証用の関数を読み込む
+import { getAuth, onAuthStateChanged, signOut, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
 // ▼ query, where, getDocs を追加で読み込む
 import { getFirestore, doc, getDoc, setDoc, collection, addDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
@@ -477,48 +478,29 @@ editBtn.addEventListener('click', async () => {
 // --- 認証UIの要素を取得 ---
 const loggedOutUI = document.getElementById('logged-out-ui');
 const loggedInUI = document.getElementById('logged-in-ui');
-const emailInput = document.getElementById('email-input');
-const passInput = document.getElementById('pass-input');
-const loginBtn = document.getElementById('login-btn');
-const signupBtn = document.getElementById('signup-btn');
+const googleLoginBtn = document.getElementById('google-login-btn'); // 変更
 const logoutBtn = document.getElementById('logout-btn');
 const userEmailDisplay = document.getElementById('user-email-display');
 
-// --- 新規登録ボタンの処理 ---
-signupBtn.addEventListener('click', async () => {
-    const email = emailInput.value;
-    const password = passInput.value;
-    if (!email || !password) return alert("メールアドレスとパスワードを入力してください");
+// Google認証プロバイダの準備
+const provider = new GoogleAuthProvider();
 
+// --- Googleログインボタンの処理 ---
+googleLoginBtn.addEventListener('click', async () => {
     try {
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        alert("新規登録が完了しました！\nあなたのUID: " + userCredential.user.uid);
-        // ※お試し用：後でFirestoreに手動でテストデータを作る時のためにUIDを表示しています
-    } catch (error) {
-        alert("エラー: " + error.message);
-    }
-});
-
-// --- フォームの要素を取得（追加） ---
-const authForm = document.getElementById('logged-out-ui');
-
-// --- ログイン処理（click から submit に変更） ---
-authForm.addEventListener('submit', async (e) => {
-    e.preventDefault(); // 画面がリロードされるの防ぐ（重要！）
-
-    const email = emailInput.value;
-    const password = passInput.value;
-
-    try {
-        await signInWithEmailAndPassword(auth, email, password);
+        // ポップアップウィンドウでGoogleログイン画面を表示
+        await signInWithPopup(auth, provider);
         alert("ログインしました！");
-        // ※ブラウザによっては、このログイン成功のタイミングで「パスワードを保存しますか？」のポップアップが出ます
     } catch (error) {
-        alert("ログイン失敗: メールアドレスかパスワードが間違っています。");
+        console.error("ログインエラー:", error);
+        // ユーザーがポップアップを閉じた場合などのエラーハンドリング
+        if (error.code !== 'auth/popup-closed-by-user') {
+            alert("ログインに失敗しました。");
+        }
     }
 });
 
-// ※「新規登録ボタン (signupBtn)」と「ログアウトボタン (logoutBtn)」の処理は前回のままでOKです。
+// ※「ログアウトボタンの処理 (logoutBtn)」は前回のままでOKです。
 
 // --- ログアウトボタンの処理 ---
 logoutBtn.addEventListener('click', async () => {
