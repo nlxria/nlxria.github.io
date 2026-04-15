@@ -33,24 +33,24 @@ const createCharaBtn = document.getElementById('create-chara-btn');
 const createLoginPrompt = document.getElementById('create-login-prompt');
 
 // 初期化処理
-// 初期化処理
 async function init() {
     if (!characterId) {
-        // IDがない場合は、アラートを出さずにダッシュボード（作成画面）を表示する
         dashboardContainer.style.display = 'block';
         return;
     }
 
-    // 1. データの取得 (IDがある場合)
     const docRef = doc(db, "characters", characterId);
     const docSnap = await getDoc(docRef);
 
     if (docSnap.exists()) {
         characterData = docSnap.data();
+        
+        // ▼▼▼ この1行を追加：データがある時だけキャラクターエリアを表示する ▼▼▼
+        document.getElementById('character-view-area').style.display = 'block';
+
         renderSheets(characterData.data.sheets, container);
         renderBasicInfo();
 
-        // ▼ 修正ポイント①：データが届いた直後にも「本人か」をチェックしてボタンを出す
         if (auth.currentUser && characterData.data.owner === auth.currentUser.uid) {
             editBtn.style.display = 'block';
         }

@@ -44,17 +44,17 @@
             </div>
         </header>
         <div class="head"></div>
-        <pre>
-            <div id="profile-container" style="display: none; padding: 2vh 4.5vh; text-align: center;">
+        <div id="character-view-area" class="chara-box-wrapper" style="display: none;">
+            <div id="profile-container" class="chara-box" style="display: none; padding: 2vh 4.5vh; text-align: center;">
                 <div class="profile-image-wrapper">
                     <img id="chara-image" src="" alt="" onerror="this.src='/assets/image/chara-image.png'">
                     <input type="text" id="chara-image-input" class="pass-input edit-only-ui" placeholder="画像URLを入力" style="margin-top: 10px;">
                 </div>
                 <h1 id="chara-name" class="editable-title"></h1>
             </div>
-            <div id="basic-status-container" style="padding: 0 4.5vh;"></div>
-            <div id="sheets-container"></div>
-        </pre>
+            <div id="basic-status-container" class="chara-box" style="padding: 1.5em 4.5vh;"></div>
+            <div id="sheets-container" class="chara-box"></div>
+        </div>
         <div id="settings-modal" class="modal-overlay" style="display: none;">
             <div class="modal-content">
                 <h3>メモの設定</h3>
@@ -71,7 +71,7 @@
                 </div>
             </div>
         </div>
-        <div id="dashboard-container" style="display: none; text-align: center; margin-top: 15vh;">
+        <div id="dashboard-container" style="display: none; text-align: center; margin-top: 9vh; margin-bottom: 9vh;">
             <h2 style="color: white; font-size: 2em; margin-bottom: 1em;">キャラクター管理</h2>
             <button id="create-chara-btn" class="edit-btn" style="font-size: 1.2em; padding: 1em 2em; display: none;">＋ 新規キャラクターを作成</button>
             <p id="create-login-prompt" style="color: lightpink;">※作成するにはログインしてください</p>

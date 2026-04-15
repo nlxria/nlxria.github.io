@@ -244,3 +244,41 @@ main.edit-mode .editable-title[contenteditable="true"]:focus {
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
+/* --- pre要素の代わりとなるコンテナのスタイル --- */
+.chara-box-wrapper {
+    color: white;
+    line-height: 2;
+    margin: 3em auto;
+    max-width: 800px; /* 見栄えよく中央に寄せるための幅（お好みで調整してください） */
+    font-family: ShinMaruGo;
+}
+
+/* 枠線のスタイル（元の pre > div のスタイルを再現） */
+.chara-box {
+    background: #322E7B;
+    border: 2px solid white;
+    border-bottom-right-radius: 1.5em;
+    padding: 1.5em;
+    margin-bottom: 2em; /* 枠と枠の間の隙間 */
+    overflow-x: auto;
+}
+
+/* アコーディオンの矢印（▼▲）の切り替えスタイル */
+.chara-box-wrapper details > summary > div:first-of-type,
+.chara-box-wrapper details[open] > summary > div:last-of-type {
+    display: inline;
+}
+.chara-box-wrapper details[open] > summary > div:first-of-type,
+.chara-box-wrapper details > summary > div:last-of-type {
+    display: none;
+}
+
+/* アコーディオンの summary (タイトル部分) をクリックしやすくする調整 */
+.chara-box-wrapper summary {
+    cursor: pointer;
+    list-style: none; /* デフォルトの黒い三角を消す */
+}
+.chara-box-wrapper summary::-webkit-details-marker {
+    display: none; /* Safari用の黒い三角消し */
+}
