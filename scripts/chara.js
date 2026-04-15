@@ -197,19 +197,26 @@ signupBtn.addEventListener('click', async () => {
   }
 });
 
-// --- ログインボタンの処理 ---
-loginBtn.addEventListener('click', async () => {
+// --- フォームの要素を取得（追加） ---
+const authForm = document.getElementById('logged-out-ui');
+
+// --- ログイン処理（click から submit に変更） ---
+authForm.addEventListener('submit', async (e) => {
+  e.preventDefault(); // 画面がリロードされるの防ぐ（重要！）
+  
   const email = emailInput.value;
   const password = passInput.value;
-  if(!email || !password) return alert("メールアドレスとパスワードを入力してください");
 
   try {
     await signInWithEmailAndPassword(auth, email, password);
     alert("ログインしました！");
+    // ※ブラウザによっては、このログイン成功のタイミングで「パスワードを保存しますか？」のポップアップが出ます
   } catch (error) {
     alert("ログイン失敗: メールアドレスかパスワードが間違っています。");
   }
 });
+
+// ※「新規登録ボタン (signupBtn)」と「ログアウトボタン (logoutBtn)」の処理は前回のままでOKです。
 
 // --- ログアウトボタンの処理 ---
 logoutBtn.addEventListener('click', async () => {
