@@ -120,6 +120,9 @@ onAuthStateChanged(auth, (user) => {
 
         if (characterData && characterData.data.owner === user.uid) {
             editBtn.style.display = 'block';
+
+            // ▼ ★ここを追記：本人だと確認できたタイミングで、ロック解除状態で再描画する
+            renderSheets(characterData.data.sheets, container);
         } else {
             editBtn.style.display = 'none';
         }
@@ -599,6 +602,11 @@ document.getElementById('modal-save-btn').addEventListener('click', () => {
     currentTargetSheet.pass = modalPassInput.value !== "" ? modalPassInput.value : null;
     settingsModal.style.display = 'none';
     renderSheets(characterData.data.sheets, container); // 再描画
+
+    // ▼ ★ここを追記：パスワード設定後も編集モードを維持する
+    if (document.getElementById('app-main').classList.contains('edit-mode')) {
+        document.querySelectorAll('.editable-area').forEach(area => area.setAttribute('contenteditable', 'true'));
+    }
 });
 
 // モーダル：削除
