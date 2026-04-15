@@ -81,8 +81,10 @@ main.edit-mode .sheet-text[contenteditable="true"]:focus {
 
 /* --- プロフィール画像周り --- */
 .profile-image-wrapper img {
-    width: 50%;          /* 横幅を親要素の50%に固定 */
-    height: auto;        /* 高さを自動調整して縦横比を維持 */
+    width: 50%;
+    /* 横幅を親要素の50%に固定 */
+    height: auto;
+    /* 高さを自動調整して縦横比を維持 */
     border-radius: 8px;
     border: 2px solid white;
     /* object-fit: cover; は削除します */
@@ -117,7 +119,7 @@ main.edit-mode .sheet-text[contenteditable="true"]:focus {
 .add-resource-btn {
     width: 100%;
     padding: 12px;
-    background-color: lightpink;
+    background-color: #466398;
     color: white;
     border: none;
     border-radius: 4px;
@@ -276,4 +278,26 @@ main.edit-mode .editable-title[contenteditable="true"]:focus {
 .chara-box-wrapper summary::-webkit-details-marker {
     display: none;
     /* Safari用の黒い三角消し */
+}
+
+/* --- 追加：親メモと子メモを安全に分離するためのテキストエリア --- */
+.text-content {
+    min-height: 1.5em;
+    /* 空でもクリックできるように高さを確保 */
+    white-space: pre-wrap;
+    margin-bottom: 1em;
+    /* 子メモとの間に少し隙間を空ける */
+}
+
+main.edit-mode .text-content[contenteditable="true"] {
+    outline: 2px dashed #44AEF3;
+    background-color: #f0f8ff;
+    cursor: text;
+    padding: 0.5em;
+    border-radius: 4px;
+}
+
+main.edit-mode .text-content[contenteditable="true"]:focus {
+    outline: 2px solid #44AEF3;
+    background-color: white;
 }
