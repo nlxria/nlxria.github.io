@@ -6,6 +6,7 @@
         <link rel="shortcut icon" href="/assets/favicon.ico">
         <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
         <link rel="stylesheet" href="/styles/index.css">
+        <link rel="stylesheet" href="/styles/game.css">
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width,initial-scale=1">
         <meta name="description" content="本ページは『クトゥルフ神話TRPG』を現代日本を舞台にして邪神、クリーチャー、カルティストらに立ち向かう探索行をプレイするキーパーとプレイヤーのためのハウスルールだ。">
@@ -14,7 +15,7 @@
         <meta property="og:description" content="本ページは『クトゥルフ神話TRPG』を現代日本を舞台にして邪神、クリーチャー、カルティストらに立ち向かう探索行をプレイするキーパーとプレイヤーのためのハウスルールだ。">
         <meta property="og:type" content="website">
         <meta property="og:locale" content="ja_JP">
-        <meta property="og:url" content="https://nlxria.github.io/chara">
+        <meta property="og:url" content="https://nlxria.github.io/game">
         <meta property="og:image" content="https://raw.githubusercontent.com/nlxria/nlxria.github.io/main/assets/favicon.png">
         <meta property="og:deteminer" content="クトゥルフ神話TRPG">
         <meta property="og:site_name" content="クトゥルフ神話TRPG">
@@ -26,6 +27,15 @@
     </head>
     <body><main>
         <header><a class="back" onclick="history.back()">←</a><a class="title" href="">関数電卓</a></header><div class="head"></div>
+        <div class="chat-window message-window">
+            <div class="chat-header"><b><span id="tab-toggle" style="cursor: pointer; color: yellow;" title="タブを切替">＃ メイン</span></b></div>
+            <div class="overflow y message-list"></div>
+            <div class="chat-input-wrapper">
+                <input name="entry.color" class="color-picker" type="color" value="#FFFFFF" title="色を変更">
+                <input name="entry.text" class="chat-input" type="text" placeholder="メッセージを入力" maxlength="2000" required>
+            </div>
+        </div>
         <script src="/scripts/login.js"></script>
+        <script type="module" src="/scripts/game.js"></script>
     </main></body>
 </html>
