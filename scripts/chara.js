@@ -73,9 +73,9 @@ onAuthStateChanged(auth, (user) => {
 
         // ▼ 修正ポイント②：Auth状態が変わった時にも、データが既にあればチェックしてボタンを出す
         if (characterData && characterData.data.owner === user.uid) {
-            editBtn.style.display = 'block'; 
+            editBtn.style.display = 'block';
         } else {
-            editBtn.style.display = 'none'; 
+            editBtn.style.display = 'none';
         }
     } else {
         // ログアウトしている時のUI切り替え
@@ -98,31 +98,27 @@ function renderSheets(sheetsArray, parentElement) {
     sheetsArray.forEach((sheet, index) => {
         const details = document.createElement('details');
         const summary = document.createElement('summary');
-        
-        // ヘッダー構造の変更（タイトル編集と設定ボタン）
+
         const headerDiv = document.createElement('div');
         headerDiv.className = 'sheet-header-controls';
-        
+
         const markDiv = document.createElement('div');
         markDiv.innerHTML = `<span>▼</span><span>▲</span>`;
-        
+
         const titleSpan = document.createElement('span');
         titleSpan.className = 'sheet-title-text editable-area';
         titleSpan.textContent = sheet.name;
-        // タイトル変更の連動
-        titleSpan.addEventListener('input', (e) => { sheet.name = e.target.innerText; });
+        // oninputを使って上書き（イベントの重複を防ぐ）
+        titleSpan.oninput = (e) => { sheet.name = e.target.innerText; };
 
-        // 鍵マーク
         const lockSpan = document.createElement('span');
         if (sheet.pass) lockSpan.textContent = " [ロック中]";
 
-        // 設定ボタン（編集時のみ表示）
         const settingBtn = document.createElement('button');
         settingBtn.textContent = "設定";
         settingBtn.className = "setting-btn edit-only-ui";
-        // クリック時にアコーディオンが開閉するのを防ぎつつ、モーダルを開く
         settingBtn.addEventListener('click', (e) => {
-            e.preventDefault(); 
+            e.preventDefault();
             currentTargetSheet = sheet;
             currentTargetArray = sheetsArray;
             currentTargetIndex = index;
@@ -137,45 +133,70 @@ function renderSheets(sheetsArray, parentElement) {
         const contentContainer = document.createElement('div');
         contentContainer.className = 'sheet-content-container';
 
-        // テキスト領域
         if (sheet.value !== undefined) {
             const textDiv = document.createElement('div');
             textDiv.className = 'sheet-text editable-area';
             textDiv.textContent = sheet.value;
-            textDiv.addEventListener('input', (e) => { sheet.value = e.target.innerText; });
+            textDiv.oninput = (e) => { sheet.value = e.target.innerText; };
             contentContainer.appendChild(textDiv);
         }
 
-        // 子要素の再帰処理
-        if (sheet.field && sheet.field.length > 0) {
-            const nestedContainer = document.createElement('div');
-            nestedContainer.className = 'nested-field';
-            renderSheets(sheet.field, nestedContainer);
-            contentContainer.appendChild(nestedContainer);
+        // ▼ 変更点：必ず子要素コンテナを作り、再帰呼び出しに任せる
+        if (!sheet.field) sheet.field = [];
+        const nestedContainer = document.createElement('div');
+        nestedContainer.className = 'nested-field';
+        renderSheets(sheet.field, nestedContainer);
+        contentContainer.appendChild(nestedContainer);
+
+        // パスワード処理
+        if (sheet.pass) {
+            const passContainer = document.createElement('div');
+            passContainer.className = 'password-container';
+            const passInput = document.createElement('input');
+            passInput.type = 'text';
+            passInput.placeholder = 'パスワードを入力';
+            passInput.className = 'pass-input';
+
+            passContainer.appendChild(passInput);
+            details.appendChild(passContainer);
+
+            contentContainer.style.display = 'none';
+            details.appendChild(contentContainer);
+
+            passInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    if (passInput.value === sheet.pass) {
+                        passContainer.style.display = 'none';
+                        contentContainer.style.display = 'block';
+                    } else {
+                        passInput.value = '';
+                        passInput.placeholder = 'パスワードが違います';
+                        passInput.style.backgroundColor = '#ffcccc';
+                    }
+                }
+            });
+        } else {
+            details.appendChild(contentContainer);
         }
 
-        // --- 子メモを追加するボタン（編集時のみ表示） ---
-        const addSubBtn = document.createElement('button');
-        addSubBtn.textContent = "＋ メモを追加";
-        addSubBtn.className = "edit-btn edit-only-ui";
-        addSubBtn.style.margin = "10px";
-        addSubBtn.addEventListener('click', () => {
-            if (!sheet.field) sheet.field = [];
-            sheet.field.push({ name: "新規メモ", value: "内容を入力", pass: null, field: [] });
-            renderSheets(sheetsArray, parentElement); // 再描画して編集状態を維持する処理が必要ですが、簡易的に再描画します
-            
-            // 再描画後に編集モードを再度適用する
-            if(document.getElementById('app-main').classList.contains('edit-mode')){
-                document.querySelectorAll('.editable-area').forEach(area => area.setAttribute('contenteditable', 'true'));
-            }
-        });
-        contentContainer.appendChild(addSubBtn);
-
-        // ...（パスワード入力ロックの処理は前回と同じなので省略・そのまま残してください）...
-
-        details.appendChild(contentContainer);
         parentElement.appendChild(details);
     });
+
+    // ▼ 変更点：階層の「最後」に必ず追加ボタンを配置する！
+    const addBtn = document.createElement('button');
+    addBtn.textContent = "＋ メモを追加";
+    addBtn.className = "edit-btn edit-only-ui";
+    addBtn.style.margin = "10px";
+    addBtn.addEventListener('click', () => {
+        sheetsArray.push({ name: "新規メモ", value: "内容を入力してください", pass: null, field: [] });
+        renderSheets(sheetsArray, parentElement); // 再描画
+        if (document.getElementById('app-main').classList.contains('edit-mode')) {
+            // 再描画された要素を編集可能にする
+            document.querySelectorAll('.editable-area').forEach(area => area.setAttribute('contenteditable', 'true'));
+        }
+    });
+    parentElement.appendChild(addBtn);
 }
 
 // プロフィールと基本パラメータを描画する関数
@@ -189,8 +210,20 @@ function renderBasicInfo() {
     const imgInput = document.getElementById('chara-image-input');
 
     if (data.iconUrl) imgEl.src = data.iconUrl;
+
+    // ▼ 変更点: editable-area クラスを追加して編集可能にする
+    nameEl.className = 'editable-title editable-area';
     nameEl.textContent = data.name;
     imgInput.value = data.iconUrl || "";
+
+    // 名前と画像のリアルタイム反映 (oninputとonchangeに変更)
+    nameEl.oninput = (e) => { data.name = e.target.innerText; };
+    imgInput.onchange = (e) => {
+        data.iconUrl = e.target.value;
+        imgEl.src = e.target.value;
+    };
+
+    // ... (以降のパラメータ描画の処理はそのまま残してください) ...
 
     // 名前と画像のリアルタイム反映
     nameEl.addEventListener('input', (e) => data.name = e.target.innerText);
@@ -213,7 +246,7 @@ function renderBasicInfo() {
         viewText.style.color = "white";
         viewText.style.flex = "1";
         viewText.textContent = `${param.label} : ${param.value}`;
-        
+
         // 編集モード用の入力欄
         const labelInput = document.createElement('input');
         labelInput.type = 'text';
@@ -248,7 +281,7 @@ function renderBasicInfo() {
         data.params.push({ label: "新規項目", value: "10" });
         renderBasicInfo();
         // 再描画時に編集モード状態なら input を表示したままにするため
-        if(document.getElementById('app-main').classList.contains('edit-mode')){
+        if (document.getElementById('app-main').classList.contains('edit-mode')) {
             // 特殊な処理は不要（CSSで .edit-mode 下の .edit-only-ui が表示されるため）
         }
     });
@@ -294,17 +327,17 @@ const userEmailDisplay = document.getElementById('user-email-display');
 
 // --- 新規登録ボタンの処理 ---
 signupBtn.addEventListener('click', async () => {
-  const email = emailInput.value;
-  const password = passInput.value;
-  if(!email || !password) return alert("メールアドレスとパスワードを入力してください");
-  
-  try {
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    alert("新規登録が完了しました！\nあなたのUID: " + userCredential.user.uid);
-    // ※お試し用：後でFirestoreに手動でテストデータを作る時のためにUIDを表示しています
-  } catch (error) {
-    alert("エラー: " + error.message);
-  }
+    const email = emailInput.value;
+    const password = passInput.value;
+    if (!email || !password) return alert("メールアドレスとパスワードを入力してください");
+
+    try {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        alert("新規登録が完了しました！\nあなたのUID: " + userCredential.user.uid);
+        // ※お試し用：後でFirestoreに手動でテストデータを作る時のためにUIDを表示しています
+    } catch (error) {
+        alert("エラー: " + error.message);
+    }
 });
 
 // --- フォームの要素を取得（追加） ---
@@ -312,31 +345,31 @@ const authForm = document.getElementById('logged-out-ui');
 
 // --- ログイン処理（click から submit に変更） ---
 authForm.addEventListener('submit', async (e) => {
-  e.preventDefault(); // 画面がリロードされるの防ぐ（重要！）
-  
-  const email = emailInput.value;
-  const password = passInput.value;
+    e.preventDefault(); // 画面がリロードされるの防ぐ（重要！）
 
-  try {
-    await signInWithEmailAndPassword(auth, email, password);
-    alert("ログインしました！");
-    // ※ブラウザによっては、このログイン成功のタイミングで「パスワードを保存しますか？」のポップアップが出ます
-  } catch (error) {
-    alert("ログイン失敗: メールアドレスかパスワードが間違っています。");
-  }
+    const email = emailInput.value;
+    const password = passInput.value;
+
+    try {
+        await signInWithEmailAndPassword(auth, email, password);
+        alert("ログインしました！");
+        // ※ブラウザによっては、このログイン成功のタイミングで「パスワードを保存しますか？」のポップアップが出ます
+    } catch (error) {
+        alert("ログイン失敗: メールアドレスかパスワードが間違っています。");
+    }
 });
 
 // ※「新規登録ボタン (signupBtn)」と「ログアウトボタン (logoutBtn)」の処理は前回のままでOKです。
 
 // --- ログアウトボタンの処理 ---
 logoutBtn.addEventListener('click', async () => {
-  await signOut(auth);
-  alert("ログアウトしました。");
-  // ログアウト時に強制的に閲覧モードに戻す
-  document.getElementById('app-main').classList.remove('edit-mode');
-  const editableAreas = document.querySelectorAll('.editable-area');
-  editableAreas.forEach(area => area.setAttribute('contenteditable', 'false'));
-  editBtn.textContent = "編集する";
+    await signOut(auth);
+    alert("ログアウトしました。");
+    // ログアウト時に強制的に閲覧モードに戻す
+    document.getElementById('app-main').classList.remove('edit-mode');
+    const editableAreas = document.querySelectorAll('.editable-area');
+    editableAreas.forEach(area => area.setAttribute('contenteditable', 'false'));
+    editBtn.textContent = "編集する";
 });
 
 // --- キャラクター新規作成ボタンの処理 ---
@@ -371,18 +404,18 @@ createCharaBtn.addEventListener('click', async () => {
     try {
         // 1. コレクションにデータを追加し、ランダムなIDを自動生成させる
         const docRef = await addDoc(collection(db, "characters"), defaultData);
-        
+
         // 2. 生成されたIDを使って、externalUrl (ココフォリアから飛んでくる用のURL) を完成させる
         const myUrl = `${window.location.origin}${window.location.pathname}?id=${docRef.id}`;
         defaultData.data.externalUrl = myUrl;
-        
+
         // 3. URLを含めた状態で上書き保存
         await setDoc(docRef, defaultData);
 
         // 4. 新しく作られたキャラクターの個別ページへ移動
         alert("キャラクターを作成しました！");
         window.location.href = `?id=${docRef.id}`;
-        
+
     } catch (error) {
         console.error("作成エラー:", error);
         alert("作成に失敗しました。");

@@ -79,6 +79,7 @@ main.edit-mode .sheet-text[contenteditable="true"]:focus {
     border-radius: 8px;
     border: 2px solid white;
 }
+
 .editable-title {
     color: white;
     font-size: 2em;
@@ -93,12 +94,17 @@ main.edit-mode .sheet-text[contenteditable="true"]:focus {
     margin-bottom: 10px;
     align-items: center;
 }
+
 .param-input-label {
-    flex: 1; /* 左側を広く */
+    flex: 1;
+    /* 左側を広く */
 }
+
 .param-input-value {
-    width: 80px; /* 数字用 */
+    width: 80px;
+    /* 数字用 */
 }
+
 /* 画像の緑色の追加ボタン */
 .add-resource-btn {
     width: 100%;
@@ -119,9 +125,11 @@ main.edit-mode .sheet-text[contenteditable="true"]:focus {
     gap: 10px;
     flex: 1;
 }
+
 .sheet-title-text {
     flex: 1;
 }
+
 .setting-btn {
     padding: 4px 8px;
     background: #6C757D;
@@ -135,13 +143,17 @@ main.edit-mode .sheet-text[contenteditable="true"]:focus {
 /* --- モーダル (ポップアップ) --- */
 .modal-overlay {
     position: fixed;
-    top: 0; left: 0; width: 100%; height: 100%;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
     background: rgba(0, 0, 0, 0.7);
     z-index: 100;
     display: flex;
     justify-content: center;
     align-items: center;
 }
+
 .modal-content {
     background: #322E7B;
     border: 2px solid white;
@@ -150,4 +162,24 @@ main.edit-mode .sheet-text[contenteditable="true"]:focus {
     width: 90%;
     max-width: 400px;
 }
-.modal-content h3 { color: white; margin-top: 0; }
+
+.modal-content h3 {
+    color: white;
+    margin-top: 0;
+}
+
+/* --- 追加: キャラクター名 編集時のスタイル --- */
+main.edit-mode .editable-title[contenteditable="true"] {
+    outline: 2px dashed #44AEF3;
+    background-color: rgba(255, 255, 255, 0.1);
+    cursor: text;
+    padding: 0 10px;
+    border-radius: 4px;
+    display: inline-block;
+    /* 枠線を文字幅に合わせるため */
+}
+
+main.edit-mode .editable-title[contenteditable="true"]:focus {
+    outline: 2px solid #44AEF3;
+    background-color: rgba(255, 255, 255, 0.2);
+}
