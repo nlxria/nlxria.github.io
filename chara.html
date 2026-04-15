@@ -1,31 +1,34 @@
 <!DOCTYPE html>
 <html lang="ja">
     <head>
-        <title>選択ルール 関数電卓</title>
+        <title>キャラクターシート</title>
         <link rel="icon" href="/assets/favicon.ico">
         <link rel="shortcut icon" href="/assets/favicon.ico">
         <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
         <link rel="stylesheet" href="/styles/index.css">
+        <link rel="stylesheet" href="/styles/chara.css">
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width,initial-scale=1">
-        <meta name="description" content="本ページは『クトゥルフ神話TRPG』を現代日本を舞台にして邪神、クリーチャー、カルティストらに立ち向かう探索行をプレイするキーパーとプレイヤーのためのハウスルールだ。">
+        <meta name="description" content="デモ版です。">
         <meta name="theme-color" content="#44AEF3">
-        <meta property="og:title" content="選択ルール 関数電卓">
-        <meta property="og:description" content="本ページは『クトゥルフ神話TRPG』を現代日本を舞台にして邪神、クリーチャー、カルティストらに立ち向かう探索行をプレイするキーパーとプレイヤーのためのハウスルールだ。">
+        <meta property="og:title" content="キャラクターシート">
+        <meta property="og:description" content="デモ版です。">
         <meta property="og:type" content="website">
         <meta property="og:locale" content="ja_JP">
         <meta property="og:url" content="https://nlxria.github.io/chara">
         <meta property="og:image" content="https://raw.githubusercontent.com/nlxria/nlxria.github.io/main/assets/favicon.png">
-        <meta property="og:deteminer" content="クトゥルフ神話TRPG">
-        <meta property="og:site_name" content="クトゥルフ神話TRPG">
+        <meta property="og:deteminer" content="GitHub">
+        <meta property="og:site_name" content="GitHub">
         <meta name="twitter:card" content="summary_large_image">
         <meta name="twitter:site" content="@cthulhumasters">
         <meta name="twitter:creator" content="@nlxria">
-        <meta name="twitter:title" content="選択ルール 関数電卓">
-        <meta name="twitter:description" content="本ページは『クトゥルフ神話TRPG』を現代日本を舞台にして邪神、クリーチャー、カルティストらに立ち向かう探索行をプレイするキーパーとプレイヤーのためのハウスルールだ。">
+        <meta name="twitter:title" content="キャラクターシート">
+        <meta name="twitter:description" content="デモ版です。">
     </head>
-    <body><main>
-        <header><a class="back" onclick="history.back()">←</a><a class="title" href="">関数電卓</a></header><div class="head"></div>
-        <script src="/scripts/login.js"></script>
+    <body><main id="app-main">
+        <header><a class="back" onclick="history.back()">←</a><a class="title" href="">NLXRIA</a><button id="edit-mode-btn" class="edit-btn" style="display: none;">編集する</button></header><div class="head"></div>
+        <div id="basic-status-container"></div>
+        <div id="sheets-container"></div>
+        <script src="/scripts/chara.js"></script>
     </main></body>
 </html>
