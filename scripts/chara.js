@@ -1,8 +1,8 @@
 // 注意: 実際のFirebase設定情報に書き換えてください
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
 import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-// ▼ collection と addDoc を追加で読み込む
-import { getFirestore, doc, getDoc, setDoc, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+// ▼ query, where, getDocs を追加で読み込む
+import { getFirestore, doc, getDoc, setDoc, collection, addDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyBP17_hAR-NO_OT0MWDvtISiM20fjg1eO4",
@@ -59,33 +59,88 @@ async function init() {
     }
 }
 
+// --- キャラクター一覧を取得・描画する関数 ---
+async function loadCharacterList(uid) {
+    const listElement = document.getElementById('character-list');
+    listElement.innerHTML = '<p style="color: white; text-align: center;">読み込み中...</p>';
+
+    try {
+        // 「data.owner が 自分のUID と同じもの」を検索するクエリ
+        const q = query(collection(db, "characters"), where("data.owner", "==", uid));
+        const querySnapshot = await getDocs(q);
+
+        listElement.innerHTML = ''; // 読み込み中テキストをクリア
+
+        if (querySnapshot.empty) {
+            listElement.innerHTML = '<p style="color: #E0E0E0; text-align: center;">作成したキャラクターはまだありません。</p>';
+            return;
+        }
+
+        // 取得したキャラクターをループ処理してカードを作る
+        querySnapshot.forEach((docSnap) => {
+            const charaId = docSnap.id;
+            const data = docSnap.data().data; 
+
+            const card = document.createElement('a');
+            card.href = `?id=${charaId}`;
+            card.className = 'chara-list-card';
+
+            // 画像URL（空なら灰色のプレースホルダー画像）
+            const iconUrl = data.iconUrl || 'data:image/svg+xml;charset=UTF8,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20width=%2260%22%20height=%2260%22%20style=%22background:%236C757D%22%3E%3C/svg%3E';
+            
+            // メモ（空ならデフォルトテキスト）
+            const memoText = data.memo ? data.memo : '設定メモなし';
+
+            card.innerHTML = `
+                <img src="${iconUrl}" alt="icon" onerror="this.src='data:image/svg+xml;charset=UTF8,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20width=%2260%22%20height=%2260%22%20style=%22background:%236C757D%22%3E%3C/svg%3E'">
+                <div class="chara-info">
+                    <h4>${data.name || '名前なし'}</h4>
+                    <p>${memoText}</p>
+                </div>
+            `;
+            listElement.appendChild(card);
+        });
+
+    } catch (error) {
+        console.error("一覧取得エラー:", error);
+        listElement.innerHTML = '<p style="color: lightpink; text-align: center;">リストの取得に失敗しました。</p>';
+    }
+}
+
 // 2. 権限チェック (ログイン状態の監視)
 onAuthStateChanged(auth, (user) => {
     if (user) {
-        // ログインしている時のUI切り替え
+        // ... (既存のUI切り替えコードはそのまま) ...
         loggedOutUI.style.display = 'none';
         loggedInUI.style.display = 'flex';
         userEmailDisplay.textContent = user.email;
-
-        // ダッシュボード（作成ボタン）の表示切り替え
         createLoginPrompt.style.display = 'none';
         createCharaBtn.style.display = 'inline-block';
 
-        // ▼ 修正ポイント②：Auth状態が変わった時にも、データが既にあればチェックしてボタンを出す
         if (characterData && characterData.data.owner === user.uid) {
-            editBtn.style.display = 'block';
+            editBtn.style.display = 'block'; 
         } else {
-            editBtn.style.display = 'none';
+            editBtn.style.display = 'none'; 
         }
+
+        // ▼ ▼ ここを追加 ▼ ▼
+        if (!characterId) {
+            // ダッシュボードにいる場合、一覧エリアを表示してデータ取得
+            document.getElementById('character-list-container').style.display = 'block';
+            loadCharacterList(user.uid);
+        }
+        // ▲ ▲ ここまで ▲ ▲
+
     } else {
-        // ログアウトしている時のUI切り替え
+        // ... (既存のログアウト時コード) ...
         loggedOutUI.style.display = 'flex';
         loggedInUI.style.display = 'none';
         editBtn.style.display = 'none';
-
-        // ダッシュボード（作成ボタン）の表示切り替え
         createLoginPrompt.style.display = 'block';
         createCharaBtn.style.display = 'none';
+
+        // ▼ 追加：ログアウト時は一覧を隠す
+        document.getElementById('character-list-container').style.display = 'none';
     }
 });
 
@@ -295,7 +350,7 @@ editBtn.addEventListener('click', async () => {
     const editableAreas = document.querySelectorAll('.editable-area');
 
     if (isEditing) {
-        editBtn.textContent = "保存して閲覧モードに戻る";
+        editBtn.textContent = "保存";
         editableAreas.forEach(area => area.setAttribute('contenteditable', 'true'));
     } else {
         editBtn.textContent = "保存中...";
@@ -304,12 +359,12 @@ editBtn.addEventListener('click', async () => {
         // Firestoreへ上書き保存
         try {
             await setDoc(doc(db, "characters", characterId), characterData);
-            editBtn.textContent = "編集する";
+            editBtn.textContent = "編集";
             alert("保存しました！");
         } catch (error) {
             console.error("Error saving document: ", error);
             alert("保存に失敗しました。");
-            editBtn.textContent = "保存して閲覧モードに戻る";
+            editBtn.textContent = "保存";
             mainElement.classList.add('edit-mode'); // 失敗したら編集モードに戻す
         }
     }
@@ -369,7 +424,7 @@ logoutBtn.addEventListener('click', async () => {
     document.getElementById('app-main').classList.remove('edit-mode');
     const editableAreas = document.querySelectorAll('.editable-area');
     editableAreas.forEach(area => area.setAttribute('contenteditable', 'false'));
-    editBtn.textContent = "編集する";
+    editBtn.textContent = "編集";
 });
 
 // --- キャラクター新規作成ボタンの処理 ---

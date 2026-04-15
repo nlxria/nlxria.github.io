@@ -27,29 +27,26 @@
     </head>
     <body><main id="app-main">
         <header><a class="back" onclick="history.back()">←</a><a class="title" href="/chara">キャラシ</a>
-            <div>        
-                <div id="auth-container" style="display: flex; align-items: center; gap: 10px;">
-                    
-                    <form id="logged-out-ui" style="display: flex; gap: 5px; margin: 0;">
+            <div>
+                <div id="auth-container" style="display: flex; align-items: center; gap: 1em;">
+                    <form id="logged-out-ui" style="display: flex; gap: 1em; margin: 0;">
                         <input type="email" id="email-input" placeholder="メールアドレス" class="pass-input" style="margin:0; width: 150px; padding: 0.5em;" required autocomplete="email">
                         <input type="password" id="pass-input" placeholder="パスワード" class="pass-input" style="margin:0; width: 120px; padding: 0.5em;" required autocomplete="current-password">
                         <button type="submit" id="login-btn" class="edit-btn">ログイン</button>
                         <button type="button" id="signup-btn" class="edit-btn" style="background: #44AEF3;">新規登録</button>
                     </form>
-                    
-                    <div id="logged-in-ui" style="display: none; align-items: center; gap: 10px; color: #304E72; font-weight: bold; font-size: 0.9em;">
+                    <div id="logged-in-ui" style="display: none; align-items: center; gap: 1em; color: #304E72;">
                         <span id="user-email-display"></span>
                         <button id="logout-btn" class="edit-btn" style="background: #e74c3c;">ログアウト</button>
                     </div>
-                    
                 </div>
+                <button id="edit-mode-btn" class="edit-btn" style="display: none;">編集</button>
             </div>
-            <button id="edit-mode-btn" class="edit-btn" style="display: none;">編集する</button>
         </header>
         <div class="head"></div>
         <div id="profile-container" style="display: none; padding: 2vh 4.5vh; text-align: center;">
             <div class="profile-image-wrapper">
-                <img id="chara-image" src="" alt="" onerror="this.src='data:image/svg+xml;charset=UTF8,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20width=%22100%22%20height=%22100%22%20style=%22background:%236C757D%22%3E%3C/svg%3E'">
+                <img id="chara-image" src="" alt="" onerror="this.src='/assets/image/chara-image.png'">
                 <input type="text" id="chara-image-input" class="pass-input edit-only-ui" placeholder="画像URLを入力" style="margin-top: 10px;">
             </div>
             <h1 id="chara-name" class="editable-title"></h1>
@@ -76,6 +73,11 @@
             <h2 style="color: white; font-size: 2em; margin-bottom: 1em;">キャラクター管理</h2>
             <button id="create-chara-btn" class="edit-btn" style="font-size: 1.2em; padding: 1em 2em; display: none;">＋ 新規キャラクターを作成</button>
             <p id="create-login-prompt" style="color: lightpink;">※作成するにはログインしてください</p>
+
+            <div id="character-list-container" style="display: none; margin-top: 3em; text-align: left; max-width: 600px; margin-left: auto; margin-right: auto; padding: 0 4.5vh;">
+                <h3 style="color: white; border-bottom: 2px solid white; padding-bottom: 0.5em;">あなたのキャラクター</h3>
+                <div id="character-list" style="display: flex; flex-direction: column; gap: 10px; margin-top: 1em;"></div>
+            </div>
         </div>
         <script type="module" src="/scripts/chara.js"></script>
     </main></body>
