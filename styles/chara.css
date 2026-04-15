@@ -1,6 +1,4 @@
-/* === ここから今回追加したスタイル === */
-
-/* ヘッダーのボタン共通スタイル（修正版） */
+/* === ヘッダーのボタン・入力欄 === */
 
 header>div {
     position: absolute;
@@ -13,7 +11,8 @@ header>div {
     z-index: 5;
 }
 
-#auth-container>* {
+#auth-container>*,
+#edit-mode-btn {
     height: 4.5vh;
 }
 
@@ -26,11 +25,6 @@ header>div {
     cursor: pointer;
 }
 
-#edit-mode-btn {
-    height: 4.5vh;
-}
-
-/* パスワード入力欄 */
 .pass-input {
     width: calc(100% - 2em);
     margin: 1em;
@@ -47,110 +41,8 @@ header>div {
     color: #E0E0E0;
 }
 
-/* 展開されたテキストボックス */
-.sheet-text {
-    background-color: #466398;
-    color: white;
-    margin: 1em;
-    padding: 1em;
-    border-radius: 4px;
-    white-space: pre-wrap;
-    transition: all 0.3s ease;
-}
+/* === モーダル (ポップアップ) === */
 
-/* --- 編集モード時のみのスタイル切り替え --- */
-.edit-only-ui {
-    display: none;
-}
-
-main.edit-mode .edit-only-ui {
-    display: block;
-}
-
-/* 編集可能なテキストエリアのハイライト */
-main.edit-mode .sheet-text[contenteditable="true"] {
-    outline: 2px dashed #44AEF3;
-    background-color: transparent;
-    cursor: text;
-}
-
-main.edit-mode .sheet-text[contenteditable="true"]:focus {
-    outline: 2px solid #44AEF3;
-    background-color: transparent;
-}
-
-/* --- プロフィール画像周り --- */
-.profile-image-wrapper img {
-    width: 50%;
-    /* 横幅を親要素の50%に固定 */
-    height: auto;
-    /* 高さを自動調整して縦横比を維持 */
-    border-radius: 8px;
-    border: 2px solid white;
-    /* object-fit: cover; は削除します */
-}
-
-.editable-title {
-    color: white;
-    font-size: 2em;
-    margin: 0.5em 0;
-    transition: background 0.3s;
-}
-
-/* --- 動的ステータス（STR 10 のような行） --- */
-.param-row {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 10px;
-    align-items: center;
-}
-
-.param-input-label {
-    flex: 1;
-    /* 左側を広く */
-}
-
-.param-input-value {
-    width: 80px;
-    /* 数字用 */
-}
-
-/* 画像の青色の追加ボタン */
-.add-resource-btn {
-    width: 100%;
-    padding: 12px;
-    background-color: #466398;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 1.1em;
-    margin-top: 10px;
-}
-
-/* --- アコーディオンのタイトル編集・設定ボタン --- */
-.sheet-header-controls {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex: 1;
-}
-
-.sheet-title-text {
-    flex: 1;
-}
-
-.setting-btn {
-    padding: 4px 8px;
-    background: #6C757D;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    font-size: 0.8em;
-    cursor: pointer;
-}
-
-/* --- モーダル (ポップアップ) --- */
 .modal-overlay {
     position: fixed;
     top: 0;
@@ -178,7 +70,136 @@ main.edit-mode .sheet-text[contenteditable="true"]:focus {
     margin-top: 0;
 }
 
-/* --- 追加: キャラクター名 編集時のスタイル --- */
+/* === プロフィール画像・基本ステータス === */
+
+.profile-image-wrapper img {
+    width: 50%;
+    height: auto;
+    border-radius: 8px;
+    border: 2px solid white;
+}
+
+.editable-title {
+    color: white;
+    font-size: 2em;
+    margin: 0.5em 0;
+    transition: background 0.3s;
+}
+
+.param-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+    align-items: center;
+}
+
+.param-input-label {
+    flex: 1;
+}
+
+.param-input-value {
+    width: 80px;
+}
+
+.add-resource-btn {
+    width: 100%;
+    padding: 12px;
+    background-color: #466398;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1.1em;
+    margin-top: 10px;
+}
+
+/* === アコーディオン・メモ枠組み === */
+
+.chara-box-wrapper {
+    color: white;
+    line-height: 2;
+    margin: 3em auto;
+    max-width: 80vw;
+    font-family: ShinMaruGo;
+}
+
+.chara-box {
+    background: #322E7B;
+    border: 2px solid white;
+    border-bottom-right-radius: 1.5em;
+    corner-bottom-right-shape: bevel;
+    padding: 1.5em;
+    margin-bottom: 2em;
+    overflow-x: auto;
+}
+
+.chara-box-wrapper summary {
+    cursor: pointer;
+    list-style: none;
+}
+
+.chara-box-wrapper summary::-webkit-details-marker {
+    display: none;
+}
+
+.sheet-header-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+}
+
+.sheet-title-text {
+    flex: 1;
+}
+
+.setting-btn {
+    padding: 4px 8px;
+    background: #6C757D;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 0.8em;
+    cursor: pointer;
+}
+
+/* === メモの中身（親テキストと子メモ） === */
+
+.sheet-text {
+    background-color: transparent;
+    color: white;
+    margin: 1em;
+    padding: 1em;
+    border-radius: 4px;
+    white-space: pre-wrap;
+    transition: all 0.3s ease;
+}
+
+.text-content {
+    min-height: 1.5em;
+    white-space: pre-wrap;
+    margin-bottom: 1em;
+}
+
+.nested-field {
+    background-color: transparent;
+    border: 2px solid white;
+    border-radius: 8px;
+    padding: 1em;
+    margin-top: 1em;
+}
+
+/* === 編集モード専用のUIとハイライト設定 === */
+
+.edit-only-ui {
+    display: none;
+}
+
+main.edit-mode .edit-only-ui {
+    display: block;
+}
+
+/* キャラクター名の編集ハイライト */
 main.edit-mode .editable-title[contenteditable="true"] {
     outline: 2px dashed #44AEF3;
     background-color: rgba(255, 255, 255, 0.1);
@@ -186,7 +207,6 @@ main.edit-mode .editable-title[contenteditable="true"] {
     padding: 0 10px;
     border-radius: 4px;
     display: inline-block;
-    /* 枠線を文字幅に合わせるため */
 }
 
 main.edit-mode .editable-title[contenteditable="true"]:focus {
@@ -194,7 +214,22 @@ main.edit-mode .editable-title[contenteditable="true"]:focus {
     background-color: rgba(255, 255, 255, 0.2);
 }
 
-/* --- キャラクター一覧カード --- */
+/* メモテキストの編集ハイライト（重複箇所を解消） */
+main.edit-mode .text-content[contenteditable="true"] {
+    outline: 2px dashed #44AEF3;
+    background-color: transparent;
+    cursor: text;
+    padding: 0.5em;
+    border-radius: 4px;
+}
+
+main.edit-mode .text-content[contenteditable="true"]:focus {
+    outline: 2px solid #44AEF3;
+    background-color: transparent;
+}
+
+/* === キャラクター一覧（ダッシュボード） === */
+
 .chara-list-card {
     display: flex;
     align-items: center;
@@ -210,7 +245,6 @@ main.edit-mode .editable-title[contenteditable="true"]:focus {
 
 .chara-list-card:hover {
     background: rgba(68, 174, 243, 0.2);
-    /* ホバーで少し水色に光る */
     border-color: #44AEF3;
 }
 
@@ -235,7 +269,6 @@ main.edit-mode .editable-title[contenteditable="true"]:focus {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    /* 長い名前は「...」で省略 */
 }
 
 .chara-list-card .chara-info p {
@@ -245,74 +278,4 @@ main.edit-mode .editable-title[contenteditable="true"]:focus {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-}
-
-/* --- pre要素の代わりとなるコンテナのスタイル --- */
-.chara-box-wrapper {
-    color: white;
-    line-height: 2;
-    margin: 3em auto;
-    max-width: 80vw;
-    /* 見栄えよく中央に寄せるための幅（お好みで調整してください） */
-    font-family: ShinMaruGo;
-}
-
-/* 枠線のスタイル（元の pre > div のスタイルを再現） */
-.chara-box {
-    background: #322E7B;
-    border: 2px solid white;
-    border-bottom-right-radius: 1.5em;
-    corner-bottom-right-shape: bevel;
-    /* ← ★この1行を追加！ */
-    padding: 1.5em;
-    margin-bottom: 2em;
-    overflow-x: auto;
-}
-
-/* アコーディオンの summary (タイトル部分) をクリックしやすくする調整 */
-.chara-box-wrapper summary {
-    cursor: pointer;
-    list-style: none;
-    /* デフォルトの黒い三角を消す */
-}
-
-.chara-box-wrapper summary::-webkit-details-marker {
-    display: none;
-    /* Safari用の黒い三角消し */
-}
-
-/* --- 追加：親メモと子メモを安全に分離するためのテキストエリア --- */
-.text-content {
-    min-height: 1.5em;
-    /* 空でもクリックできるように高さを確保 */
-    white-space: pre-wrap;
-    margin-bottom: 1em;
-    /* 子メモとの間に少し隙間を空ける */
-}
-
-main.edit-mode .text-content[contenteditable="true"] {
-    outline: 2px dashed #44AEF3;
-    background-color: #f0f8ff;
-    cursor: text;
-    padding: 0.5em;
-    border-radius: 4px;
-}
-
-main.edit-mode .text-content[contenteditable="true"]:focus {
-    outline: 2px solid #44AEF3;
-    background-color: transparent;
-}
-
-/* --- 追加：子メモを囲む枠線のスタイル --- */
-.nested-field {
-    background-color: transparent;
-    /* 背景を透明に */
-    border: 2px solid white;
-    /* 白い枠線 */
-    border-radius: 8px;
-    /* 枠の角を少し丸く */
-    padding: 1em;
-    /* 枠線と中の要素がくっつかないように余白 */
-    margin-top: 1em;
-    /* 上のテキストエリアとの間に隙間を作る */
 }
