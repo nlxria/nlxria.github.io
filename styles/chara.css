@@ -188,9 +188,10 @@ header>div {
 .nested-field {
     background-color: transparent;
     border: 2px solid white;
-    border-radius: 8px; /* 全体の角の丸み */
-    border-bottom-right-radius: 1.5em; /* 右下を大枠と同じサイズに */
-    corner-bottom-right-shape: bevel;  /* 右下を角ばらせる */
+    border-bottom-right-radius: 1.5em;
+    /* 右下を大枠と同じサイズに */
+    corner-bottom-right-shape: bevel;
+    /* 右下を角ばらせる */
     padding: 1em;
     margin-top: 1em;
 }
