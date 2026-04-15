@@ -408,18 +408,27 @@ function renderBasicInfo() {
     });
 
     basicContainer.appendChild(addBtn);
+    updateSheetsContainerVisibility();
 }
 
-// --- 閲覧モードでメモが空のときに枠を隠す関数 ---
+// --- 閲覧モードで空の枠を隠す関数（メモ・能力値の両方に対応） ---
 function updateSheetsContainerVisibility() {
     const isEditing = document.getElementById('app-main').classList.contains('edit-mode');
+    
+    // ① メモ枠の表示切替
     const sheetsContainer = document.getElementById('sheets-container');
-
-    // データが存在し、かつメモが0個、かつ「閲覧モード」のときだけ隠す
     if (characterData && characterData.data.sheets.length === 0 && !isEditing) {
         sheetsContainer.style.display = 'none';
     } else {
         sheetsContainer.style.display = 'block';
+    }
+
+    // ② 能力値（基本ステータス）枠の表示切替
+    const basicContainer = document.getElementById('basic-status-container');
+    if (characterData && characterData.data.params.length === 0 && !isEditing) {
+        basicContainer.style.display = 'none';
+    } else {
+        basicContainer.style.display = 'block';
     }
 }
 
