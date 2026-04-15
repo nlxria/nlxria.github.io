@@ -3,71 +3,70 @@
 /* ヘッダーのボタン共通スタイル（修正版） */
 
 header>div {
-  position: absolute;
-  right: 4.5vh;
-  top: 50%;
-  transform: translateY(-50%);
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  z-index: 5;
+    position: absolute;
+    right: 4.5vh;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    z-index: 5;
 }
 
 .edit-btn {
-  padding: 1vh 2vh;
-  background: #322E7B;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
+    padding: 1vh 2vh;
+    background: #322E7B;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
 }
 
 /* パスワード入力欄 */
 .pass-input {
-  width: calc(100% - 2em);
-  margin: 1em;
-  padding: 0.8em;
-  background-color: #6C757D;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  font-family: inherit;
-  font-size: 1em;
-  outline: none;
+    width: calc(100% - 2em);
+    margin: 1em;
+    padding: 0.8em;
+    background-color: #6C757D;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 1em;
+    outline: none;
 }
 
 .pass-input::placeholder {
-  color: #E0E0E0;
+    color: #E0E0E0;
 }
 
 /* 展開されたテキストボックス */
 .sheet-text {
-  background-color: white;
-  color: black;
-  margin: 1em;
-  padding: 1em;
-  border-radius: 4px;
-  white-space: pre-wrap;
-  transition: all 0.3s ease;
+    background-color: white;
+    color: black;
+    margin: 1em;
+    padding: 1em;
+    border-radius: 4px;
+    white-space: pre-wrap;
+    transition: all 0.3s ease;
 }
 
 /* --- 編集モード時のみのスタイル切り替え --- */
 .edit-only-ui {
-  display: none;
+    display: none;
 }
 
 main.edit-mode .edit-only-ui {
-  display: block;
+    display: block;
 }
 
 /* 編集可能なテキストエリアのハイライト */
 main.edit-mode .sheet-text[contenteditable="true"] {
-  outline: 2px dashed #44AEF3;
-  background-color: #f0f8ff;
-  cursor: text;
+    outline: 2px dashed #44AEF3;
+    background-color: #f0f8ff;
+    cursor: text;
 }
 
 main.edit-mode .sheet-text[contenteditable="true"]:focus {
-  outline: 2px solid #44AEF3;
-  background-color: white;
+    outline: 2px solid #44AEF3;
+    background-color: white;
 }

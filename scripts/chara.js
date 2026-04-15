@@ -1,7 +1,8 @@
 // 注意: 実際のFirebase設定情報に書き換えてください
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
 import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+// ▼ collection と addDoc を追加で読み込む
+import { getFirestore, doc, getDoc, setDoc, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyBP17_hAR-NO_OT0MWDvtISiM20fjg1eO4",
@@ -25,14 +26,21 @@ const mainElement = document.getElementById('app-main');
 const editBtn = document.getElementById('edit-mode-btn');
 const container = document.getElementById('sheets-container');
 
+// ==== ここから上書き ====
+
+const dashboardContainer = document.getElementById('dashboard-container');
+const createCharaBtn = document.getElementById('create-chara-btn');
+const createLoginPrompt = document.getElementById('create-login-prompt');
+
 // 初期化処理
 async function init() {
     if (!characterId) {
-        alert("キャラクターIDが指定されていません");
+        // IDがない場合は、アラートを出さずにダッシュボード（作成画面）を表示する
+        dashboardContainer.style.display = 'block';
         return;
     }
 
-    // 1. データの取得
+    // 1. データの取得 (IDがある場合)
     const docRef = doc(db, "characters", characterId);
     const docSnap = await getDoc(docRef);
 
@@ -42,16 +50,39 @@ async function init() {
     } else {
         alert("キャラクターが見つかりません");
     }
-
-    // 2. 権限チェック (ログイン状態の監視)
-    onAuthStateChanged(auth, (user) => {
-        if (user && characterData && characterData.data.owner === user.uid) {
-            editBtn.style.display = 'block'; // 本人なら編集ボタンを表示
-        } else {
-            editBtn.style.display = 'none';
-        }
-    });
 }
+
+// 2. 権限チェック (ログイン状態の監視)
+onAuthStateChanged(auth, (user) => {
+    if (user) {
+        // ログインしている時のUI切り替え
+        loggedOutUI.style.display = 'none';
+        loggedInUI.style.display = 'flex';
+        userEmailDisplay.textContent = user.email;
+
+        // ダッシュボード（作成ボタン）の表示切り替え
+        createLoginPrompt.style.display = 'none';
+        createCharaBtn.style.display = 'inline-block';
+
+        // キャラクターの所有者と一致するかチェック（閲覧画面にいる場合）
+        if (characterData && characterData.data.owner === user.uid) {
+            editBtn.style.display = 'block'; 
+        } else {
+            editBtn.style.display = 'none'; 
+        }
+    } else {
+        // ログアウトしている時のUI切り替え
+        loggedOutUI.style.display = 'flex';
+        loggedInUI.style.display = 'none';
+        editBtn.style.display = 'none';
+
+        // ダッシュボード（作成ボタン）の表示切り替え
+        createLoginPrompt.style.display = 'block';
+        createCharaBtn.style.display = 'none';
+    }
+});
+
+// ==== ここまで上書き ====
 
 // アコーディオンの再帰的描画関数
 function renderSheets(sheetsArray, parentElement) {
@@ -160,28 +191,6 @@ const signupBtn = document.getElementById('signup-btn');
 const logoutBtn = document.getElementById('logout-btn');
 const userEmailDisplay = document.getElementById('user-email-display');
 
-// --- ログイン状態の監視（前回のコードを上書き） ---
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    // ログインしている時のUI切り替え
-    loggedOutUI.style.display = 'none';
-    loggedInUI.style.display = 'flex';
-    userEmailDisplay.textContent = user.email; // メルアドを表示
-
-    // キャラクターの所有者と一致するかチェック
-    if (characterData && characterData.data.owner === user.uid) {
-      editBtn.style.display = 'block'; // 本人なら編集ボタンを表示
-    } else {
-      editBtn.style.display = 'none';  // 他人なら隠す
-    }
-  } else {
-    // ログアウトしている時（未ログイン）のUI切り替え
-    loggedOutUI.style.display = 'flex';
-    loggedInUI.style.display = 'none';
-    editBtn.style.display = 'none'; // 編集ボタンも隠す
-  }
-});
-
 // --- 新規登録ボタンの処理 ---
 signupBtn.addEventListener('click', async () => {
   const email = emailInput.value;
@@ -227,6 +236,67 @@ logoutBtn.addEventListener('click', async () => {
   const editableAreas = document.querySelectorAll('.editable-area');
   editableAreas.forEach(area => area.setAttribute('contenteditable', 'false'));
   editBtn.textContent = "編集する";
+});
+
+// --- キャラクター新規作成ボタンの処理 ---
+createCharaBtn.addEventListener('click', async () => {
+    const user = auth.currentUser;
+    if (!user) return alert("ログインが必要です");
+
+    createCharaBtn.textContent = "作成中...";
+    createCharaBtn.disabled = true;
+
+    // ココフォリア互換の初期テンプレートデータ
+    const defaultData = {
+        kind: "character",
+        data: {
+            name: "新しい探索者",
+            memo: "ここに設定などを記入します",
+            initiative: 0,
+            externalUrl: "", // ID生成後にURLを入れます
+            status: [
+                { label: "HP", value: 10, max: 10 },
+                { label: "MP", value: 10, max: 10 },
+                { label: "SAN", value: 50, max: 99 }
+            ],
+            params: [
+                { label: "STR", value: "10" },
+                { label: "DEX", value: "10" }
+            ],
+            iconUrl: "",
+            faces: [],
+            x: 0, y: 0, angle: 0, width: 4, height: 4,
+            active: true, secret: false, invisible: false, hideStatus: false,
+            color: "#322E7B",
+            commands: "1d100<=50 【目星】",
+            sheets: [
+                { name: "設定メモ", value: "キャラクターのバックストーリーなどを記述します", pass: null, field: [] }
+            ],
+            owner: user.uid // 【重要】これで自分しか編集できなくなる
+        }
+    };
+
+    try {
+        // 1. コレクションにデータを追加し、ランダムなIDを自動生成させる
+        const docRef = await addDoc(collection(db, "characters"), defaultData);
+        
+        // 2. 生成されたIDを使って、externalUrl (ココフォリアから飛んでくる用のURL) を完成させる
+        const myUrl = `${window.location.origin}${window.location.pathname}?id=${docRef.id}`;
+        defaultData.data.externalUrl = myUrl;
+        
+        // 3. URLを含めた状態で上書き保存
+        await setDoc(docRef, defaultData);
+
+        // 4. 新しく作られたキャラクターの個別ページへ移動
+        alert("キャラクターを作成しました！");
+        window.location.href = `?id=${docRef.id}`;
+        
+    } catch (error) {
+        console.error("作成エラー:", error);
+        alert("作成に失敗しました。");
+        createCharaBtn.textContent = "＋ 新規キャラクターを作成";
+        createCharaBtn.disabled = false;
+    }
 });
 
 // 実行
