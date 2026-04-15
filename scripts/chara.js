@@ -205,7 +205,7 @@ function renderSheets(sheetsArray, parentElement, isRoot = true) {
         titleSpan.addEventListener('click', (e) => {
             // 編集モード（入力可能）の時だけ、クリックによる開閉を無効化する
             if (titleSpan.getAttribute('contenteditable') === 'true') {
-                e.preventDefault(); 
+                e.preventDefault();
             }
         });
         // ▲ ▲ ★ここまで★ ▲ ▲
@@ -295,7 +295,7 @@ function renderSheets(sheetsArray, parentElement, isRoot = true) {
     const addBtn = document.createElement('button');
 
     if (isRoot) {
-        // 一番上の階層の場合は緑色の全幅ボタン
+        // 一番上の階層の場合は青色の全幅ボタン
         addBtn.textContent = "＋ メモを追加";
         addBtn.className = "add-resource-btn edit-only-ui";
     } else {
@@ -394,7 +394,7 @@ function renderBasicInfo() {
         basicContainer.appendChild(row);
     });
 
-    // 「＋ リソース追加」ボタン（緑色）
+    // 「＋ リソース追加」ボタン（青色）
     const addBtn = document.createElement('button');
     addBtn.textContent = "＋ リソース追加";
     addBtn.className = 'add-resource-btn edit-only-ui';
@@ -414,7 +414,7 @@ function renderBasicInfo() {
 // --- 閲覧モードで空の枠を隠す関数（メモ・能力値の両方に対応） ---
 function updateSheetsContainerVisibility() {
     const isEditing = document.getElementById('app-main').classList.contains('edit-mode');
-    
+
     // ① メモ枠の表示切替
     const sheetsContainer = document.getElementById('sheets-container');
     if (characterData && characterData.data.sheets.length === 0 && !isEditing) {

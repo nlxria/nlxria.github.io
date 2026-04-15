@@ -13,13 +13,13 @@ header>div {
     z-index: 5;
 }
 
-.auth-container>* {
+#auth-container>* {
     height: 4.5vh;
 }
 
 .edit-btn {
     padding: 1vh 2vh;
-    background: #322E7B;
+    background: #466398;
     color: white;
     border: none;
     border-radius: 4px;
@@ -70,13 +70,13 @@ main.edit-mode .edit-only-ui {
 /* 編集可能なテキストエリアのハイライト */
 main.edit-mode .sheet-text[contenteditable="true"] {
     outline: 2px dashed #44AEF3;
-    background-color: #f0f8ff;
+    background-color: transparent;
     cursor: text;
 }
 
 main.edit-mode .sheet-text[contenteditable="true"]:focus {
     outline: 2px solid #44AEF3;
-    background-color: white;
+    background-color: transparent;
 }
 
 /* --- プロフィール画像周り --- */
@@ -115,7 +115,7 @@ main.edit-mode .sheet-text[contenteditable="true"]:focus {
     /* 数字用 */
 }
 
-/* 画像の緑色の追加ボタン */
+/* 画像の青色の追加ボタン */
 .add-resource-btn {
     width: 100%;
     padding: 12px;
@@ -262,9 +262,10 @@ main.edit-mode .editable-title[contenteditable="true"]:focus {
     background: #322E7B;
     border: 2px solid white;
     border-bottom-right-radius: 1.5em;
+    corner-bottom-right-shape: bevel;
+    /* ← ★この1行を追加！ */
     padding: 1.5em;
     margin-bottom: 2em;
-    /* 枠と枠の間の隙間 */
     overflow-x: auto;
 }
 
@@ -299,5 +300,19 @@ main.edit-mode .text-content[contenteditable="true"] {
 
 main.edit-mode .text-content[contenteditable="true"]:focus {
     outline: 2px solid #44AEF3;
-    background-color: white;
+    background-color: transparent;
+}
+
+/* --- 追加：子メモを囲む枠線のスタイル --- */
+.nested-field {
+    background-color: transparent;
+    /* 背景を透明に */
+    border: 2px solid white;
+    /* 白い枠線 */
+    border-radius: 8px;
+    /* 枠の角を少し丸く */
+    padding: 1em;
+    /* 枠線と中の要素がくっつかないように余白 */
+    margin-top: 1em;
+    /* 上のテキストエリアとの間に隙間を作る */
 }
