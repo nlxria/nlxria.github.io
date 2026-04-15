@@ -75,8 +75,7 @@ header>div {
 .profile-image-wrapper img {
     width: 50%;
     height: auto;
-    border-radius: 8px;
-    border: 2px solid white;
+    border: none;
 }
 
 .editable-title {
