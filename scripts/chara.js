@@ -145,7 +145,7 @@ onAuthStateChanged(auth, (user) => {
     }
 });
 
-// アコーディオンの再帰的描画関数（大枠と子要素の分離版）
+// アコーディオンの再帰的描画関数（親と子要素の分離版）
 function renderSheets(sheetsArray, parentElement, isRoot = true) {
     // 再描画時にアコーディオンが閉じてしまうのを防ぐため、現在の開閉状態を記憶
     const openStates = Array.from(parentElement.children).map(child => {
@@ -163,7 +163,7 @@ function renderSheets(sheetsArray, parentElement, isRoot = true) {
     sheetsArray.forEach((sheet, index) => {
         let targetParent = parentElement;
 
-        // 大枠（ルート階層）の場合は青背景・白枠（chara-box）で囲む
+        // 親（ルート階層）の場合は青背景・白枠（chara-box）で囲む
         if (isRoot) {
             const box = document.createElement('div');
             box.className = 'chara-box';
@@ -200,6 +200,15 @@ function renderSheets(sheetsArray, parentElement, isRoot = true) {
         titleSpan.className = 'sheet-title-text editable-area';
         titleSpan.textContent = sheet.name;
         titleSpan.oninput = (e) => { sheet.name = e.target.innerText; };
+
+        // ▼ ▼ ★ここに追加★ ▼ ▼
+        titleSpan.addEventListener('click', (e) => {
+            // 編集モード（入力可能）の時だけ、クリックによる開閉を無効化する
+            if (titleSpan.getAttribute('contenteditable') === 'true') {
+                e.preventDefault(); 
+            }
+        });
+        // ▲ ▲ ★ここまで★ ▲ ▲
 
         const lockSpan = document.createElement('span');
         if (sheet.pass) lockSpan.textContent = " [ロック中]";
@@ -287,17 +296,17 @@ function renderSheets(sheetsArray, parentElement, isRoot = true) {
 
     if (isRoot) {
         // 一番上の階層の場合は緑色の全幅ボタン
-        addBtn.textContent = "＋ 大枠メモを追加";
+        addBtn.textContent = "＋ メモを追加";
         addBtn.className = "add-resource-btn edit-only-ui";
     } else {
         // 子階層の場合は通常の青色ボタン
-        addBtn.textContent = "＋ 子メモを追加";
+        addBtn.textContent = "＋ メモを追加";
         addBtn.className = "edit-btn edit-only-ui";
         addBtn.style.marginTop = "10px";
     }
 
     addBtn.addEventListener('click', () => {
-        sheetsArray.push({ name: isRoot ? "新規大枠メモ" : "新規子メモ", value: "内容を入力してください", pass: null, field: [] });
+        sheetsArray.push({ name: isRoot ? "メモ" : "メモ", value: "内容を入力してください", pass: null, field: [] });
 
         // この階層だけを再描画する
         renderSheets(sheetsArray, parentElement, isRoot);
