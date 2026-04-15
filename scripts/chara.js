@@ -54,6 +54,7 @@ async function init() {
         if (auth.currentUser && characterData.data.owner === auth.currentUser.uid) {
             editBtn.style.display = 'block';
         }
+        updateSheetsContainerVisibility(); // ← ここに追加
     } else {
         alert("キャラクターが見つかりません");
     }
@@ -154,16 +155,24 @@ function renderSheets(sheetsArray, parentElement) {
         const details = document.createElement('details');
         const summary = document.createElement('summary');
 
-        const headerDiv = document.createElement('div');
-        headerDiv.className = 'sheet-header-controls';
+        // CSSの干渉を避けるため、divではなくspanに変更しflexレイアウトを維持
+        const headerContainer = document.createElement('span');
+        headerContainer.className = 'sheet-header-controls';
+        headerContainer.style.display = 'flex';
+        headerContainer.style.alignItems = 'center';
+        headerContainer.style.width = '100%';
 
-        const markDiv = document.createElement('div');
-        markDiv.innerHTML = `<span>▼</span><span>▲</span>`;
+        // 矢印の切り替えをJSで制御
+        const markSpan = document.createElement('span');
+        markSpan.textContent = '▼ ';
+        markSpan.style.marginRight = '8px';
+        details.addEventListener('toggle', () => {
+            markSpan.textContent = details.open ? '▲ ' : '▼ ';
+        });
 
         const titleSpan = document.createElement('span');
         titleSpan.className = 'sheet-title-text editable-area';
         titleSpan.textContent = sheet.name;
-        // oninputを使って上書き（イベントの重複を防ぐ）
         titleSpan.oninput = (e) => { sheet.name = e.target.innerText; };
 
         const lockSpan = document.createElement('span');
@@ -181,8 +190,8 @@ function renderSheets(sheetsArray, parentElement) {
             settingsModal.style.display = 'flex';
         });
 
-        headerDiv.append(markDiv, titleSpan, lockSpan, settingBtn);
-        summary.appendChild(headerDiv);
+        headerContainer.append(markSpan, titleSpan, lockSpan, settingBtn);
+        summary.appendChild(headerContainer);
         details.appendChild(summary);
 
         const contentContainer = document.createElement('div');
@@ -196,7 +205,6 @@ function renderSheets(sheetsArray, parentElement) {
             contentContainer.appendChild(textDiv);
         }
 
-        // ▼ 変更点：必ず子要素コンテナを作り、再帰呼び出しに任せる
         if (!sheet.field) sheet.field = [];
         const nestedContainer = document.createElement('div');
         nestedContainer.className = 'nested-field';
@@ -238,7 +246,7 @@ function renderSheets(sheetsArray, parentElement) {
         parentElement.appendChild(details);
     });
 
-    // ▼ 変更点：階層の「最後」に必ず追加ボタンを配置する！
+    // ＋ メモを追加 ボタン
     const addBtn = document.createElement('button');
     addBtn.textContent = "＋ メモを追加";
     addBtn.className = "edit-btn edit-only-ui";
@@ -246,10 +254,19 @@ function renderSheets(sheetsArray, parentElement) {
     addBtn.addEventListener('click', () => {
         sheetsArray.push({ name: "新規メモ", value: "内容を入力してください", pass: null, field: [] });
         renderSheets(sheetsArray, parentElement); // 再描画
+        
+        // ▼ 追加：新しく作られたメモを自動的に開いた状態にする
+        const detailsElements = Array.from(parentElement.children).filter(el => el.tagName === 'DETAILS');
+        if (detailsElements.length > 0) {
+            detailsElements[detailsElements.length - 1].open = true;
+        }
+
         if (document.getElementById('app-main').classList.contains('edit-mode')) {
-            // 再描画された要素を編集可能にする
             document.querySelectorAll('.editable-area').forEach(area => area.setAttribute('contenteditable', 'true'));
         }
+        
+        // メモが追加されたので表示状態を更新
+        updateSheetsContainerVisibility();
     });
     parentElement.appendChild(addBtn);
 }
@@ -344,6 +361,19 @@ function renderBasicInfo() {
     basicContainer.appendChild(addBtn);
 }
 
+// --- 閲覧モードでメモが空のときに枠を隠す関数 ---
+function updateSheetsContainerVisibility() {
+    const isEditing = document.getElementById('app-main').classList.contains('edit-mode');
+    const sheetsContainer = document.getElementById('sheets-container');
+    
+    // データが存在し、かつメモが0個、かつ「閲覧モード」のときだけ隠す
+    if (characterData && characterData.data.sheets.length === 0 && !isEditing) {
+        sheetsContainer.style.display = 'none';
+    } else {
+        sheetsContainer.style.display = 'block';
+    }
+}
+
 // 編集モードの切り替えロジック
 editBtn.addEventListener('click', async () => {
     const isEditing = mainElement.classList.toggle('edit-mode');
@@ -368,6 +398,7 @@ editBtn.addEventListener('click', async () => {
             mainElement.classList.add('edit-mode'); // 失敗したら編集モードに戻す
         }
     }
+    updateSheetsContainerVisibility(); // ← ここに追加
 });
 
 // --- 認証UIの要素を取得 ---
@@ -425,6 +456,7 @@ logoutBtn.addEventListener('click', async () => {
     const editableAreas = document.querySelectorAll('.editable-area');
     editableAreas.forEach(area => area.setAttribute('contenteditable', 'false'));
     editBtn.textContent = "編集";
+    updateSheetsContainerVisibility(); // ← ここに追加
 });
 
 // --- キャラクター新規作成ボタンの処理 ---
@@ -505,6 +537,13 @@ document.getElementById('modal-delete-btn').addEventListener('click', () => {
         currentTargetArray.splice(currentTargetIndex, 1); // 配列から削除
         settingsModal.style.display = 'none';
         renderSheets(characterData.data.sheets, container); // 再描画
+        
+        // ▼ 追加：再描画後も編集モードを維持する
+        if (document.getElementById('app-main').classList.contains('edit-mode')) {
+            document.querySelectorAll('.editable-area').forEach(area => area.setAttribute('contenteditable', 'true'));
+        }
+        // ▼ 追加：メモが0になったら枠を隠す
+        updateSheetsContainerVisibility();
     }
 });
 
