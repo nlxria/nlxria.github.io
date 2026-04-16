@@ -330,7 +330,7 @@ function renderStatusContent(containerElement, data) {
     });
 
     const addBtn = document.createElement('button');
-    addBtn.textContent = "＋ ステータス追加";
+    addBtn.textContent = "ステータスを追加";
     addBtn.className = 'add-resource-btn edit-only-ui';
     addBtn.addEventListener('click', () => {
         data.status.push({ label: "HP", value: "10", max: "10" });
@@ -382,7 +382,7 @@ function renderParamsContent(containerElement, data) {
     });
 
     const addBtn = document.createElement('button');
-    addBtn.textContent = "＋ パラメータ追加";
+    addBtn.textContent = "パラメータを追加";
     addBtn.className = 'add-resource-btn edit-only-ui';
     addBtn.addEventListener('click', () => {
         data.params.push({ label: "STR", value: "10" });
@@ -444,11 +444,11 @@ function renderSheets(sheetsArray, parentElement, isRoot = true, forceOpenLast =
         headerContainer.className = 'sheet-header-controls';
         headerContainer.style.display = 'flex';
         headerContainer.style.alignItems = 'center';
-        headerContainer.style.width = '100%';
+        headerContainer.style.width = 'auto';
 
         const markSpan = document.createElement('span');
         markSpan.textContent = details.open ? '▲ ' : '▼ ';
-        markSpan.style.marginRight = '8px';
+        markSpan.style.marginRight = '0.5em';
         details.addEventListener('toggle', () => {
             markSpan.textContent = details.open ? '▲ ' : '▼ ';
         });
@@ -550,10 +550,10 @@ function renderSheets(sheetsArray, parentElement, isRoot = true, forceOpenLast =
     const addBtn = document.createElement('button');
 
     if (isRoot) {
-        addBtn.textContent = "＋ メモを追加";
+        addBtn.textContent = "メモを追加";
         addBtn.className = "add-resource-btn edit-only-ui";
     } else {
-        addBtn.textContent = "＋ メモを追加";
+        addBtn.textContent = "メモを追加";
         addBtn.className = "edit-btn edit-only-ui";
         addBtn.style.marginTop = "10px";
     }

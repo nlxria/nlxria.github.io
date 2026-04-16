@@ -163,7 +163,7 @@ header .edit-btn {
     align-items: center;
     gap: 10px;
     flex: 1;
-    padding: 0.75em;
+    padding: 0.75em 1.5em;
     /* ここにヘッダー用の余白を設定 */
     background-color: #322E7B;
 }
