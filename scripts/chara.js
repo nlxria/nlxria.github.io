@@ -130,6 +130,7 @@ onAuthStateChanged(auth, (user) => {
         userEmailDisplay.textContent = user.email;
         createLoginPrompt.style.display = 'none';
         createCharaBtn.style.display = 'inline-block';
+        importCharaBtn.style.display = 'inline-block'; // 追加：ログイン中なら入力ボタンを表示
 
         if (characterData && characterData.data.owner === user.uid) {
             editBtn.style.display = 'block';
@@ -155,6 +156,7 @@ onAuthStateChanged(auth, (user) => {
         editBtn.style.display = 'none';
         createLoginPrompt.style.display = 'block';
         createCharaBtn.style.display = 'none';
+        importCharaBtn.style.display = 'none'; // 追加
 
         // ▼ 追加：ログアウト時は一覧を隠す
         document.getElementById('character-list-container').style.display = 'none';
@@ -584,8 +586,69 @@ createCharaBtn.addEventListener('click', async () => {
     } catch (error) {
         console.error("作成エラー:", error);
         alert("作成に失敗しました。");
-        createCharaBtn.textContent = "＋ 新規キャラクターを作成";
+        createCharaBtn.textContent = "キャラクターを作成";
         createCharaBtn.disabled = false;
+    }
+});
+
+// --- ココフォリア駒入力（インポート）の処理 ---
+importCharaBtn.addEventListener('click', async () => {
+    const user = auth.currentUser;
+    if (!user) return alert("ログインが必要です");
+
+    try {
+        // 1. クリップボードからテキストを読み取る
+        const clipboardText = await navigator.clipboard.readText();
+        if (!clipboardText) return alert("クリップボードが空です。");
+
+        // 2. JSONとして解析
+        let importedJson;
+        try {
+            importedJson = JSON.parse(clipboardText);
+        } catch (e) {
+            return alert("クリップボードの内容が正しいキャラクターデータではありません。");
+        }
+
+        // 3. データのバリデーション（ココフォリア形式かチェック）
+        if (importedJson.kind !== "character" || !importedJson.data) {
+            return alert("ココフォリア互換のキャラクターデータが見つかりませんでした。");
+        }
+
+        importCharaBtn.textContent = "読み込み中...";
+        importCharaBtn.disabled = true;
+
+        // 4. データの整形（本サイト用のメタデータを付与）
+        const charaData = importedJson.data;
+
+        // 既存のデータ構造を活かしつつ、管理に必要な情報を上書き/追加
+        charaData.owner = user.uid;      // 所有者を自分に設定
+        charaData.date = Date.now();    // 更新日時を現在に
+
+        // 必須フィールドが欠けている場合の補完（念のため）
+        if (!charaData.sheets) charaData.sheets = [];
+        if (!charaData.params) charaData.params = [];
+        if (!charaData.status) charaData.status = [];
+
+        // 5. Firestoreへ新規保存
+        const docRef = await addDoc(collection(db, "characters"), {
+            kind: "character",
+            data: charaData
+        });
+
+        // 6. URLを生成して更新（ココフォリア用のリンクも正しくしておく）
+        const myUrl = `${window.location.origin}${window.location.pathname}?id=${docRef.id}`;
+        charaData.externalUrl = myUrl;
+        await setDoc(docRef, { kind: "character", data: charaData });
+
+        alert("キャラクターをインポートしました！");
+        window.location.href = `?id=${docRef.id}`;
+
+    } catch (error) {
+        console.error("インポートエラー:", error);
+        alert("読み込みに失敗しました。クリップボードへのアクセスを許可してください。");
+    } finally {
+        importCharaBtn.textContent = "ココフォリア駒入力";
+        importCharaBtn.disabled = false;
     }
 });
 
