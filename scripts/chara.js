@@ -302,6 +302,9 @@ function renderStatusContent(containerElement, data) {
         valueInput.className = 'pass-input param-input-value edit-only-ui';
         valueInput.value = st.value;
         valueInput.setAttribute('autocomplete', 'off');
+
+        valueInput.style.textAlign = 'right'; // ← ★この1行を追加！
+
         valueInput.addEventListener('input', (e) => st.value = e.target.value);
 
         const separator = document.createElement('span');
