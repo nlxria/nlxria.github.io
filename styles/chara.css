@@ -74,6 +74,7 @@ header .edit-btn {
 .profile-image-wrapper img {
     width: 75%;
     height: auto;
+    max-height: 75vh;
     border: none;
 }
 
@@ -209,6 +210,8 @@ details[open]>summary {
     padding: 0;
     margin-top: 0.75em;
     /* テキストボックスとの隙間 */
+    overflow: hidden;
+    /* ← ★この1行を追加！（内側の背景が枠線からはみ出ないようにする） */
 }
 
 .nested-field.empty-nested {
@@ -322,3 +325,20 @@ main.edit-mode .text-content[contenteditable="true"]:focus {
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
+/* === 編集モード専用のUIとハイライト設定 === */
+.edit-only-ui {
+    display: none;
+}
+
+main.edit-mode .edit-only-ui {
+    display: block;
+}
+
+/* ▼ ★ここから3行を追加 ★ ▼ */
+main.edit-mode .view-only-ui {
+    display: none !important;
+    /* 編集モードの時は閲覧用のテキストを強制的に消す */
+}
+
+/* ▲ ★ここまで追加 ★ ▲ */

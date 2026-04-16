@@ -278,7 +278,7 @@ function renderSheets(sheetsArray, parentElement, isRoot = true) {
             passInput.type = 'text';
             passInput.placeholder = 'パスワードを入力';
             passInput.className = 'pass-input';
-            
+
             // ▼ この1行を追加
             passInput.setAttribute('autocomplete', 'off');
 
@@ -383,6 +383,7 @@ function renderBasicInfo() {
 
         // 閲覧モード用のテキスト（通常表示）
         const viewText = document.createElement('span');
+        viewText.className = 'view-only-ui'; // ← ★この1行を追加！
         viewText.style.color = "white";
         viewText.style.flex = "1";
         viewText.textContent = `${param.label} : ${param.value}`;
