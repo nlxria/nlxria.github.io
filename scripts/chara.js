@@ -193,7 +193,7 @@ function renderSpecialSections() {
         headerContainer.className = 'sheet-header-controls';
         headerContainer.style.display = 'flex';
         headerContainer.style.alignItems = 'center';
-        headerContainer.style.width = '100%';
+        headerContainer.style.width = 'auto';
 
         const markSpan = document.createElement('span');
         markSpan.textContent = details.open ? '▲ ' : '▼ ';
@@ -288,7 +288,7 @@ function renderStatusContent(containerElement, data) {
         viewText.className = 'view-only-ui';
         viewText.style.color = "white";
         viewText.style.flex = "1";
-        viewText.textContent = `${st.label} : ${st.value} / ${st.max}`;
+        viewText.textContent = `${st.label}：${st.value} / ${st.max}`;
 
         const labelInput = document.createElement('input');
         labelInput.type = 'text';
@@ -333,7 +333,7 @@ function renderStatusContent(containerElement, data) {
     addBtn.textContent = "ステータスを追加";
     addBtn.className = 'add-resource-btn edit-only-ui';
     addBtn.addEventListener('click', () => {
-        data.status.push({ label: "HP", value: "10", max: "10" });
+        data.status.push({ label: "NEW", value: "0", max: "0" });
         specialOpenStates.status = true;
         renderSpecialSections();
         applyEditMode();
@@ -352,7 +352,7 @@ function renderParamsContent(containerElement, data) {
         viewText.className = 'view-only-ui';
         viewText.style.color = "white";
         viewText.style.flex = "1";
-        viewText.textContent = `${param.label} : ${param.value}`;
+        viewText.textContent = `${param.label}：${param.value}`;
 
         const labelInput = document.createElement('input');
         labelInput.type = 'text';
