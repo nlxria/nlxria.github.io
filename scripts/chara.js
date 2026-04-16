@@ -278,6 +278,9 @@ function renderSheets(sheetsArray, parentElement, isRoot = true) {
             passInput.type = 'text';
             passInput.placeholder = 'パスワードを入力';
             passInput.className = 'pass-input';
+            
+            // ▼ この1行を追加
+            passInput.setAttribute('autocomplete', 'off');
 
             passContainer.appendChild(passInput);
             details.appendChild(passContainer);
@@ -389,12 +392,14 @@ function renderBasicInfo() {
         labelInput.type = 'text';
         labelInput.className = 'pass-input param-input-label edit-only-ui';
         labelInput.value = param.label;
+        labelInput.setAttribute('autocomplete', 'off'); // ▼ 追加
         labelInput.addEventListener('input', (e) => param.label = e.target.value);
 
         const valueInput = document.createElement('input');
         valueInput.type = 'text';
         valueInput.className = 'pass-input param-input-value edit-only-ui';
         valueInput.value = param.value;
+        valueInput.setAttribute('autocomplete', 'off'); // ▼ 追加
         valueInput.addEventListener('input', (e) => param.value = e.target.value);
 
         // 削除ボタン

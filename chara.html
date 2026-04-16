@@ -47,7 +47,7 @@
             <div id="profile-container" class="chara-box" style="display: none; padding: 2vh 4.5vh; text-align: center;">
                 <div class="profile-image-wrapper">
                     <img id="chara-image" src="" alt="" onerror="this.src='/assets/image/chara-image.png'">
-                    <input type="text" id="chara-image-input" class="pass-input edit-only-ui" placeholder="画像URLを入力" style="margin-top: 10px;">
+                    <input type="text" id="chara-image-input" class="pass-input edit-only-ui" placeholder="画像URLを入力" style="margin-top: 10px;" autocomplete="off">
                 </div>
                 <h1 id="chara-name" class="editable-title"></h1>
             </div>
@@ -59,7 +59,7 @@
                 <h3>設定</h3>
                 <div style="margin-bottom: 1em;">
                     <label style="color: white; font-size: 0.9em;">閲覧パスワード（空欄でロックなし）</label>
-                    <input type="text" id="modal-pass-input" class="pass-input" placeholder="パスワードを入力">
+                    <input type="text" id="modal-pass-input" class="pass-input" placeholder="パスワードを入力" autocomplete="off">
                 </div>
                 <div style="display: flex; justify-content: space-between; margin-top: 2em;">
                     <button id="modal-delete-btn" class="edit-btn" style="background: #e74c3c;">削除</button>
