@@ -123,10 +123,12 @@ header .edit-btn {
 
 .chara-box {
     background: #322E7B;
-    border: 1px solid white; /* 2pxから1pxに細くスタイリッシュに */
+    border: 1px solid white;
+    /* 2pxから1pxに細くスタイリッシュに */
     border-bottom-right-radius: 1.5em;
     corner-bottom-right-shape: bevel;
-    padding: 0; /* 枠の端まで横線を伸ばすために0に */
+    padding: 0;
+    /* 枠の端まで横線を伸ばすために0に */
     margin-bottom: 2em;
     overflow-x: auto;
 }
@@ -134,7 +136,8 @@ header .edit-btn {
 .chara-box-wrapper summary {
     cursor: pointer;
     list-style: none;
-    display: block; /* 全幅をクリック可能に */
+    display: block;
+    /* 全幅をクリック可能に */
 }
 
 .chara-box-wrapper summary::-webkit-details-marker {
@@ -146,7 +149,9 @@ header .edit-btn {
     align-items: center;
     gap: 10px;
     flex: 1;
-    padding: 12px 15px; /* ここにヘッダー用の余白を設定 */
+    padding: 12px 0.25em;
+    /* ここにヘッダー用の余白を設定 */
+    background-color: #322E7B;
 }
 
 .sheet-title-text {
@@ -164,14 +169,16 @@ header .edit-btn {
 }
 
 /* アコーディオンが開いている時、タイトル下に直線を引く */
-details[open] > summary {
+details[open]>summary {
     border-bottom: 1px solid white;
 }
 
 /* === メモの中身（親テキストと子メモ） === */
 
 .sheet-content-container {
-    padding: 15px; /* 大枠の線と、中身の要素との間の余白 */
+    padding: 0.25em;
+    /* 大枠の線と、中身の要素との間の余白 */
+    background-color: #050949;
 }
 
 .sheet-text {
@@ -187,20 +194,22 @@ details[open] > summary {
     min-height: 1.5em;
     white-space: pre-wrap;
     margin-bottom: 0;
-    border: 1px solid white; /* 画像のように白枠を追加 */
+    border: 1px solid white;
+    /* 画像のように白枠を追加 */
     border-radius: 4px;
-    padding: 15px;
+    padding: 0.25em;
 }
 
 /* 子メモのグループ枠 */
 .nested-field {
     background-color: transparent;
     border: 1px solid white;
-    border-radius: 4px;
-    border-bottom-right-radius: 1.5em; /* 角ばったデザインを維持 */
+    border-bottom-right-radius: 1.5em;
+    /* 角ばったデザインを維持 */
     corner-bottom-right-shape: bevel;
     padding: 0;
-    margin-top: 15px; /* テキストボックスとの隙間 */
+    margin-top: 0.25em;
+    /* テキストボックスとの隙間 */
 }
 
 .nested-field.empty-nested {
@@ -210,18 +219,20 @@ details[open] > summary {
 }
 
 /* 子メモ単体の区切り線（リストのように表示） */
-.nested-field > details {
+.nested-field>details {
     border-bottom: 1px solid white;
 }
 
-.nested-field > details:last-of-type {
-    border-bottom: none; /* 最後の子メモの下には線を引かない */
+.nested-field>details:last-of-type {
+    border-bottom: none;
+    /* 最後の子メモの下には線を引かない */
 }
 
 /* 子メモ追加ボタンの余白 */
-.nested-field > .edit-btn {
-    margin: 15px;
-    width: calc(100% - 30px); /* 横幅を揃える */
+.nested-field>.edit-btn {
+    margin: 0.25em;
+    width: calc(100% - 30px);
+    /* 横幅を揃える */
 }
 
 /* === 編集モード専用のUIとハイライト設定 === */

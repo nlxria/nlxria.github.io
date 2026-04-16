@@ -191,7 +191,7 @@ function renderSheets(sheetsArray, parentElement, isRoot = true) {
         headerContainer.className = 'sheet-header-controls';
         headerContainer.style.display = 'flex';
         headerContainer.style.alignItems = 'center';
-        headerContainer.style.width = '100%';
+        headerContainer.style.width = 'auto';
 
         const markSpan = document.createElement('span');
         markSpan.textContent = details.open ? '▲ ' : '▼ ';
