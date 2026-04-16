@@ -34,6 +34,10 @@ const dashboardContainer = document.getElementById('dashboard-container');
 const createCharaBtn = document.getElementById('create-chara-btn');
 const createLoginPrompt = document.getElementById('create-login-prompt');
 
+// ▼ ★この1行を追加してください！★ ▼
+const importCharaBtn = document.getElementById('import-ccfolia-btn');
+// ▲ ★ここまで★ ▲
+
 // 初期化処理
 async function init() {
     if (!characterId) {
