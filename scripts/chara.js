@@ -2,8 +2,8 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
 // ▼ 変更：Google認証用の関数を読み込む
 import { getAuth, onAuthStateChanged, signOut, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-// ▼ query, where, getDocs を追加で読み込む
-import { getFirestore, doc, getDoc, setDoc, collection, addDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+// ▼ query, where, getDocs, deleteDoc を追加で読み込む
+import { getFirestore, doc, getDoc, setDoc, collection, addDoc, query, where, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyBP17_hAR-NO_OT0MWDvtISiM20fjg1eO4",
@@ -116,6 +116,34 @@ async function loadCharacterList(uid) {
                     <p>データ量：${charCount}文字</p>
                 </div>
             `;
+
+            // ▼ ▼ ★ここから削除ボタンの追加処理★ ▼ ▼
+            const deleteBtn = document.createElement('button');
+            deleteBtn.textContent = '削除';
+            deleteBtn.className = 'chara-delete-btn';
+
+            deleteBtn.addEventListener('click', async (e) => {
+                e.preventDefault();  // aタグのリンク移動をキャンセル
+                e.stopPropagation(); // クリックイベントが親要素に伝わるのを防ぐ
+
+                if (confirm("本当にこのキャラクターを削除しますか？\n（この操作は取り消せません）")) {
+                    try {
+                        // Firestoreから該当のドキュメントを削除
+                        await deleteDoc(doc(db, "characters", charaId));
+                        alert("キャラクターを削除しました。");
+
+                        // 削除後、一覧リストを再読み込みして画面を更新
+                        loadCharacterList(uid);
+                    } catch (err) {
+                        console.error("削除エラー:", err);
+                        alert("削除に失敗しました。");
+                    }
+                }
+            });
+
+            card.appendChild(deleteBtn);
+            // ▲ ▲ ★ここまで★ ▲ ▲
+
             listElement.appendChild(card);
         });
 

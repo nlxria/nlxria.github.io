@@ -355,3 +355,23 @@ main.edit-mode .view-only-ui {
 }
 
 /* ▲ ★ここまで追加 ★ ▲ */
+
+/* --- 一覧画面：キャラクター削除ボタン --- */
+.chara-delete-btn {
+    background-color: #e74c3c;
+    color: white;
+    border: 2px solid transparent;
+    border-radius: 4px;
+    padding: 8px 16px;
+    font-size: 0.9em;
+    cursor: pointer;
+    margin-left: 10px;
+    transition: all 0.2s;
+    font-family: inherit;
+}
+
+.chara-delete-btn:hover {
+    background-color: transparent;
+    color: #e74c3c;
+    border: 2px solid #e74c3c;
+}
