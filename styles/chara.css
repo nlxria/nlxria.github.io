@@ -249,7 +249,6 @@ main.edit-mode .editable-title[contenteditable="true"] {
     background-color: rgba(255, 255, 255, 0.1);
     cursor: text;
     padding: 0 10px;
-    border-radius: 4px;
     display: inline-block;
 }
 
@@ -264,7 +263,7 @@ main.edit-mode .text-content[contenteditable="true"] {
     background-color: transparent;
     cursor: text;
     padding: 0.5em;
-    border-radius: 4px;
+    border: none;
 }
 
 main.edit-mode .text-content[contenteditable="true"]:focus {
