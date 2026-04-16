@@ -25,6 +25,7 @@ let characterId = new URLSearchParams(window.location.search).get('id');
 
 const mainElement = document.getElementById('app-main');
 const editBtn = document.getElementById('edit-mode-btn');
+const exportBtn = document.getElementById('export-ccfolia-btn'); // ← ★この1行を追加
 const container = document.getElementById('sheets-container');
 
 // ==== ここから上書き ====
@@ -48,6 +49,7 @@ async function init() {
 
         // ▼▼▼ この1行を追加：データがある時だけキャラクターエリアを表示する ▼▼▼
         document.getElementById('character-view-area').style.display = 'block';
+        exportBtn.style.display = 'block'; // ← ★この1行を追加：データがあれば出力ボタンを表示
 
         renderSheets(characterData.data.sheets, container);
         renderBasicInfo();
@@ -87,16 +89,7 @@ async function loadCharacterList(uid) {
         // ※古いデータで date が無い場合は 0 として一番下に表示します
         charaList.sort((a, b) => (b.data.date || 0) - (a.data.date || 0));
 
-        // ▼ 文字数を計算する補助関数（メモの中の文字数をすべて足し合わせる）
-        function getSheetCharCount(sheets) {
-            let count = 0;
-            if (!sheets) return 0;
-            sheets.forEach(sheet => {
-                if (sheet.value) count += sheet.value.length;
-                if (sheet.field) count += getSheetCharCount(sheet.field); // 子メモも再帰的にカウント
-            });
-            return count;
-        }
+        // ※ getSheetCharCount 関数は削除しました
 
         // ▼ 3. 並び替えたデータをループしてカードを作る
         charaList.forEach((chara) => {
@@ -108,13 +101,15 @@ async function loadCharacterList(uid) {
             card.className = 'chara-list-card';
 
             const iconUrl = data.iconUrl || '/assets/image/chara-image.png';
-            const charCount = getSheetCharCount(data.sheets); // 文字数を計算
+
+            // ▼ ★ここを変更：ココフォリアに送るJSON全体の文字数をカウントする
+            const charCount = JSON.stringify({ kind: "character", data: data }).length;
 
             card.innerHTML = `
                 <img src="${iconUrl}" alt="icon" onerror="this.src='/assets/image/chara-image.png'">
                 <div class="chara-info">
-                    <h4>${data.name || '名前なし'}</h4>
-                    <p>総文字数：${charCount}文字</p>
+                    <h4>${data.name || '名無し'}</h4>
+                    <p>データ量：${charCount}文字</p>
                 </div>
             `;
             listElement.appendChild(card);
@@ -478,18 +473,19 @@ editBtn.addEventListener('click', async () => {
 
     if (isEditing) {
         editBtn.textContent = "保存";
+        exportBtn.style.display = 'none'; // ← ★追加：編集中は出力ボタンを隠す
         editableAreas.forEach(area => area.setAttribute('contenteditable', 'true'));
     } else {
         editBtn.textContent = "保存中...";
         editableAreas.forEach(area => area.setAttribute('contenteditable', 'false'));
 
-        // ▼ ★ここを追加：保存した時間をミリ秒で記録する
         characterData.data.date = Date.now();
 
         // Firestoreへ上書き保存
         try {
             await setDoc(doc(db, "characters", characterId), characterData);
             editBtn.textContent = "編集";
+            exportBtn.style.display = 'block'; // ← ★追加：保存完了で出力ボタンを復活させる
             alert("保存しました！");
         } catch (error) {
             console.error("Error saving document: ", error);
@@ -631,6 +627,24 @@ document.getElementById('modal-delete-btn').addEventListener('click', () => {
         }
         // ▼ 追加：メモが0になったら枠を隠す
         updateSheetsContainerVisibility();
+    }
+});
+
+// --- ココフォリア出力機能 ---
+exportBtn.addEventListener('click', async () => {
+    if (!characterData) return;
+
+    try {
+        // characterData は既に { kind: "character", data: {...} } の形になっています
+        const jsonText = JSON.stringify(characterData);
+
+        // クリップボードにJSON文字列をコピー
+        await navigator.clipboard.writeText(jsonText);
+
+        alert("ココフォリア用データをコピーしました！\nココフォリアの盤面を開き、「Ctrl + V（ペースト）」で出力できます。");
+    } catch (err) {
+        console.error("クリップボードコピーエラー:", err);
+        alert("コピーに失敗しました。ブラウザのクリップボード権限を確認してください。");
     }
 });
 
