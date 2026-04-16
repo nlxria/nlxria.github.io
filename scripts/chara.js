@@ -67,37 +67,54 @@ async function loadCharacterList(uid) {
     listElement.innerHTML = '<p style="color: white; text-align: center;">読み込み中...</p>';
 
     try {
-        // 「data.owner が 自分のUID と同じもの」を検索するクエリ
         const q = query(collection(db, "characters"), where("data.owner", "==", uid));
         const querySnapshot = await getDocs(q);
 
-        listElement.innerHTML = ''; // 読み込み中テキストをクリア
+        listElement.innerHTML = '';
 
         if (querySnapshot.empty) {
             listElement.innerHTML = '<p style="color: #E0E0E0; text-align: center;">作成したキャラクターはまだありません。</p>';
             return;
         }
 
-        // 取得したキャラクターをループ処理してカードを作る
+        // ▼ 1. 取得したデータを一旦配列にまとめる
+        const charaList = [];
         querySnapshot.forEach((docSnap) => {
-            const charaId = docSnap.id;
-            const data = docSnap.data().data;
+            charaList.push({ id: docSnap.id, data: docSnap.data().data });
+        });
+
+        // ▼ 2. date（更新時間）が大きい順（新しい順）に並び替える
+        // ※古いデータで date が無い場合は 0 として一番下に表示します
+        charaList.sort((a, b) => (b.data.date || 0) - (a.data.date || 0));
+
+        // ▼ 文字数を計算する補助関数（メモの中の文字数をすべて足し合わせる）
+        function getSheetCharCount(sheets) {
+            let count = 0;
+            if (!sheets) return 0;
+            sheets.forEach(sheet => {
+                if (sheet.value) count += sheet.value.length;
+                if (sheet.field) count += getSheetCharCount(sheet.field); // 子メモも再帰的にカウント
+            });
+            return count;
+        }
+
+        // ▼ 3. 並び替えたデータをループしてカードを作る
+        charaList.forEach((chara) => {
+            const charaId = chara.id;
+            const data = chara.data;
 
             const card = document.createElement('a');
             card.href = `?id=${charaId}`;
             card.className = 'chara-list-card';
 
-            // 画像URL（空なら灰色のプレースホルダー画像）
             const iconUrl = data.iconUrl || '/assets/image/chara-image.png';
-
-            // メモ（空ならデフォルトテキスト）
-            const memoText = data.memo ? data.memo : 'メモなし';
+            const charCount = getSheetCharCount(data.sheets); // 文字数を計算
 
             card.innerHTML = `
                 <img src="${iconUrl}" alt="icon" onerror="this.src='/assets/image/chara-image.png'">
                 <div class="chara-info">
                     <h4>${data.name || '名前なし'}</h4>
-                    <p>${memoText}</p>
+                    <p>総文字数：${charCount}文字</p>
                 </div>
             `;
             listElement.appendChild(card);
@@ -466,6 +483,9 @@ editBtn.addEventListener('click', async () => {
         editBtn.textContent = "保存中...";
         editableAreas.forEach(area => area.setAttribute('contenteditable', 'false'));
 
+        // ▼ ★ここを追加：保存した時間をミリ秒で記録する
+        characterData.data.date = Date.now();
+
         // Firestoreへ上書き保存
         try {
             await setDoc(doc(db, "characters", characterId), characterData);
@@ -534,6 +554,7 @@ createCharaBtn.addEventListener('click', async () => {
         data: {
             name: "新たなキャラクター",
             memo: "",
+            date: Date.now(),
             initiative: 0,
             externalUrl: "", // ID生成後にURLを入れます
             status: [],

@@ -72,10 +72,23 @@ header .edit-btn {
 /* === プロフィール画像・基本ステータス === */
 
 .profile-image-wrapper img {
-    width: 75%;
-    height: auto;
-    max-height: 75vh;
     border: none;
+}
+
+/* 縦画面のとき（スマホなど：横幅を基準にする） */
+@media screen and (orientation: portrait) {
+    .profile-image-wrapper img {
+        width: 50vw;
+        height: auto;
+    }
+}
+
+/* 横画面のとき（PCなど：高さを基準にする） */
+@media screen and (orientation: landscape) {
+    .profile-image-wrapper img {
+        height: 50vh;
+        width: auto;
+    }
 }
 
 .editable-title {
