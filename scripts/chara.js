@@ -768,7 +768,7 @@ importCharaBtn.addEventListener('click', async () => {
 
         charaData.owner = user.uid;
         charaData.date = Date.now();
-        if (charaData.privacy === undefined) charaData.privacy = 2;
+        charaData.privacy = 2; // ▼ 変更：外部データに関わらず、インポート時は必ず「非公開(2)」に強制リセットする！
 
         const docRef = await addDoc(collection(db, "characters"), {
             kind: "character",
