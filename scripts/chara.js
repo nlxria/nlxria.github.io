@@ -1,3 +1,4 @@
+// 注意: 実際のFirebase設定情報に書き換えてください
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
 import { getFirestore, doc, getDoc, setDoc, collection, addDoc, query, where, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
@@ -20,7 +21,7 @@ const db = getFirestore(app);
 let characterData = null;
 let characterId = new URLSearchParams(window.location.search).get('id');
 let specialOpenStates = { memo: false, status: false, params: false, commands: false };
-let isAuthLoaded = false; // 認証ラグ対策
+let isAuthLoaded = false;
 
 const mainElement = document.getElementById('app-main');
 const editBtn = document.getElementById('edit-mode-btn');
@@ -30,15 +31,12 @@ const dashboardContainer = document.getElementById('dashboard-container');
 const createCharaBtn = document.getElementById('create-chara-btn');
 const createLoginPrompt = document.getElementById('create-login-prompt');
 const importCharaBtn = document.getElementById('import-ccfolia-btn');
-
-// ▼ ★追加：検索入力欄の取得
 const searchInput = document.getElementById('search-input');
 
-// ▼ ★追加：キャラクターのベースとなる完全なデータ構造（ひな形）を生成する関数
 function getDefaultData(uid) {
     return {
         name: "新たなキャラクター",
-        ruby: "", // ふりがなを追加
+        ruby: "",
         memo: "",
         date: Date.now(),
         initiative: 0,
@@ -53,7 +51,7 @@ function getDefaultData(uid) {
         commands: "",
         sheets: [],
         owner: uid,
-        privacy: 2, // 初期値は非公開
+        privacy: 2,
     };
 }
 
@@ -61,11 +59,9 @@ function applyEditMode() {
     const isEditing = mainElement.classList.contains('edit-mode');
     document.querySelectorAll('.editable-area').forEach(area => area.setAttribute('contenteditable', isEditing ? 'true' : 'false'));
 
-    // ▼ ★追加：編集モードではない時は、プライバシー設定のプルダウンを操作不可にする
     const privacySelect = document.getElementById('chara-privacy-select');
     if (privacySelect) {
         privacySelect.disabled = !isEditing;
-        // 操作不可の時は少しだけ透明にして「押せない感」を出す
         privacySelect.style.opacity = isEditing ? "1" : "0.8";
         privacySelect.style.cursor = isEditing ? "pointer" : "default";
     }
@@ -83,26 +79,18 @@ async function init() {
 
     if (docSnap.exists()) {
         characterData = docSnap.data();
-
-        // 互換性維持：privacy値がない古いデータは「2(非公開)」として扱う
-        if (characterData.data.privacy === undefined) {
-            characterData.data.privacy = 2;
-        }
-
-        if (isAuthLoaded) {
-            checkAndRender();
-        }
+        if (characterData.data.privacy === undefined) characterData.data.privacy = 2;
+        if (isAuthLoaded) checkAndRender();
     } else {
         alert("キャラクターが見つかりません。");
     }
 }
 
-// === 権限チェックと描画の統合関数 ===
+// === 権限チェックと描画 ===
 function checkAndRender() {
     const isOwner = auth.currentUser && characterData.data.owner === auth.currentUser.uid;
     const privacy = characterData.data.privacy;
 
-    // 非公開(2)かつ、所有者ではない場合はブロックする
     if (privacy === 2 && !isOwner) {
         document.getElementById('character-view-area').style.display = 'none';
         document.getElementById('dashboard-container').style.display = 'none';
@@ -112,7 +100,6 @@ function checkAndRender() {
         return;
     }
 
-    // 閲覧許可された場合の処理
     document.getElementById('private-alert-container').style.display = 'none';
     document.getElementById('character-view-area').style.display = 'block';
     exportBtn.style.display = 'block';
@@ -121,12 +108,7 @@ function checkAndRender() {
     renderSpecialSections();
     renderSheets(characterData.data.sheets, container, true, false);
 
-    if (isOwner) {
-        editBtn.style.display = 'block';
-    } else {
-        editBtn.style.display = 'none';
-    }
-
+    editBtn.style.display = isOwner ? 'block' : 'none';
     updateSheetsContainerVisibility();
     applyEditMode();
 }
@@ -150,11 +132,10 @@ onAuthStateChanged(auth, (user) => {
         importCharaBtn.style.display = 'none';
     }
 
-    // ログイン状態が変わった時に権限を再チェック
     if (characterData) {
         checkAndRender();
     } else if (!characterId) {
-        document.getElementById('character-list-container').style.display = user ? 'block' : 'none';
+        document.getElementById('character-list-container').style.display = 'block';
         if (user) loadCharacterList(user.uid);
     }
 });
@@ -162,16 +143,19 @@ onAuthStateChanged(auth, (user) => {
 // === キャラクター一覧の取得 ===
 async function loadCharacterList(uid) {
     const listElement = document.getElementById('character-list');
-    const searchKeyword = searchInput.value.trim().toLowerCase(); // 検索キーワードを取得
+    const searchKeyword = searchInput.innerText.trim().toLowerCase(); // valueからinnerTextに変更
     listElement.innerHTML = '<p style="color: white; text-align: center;">読み込み中...</p>';
 
     try {
         let q;
         if (searchKeyword === "") {
-            // ① 検索欄が空の場合：自分がオーナーのキャラを取得
+            // UIDが無い（未ログイン）場合は空文字検索でも何も出さない
+            if (!uid) {
+                listElement.innerHTML = '<p style="color: #E0E0E0; text-align: center;">検索キーワードを入力してください。</p>';
+                return;
+            }
             q = query(collection(db, "characters"), where("data.owner", "==", uid));
         } else {
-            // ② 文字がある場合：公開中（privacy === 0）の全キャラを取得
             q = query(collection(db, "characters"), where("data.privacy", "==", 0));
         }
 
@@ -184,7 +168,6 @@ async function loadCharacterList(uid) {
             if (searchKeyword === "") {
                 charaList.push({ id: docSnap.id, data: data });
             } else {
-                // ③ JSON全体を文字列にして検索キーワードが含まれるかチェック
                 const jsonStr = JSON.stringify(data).toLowerCase();
                 if (jsonStr.includes(searchKeyword)) {
                     charaList.push({ id: docSnap.id, data: data });
@@ -217,8 +200,7 @@ async function loadCharacterList(uid) {
                 </div>
             `;
 
-            // ④ 自分がオーナーのキャラクターにのみ削除ボタンを表示する
-            if (data.owner === uid) {
+            if (uid && data.owner === uid) {
                 const deleteBtn = document.createElement('button');
                 deleteBtn.textContent = '削除';
                 deleteBtn.className = 'chara-delete-btn';
@@ -238,7 +220,6 @@ async function loadCharacterList(uid) {
                 });
                 card.appendChild(deleteBtn);
             }
-
             listElement.appendChild(card);
         });
     } catch (error) {
@@ -256,9 +237,7 @@ function renderSpecialSections() {
     const isOwner = auth.currentUser && data.owner === auth.currentUser.uid;
 
     const sections = [
-        // ▼ ★ここに追加：ステータスの上にキャラクターメモを配置
         { id: 'memo', title: 'キャラクターメモ', dataKey: 'memo', passKey: 'memoPass', render: renderMemoContent, isEmpty: !data.memo || data.memo.trim() === "" },
-
         { id: 'status', title: 'ステータス', dataKey: 'status', passKey: 'statusPass', render: renderStatusContent, isEmpty: !data.status || data.status.length === 0 },
         { id: 'params', title: 'パラメータ', dataKey: 'params', passKey: 'paramsPass', render: renderParamsContent, isEmpty: !data.params || data.params.length === 0 },
         { id: 'commands', title: 'チャットパレット', dataKey: 'commands', passKey: 'commandsPass', render: renderCommandsContent, isEmpty: !data.commands || data.commands.trim() === "" }
@@ -305,7 +284,7 @@ function renderSpecialSections() {
             e.preventDefault();
             currentTargetType = 'special';
             currentTargetPassKey = sec.passKey;
-            modalPassInput.value = data[sec.passKey] || "";
+            modalPassInput.innerText = data[sec.passKey] || "";
             document.getElementById('modal-delete-btn').style.display = 'none';
             settingsModal.style.display = 'flex';
         });
@@ -316,7 +295,6 @@ function renderSpecialSections() {
 
         const contentContainer = document.createElement('div');
         contentContainer.className = 'sheet-content-container';
-
         const whiteBox = document.createElement('div');
         whiteBox.className = 'sheet-text';
 
@@ -326,11 +304,14 @@ function renderSpecialSections() {
         if (data[sec.passKey] && !isOwner) {
             const passContainer = document.createElement('div');
             passContainer.className = 'password-container';
-            const passInput = document.createElement('input');
-            passInput.type = 'text';
-            passInput.placeholder = 'パスワードを入力';
+
+            // ▼ パスワード入力欄をdivに
+            const passInput = document.createElement('div');
+            passInput.setAttribute('placeholder', 'パスワードを入力');
             passInput.className = 'pass-input';
-            passInput.setAttribute('autocomplete', 'off');
+            passInput.contentEditable = 'true';
+            passInput.style.minHeight = '1.5em';
+            passInput.style.cursor = 'text';
 
             passContainer.appendChild(passInput);
             details.appendChild(passContainer);
@@ -341,12 +322,12 @@ function renderSpecialSections() {
             passInput.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter') {
                     e.preventDefault();
-                    if (passInput.value === data[sec.passKey]) {
+                    if (passInput.innerText.trim() === data[sec.passKey]) {
                         passContainer.style.display = 'none';
                         contentContainer.style.display = 'block';
                     } else {
-                        passInput.value = '';
-                        passInput.placeholder = 'パスワードが違います';
+                        passInput.innerText = '';
+                        passInput.setAttribute('placeholder', 'パスワードが違います');
                         passInput.style.backgroundColor = '#ffcccc';
                     }
                 }
@@ -372,32 +353,33 @@ function renderStatusContent(containerElement, data) {
         viewText.style.flex = "1";
         viewText.textContent = `${st.label}：${st.value} / ${st.max}`;
 
-        const labelInput = document.createElement('input');
-        labelInput.type = 'text';
+        // ▼ inputをdivに変更
+        const labelInput = document.createElement('div');
         labelInput.className = 'pass-input param-input-label edit-only-ui';
-        labelInput.value = st.label;
-        labelInput.setAttribute('autocomplete', 'off');
-        labelInput.addEventListener('input', (e) => st.label = e.target.value);
+        labelInput.contentEditable = 'true';
+        labelInput.textContent = st.label;
+        labelInput.addEventListener('input', (e) => st.label = e.target.innerText.trim());
+        labelInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') e.preventDefault(); });
 
-        const valueInput = document.createElement('input');
-        valueInput.type = 'text';
+        const valueInput = document.createElement('div');
         valueInput.className = 'pass-input param-input-value edit-only-ui';
-        valueInput.value = st.value;
-        valueInput.setAttribute('autocomplete', 'off');
+        valueInput.contentEditable = 'true';
+        valueInput.textContent = st.value;
         valueInput.style.textAlign = 'right';
-        valueInput.addEventListener('input', (e) => st.value = e.target.value);
+        valueInput.addEventListener('input', (e) => st.value = e.target.innerText.trim());
+        valueInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') e.preventDefault(); });
 
         const separator = document.createElement('span');
         separator.textContent = " / ";
         separator.className = 'edit-only-ui';
         separator.style.color = "white";
 
-        const maxInput = document.createElement('input');
-        maxInput.type = 'text';
+        const maxInput = document.createElement('div');
         maxInput.className = 'pass-input param-input-value edit-only-ui';
-        maxInput.value = st.max;
-        maxInput.setAttribute('autocomplete', 'off');
-        maxInput.addEventListener('input', (e) => st.max = e.target.value);
+        maxInput.contentEditable = 'true';
+        maxInput.textContent = st.max;
+        maxInput.addEventListener('input', (e) => st.max = e.target.innerText.trim());
+        maxInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') e.preventDefault(); });
 
         const delBtn = document.createElement('button');
         delBtn.textContent = "削除";
@@ -436,19 +418,19 @@ function renderParamsContent(containerElement, data) {
         viewText.style.flex = "1";
         viewText.textContent = `${param.label}：${param.value}`;
 
-        const labelInput = document.createElement('input');
-        labelInput.type = 'text';
+        const labelInput = document.createElement('div');
         labelInput.className = 'pass-input param-input-label edit-only-ui';
-        labelInput.value = param.label;
-        labelInput.setAttribute('autocomplete', 'off');
-        labelInput.addEventListener('input', (e) => param.label = e.target.value);
+        labelInput.contentEditable = 'true';
+        labelInput.textContent = param.label;
+        labelInput.addEventListener('input', (e) => param.label = e.target.innerText.trim());
+        labelInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') e.preventDefault(); });
 
-        const valueInput = document.createElement('input');
-        valueInput.type = 'text';
+        const valueInput = document.createElement('div');
         valueInput.className = 'pass-input param-input-value edit-only-ui';
-        valueInput.value = param.value;
-        valueInput.setAttribute('autocomplete', 'off');
-        valueInput.addEventListener('input', (e) => param.value = e.target.value);
+        valueInput.contentEditable = 'true';
+        valueInput.textContent = param.value;
+        valueInput.addEventListener('input', (e) => param.value = e.target.innerText.trim());
+        valueInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') e.preventDefault(); });
 
         const delBtn = document.createElement('button');
         delBtn.textContent = "削除";
@@ -478,24 +460,18 @@ function renderParamsContent(containerElement, data) {
 function renderCommandsContent(containerElement, data) {
     const textDiv = document.createElement('div');
     textDiv.className = 'editable-area text-content';
-    if (data.commands !== undefined) {
-        textDiv.textContent = data.commands;
-    }
+    if (data.commands !== undefined) textDiv.textContent = data.commands;
     textDiv.oninput = (e) => { data.commands = e.target.innerText; };
     containerElement.appendChild(textDiv);
 }
 
-// ▼ ▼ ★ここから丸ごと追加★ ▼ ▼
 function renderMemoContent(containerElement, data) {
     const textDiv = document.createElement('div');
     textDiv.className = 'editable-area text-content';
-    if (data.memo !== undefined) {
-        textDiv.textContent = data.memo;
-    }
+    if (data.memo !== undefined) textDiv.textContent = data.memo;
     textDiv.oninput = (e) => { data.memo = e.target.innerText; };
     containerElement.appendChild(textDiv);
 }
-// ▲ ▲ ★ここまで★ ▲ ▲
 
 // === メモの描画 ===
 function renderSheets(sheetsArray, parentElement, isRoot = true) {
@@ -531,12 +507,7 @@ function renderSheets(sheetsArray, parentElement, isRoot = true) {
 
         details.addEventListener('toggle', () => {
             markSpan.textContent = details.open ? '▲ ' : '▼ ';
-            Object.defineProperty(sheet, '_isOpen', {
-                value: details.open,
-                writable: true,
-                enumerable: false,
-                configurable: true
-            });
+            Object.defineProperty(sheet, '_isOpen', { value: details.open, writable: true, enumerable: false, configurable: true });
         });
 
         const titleSpan = document.createElement('span');
@@ -560,7 +531,7 @@ function renderSheets(sheetsArray, parentElement, isRoot = true) {
             currentTargetSheet = sheet;
             currentTargetArray = sheetsArray;
             currentTargetIndex = index;
-            modalPassInput.value = sheet.pass || "";
+            modalPassInput.innerText = sheet.pass || "";
             document.getElementById('modal-delete-btn').style.display = 'block';
             settingsModal.style.display = 'flex';
         });
@@ -571,25 +542,19 @@ function renderSheets(sheetsArray, parentElement, isRoot = true) {
 
         const contentContainer = document.createElement('div');
         contentContainer.className = 'sheet-content-container';
-
         const whiteBox = document.createElement('div');
         whiteBox.className = 'sheet-text';
 
         const textDiv = document.createElement('div');
         textDiv.className = 'editable-area text-content';
-        if (sheet.value !== undefined && sheet.value !== "") {
-            textDiv.textContent = sheet.value;
-        }
+        if (sheet.value !== undefined && sheet.value !== "") textDiv.textContent = sheet.value;
         textDiv.oninput = (e) => { sheet.value = e.target.innerText; };
         whiteBox.appendChild(textDiv);
 
         if (!sheet.field) sheet.field = [];
         const nestedContainer = document.createElement('div');
         nestedContainer.className = 'nested-field';
-
-        if (sheet.field.length === 0) {
-            nestedContainer.classList.add('empty-nested');
-        }
+        if (sheet.field.length === 0) nestedContainer.classList.add('empty-nested');
 
         renderSheets(sheet.field, nestedContainer, false);
 
@@ -601,11 +566,13 @@ function renderSheets(sheetsArray, parentElement, isRoot = true) {
         if (sheet.pass && !isOwner) {
             const passContainer = document.createElement('div');
             passContainer.className = 'password-container';
-            const passInput = document.createElement('input');
-            passInput.type = 'text';
-            passInput.placeholder = 'パスワードを入力';
+
+            const passInput = document.createElement('div');
+            passInput.setAttribute('placeholder', 'パスワードを入力');
             passInput.className = 'pass-input';
-            passInput.setAttribute('autocomplete', 'off');
+            passInput.contentEditable = 'true';
+            passInput.style.minHeight = '1.5em';
+            passInput.style.cursor = 'text';
 
             passContainer.appendChild(passInput);
             details.appendChild(passContainer);
@@ -616,12 +583,12 @@ function renderSheets(sheetsArray, parentElement, isRoot = true) {
             passInput.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter') {
                     e.preventDefault();
-                    if (passInput.value === sheet.pass) {
+                    if (passInput.innerText.trim() === sheet.pass) {
                         passContainer.style.display = 'none';
                         contentContainer.style.display = 'block';
                     } else {
-                        passInput.value = '';
-                        passInput.placeholder = 'パスワードが違います';
+                        passInput.innerText = '';
+                        passInput.setAttribute('placeholder', 'パスワードが違います');
                         passInput.style.backgroundColor = '#ffcccc';
                     }
                 }
@@ -634,26 +601,14 @@ function renderSheets(sheetsArray, parentElement, isRoot = true) {
     });
 
     const addBtn = document.createElement('button');
-
-    if (isRoot) {
-        addBtn.textContent = "メモを追加";
-        addBtn.className = "add-resource-btn edit-only-ui";
-    } else {
-        addBtn.textContent = "メモを追加";
-        addBtn.className = "edit-btn edit-only-ui";
-        addBtn.style.marginTop = "10px";
-    }
+    addBtn.textContent = "メモを追加";
+    addBtn.className = isRoot ? "add-resource-btn edit-only-ui" : "edit-btn edit-only-ui";
+    if (!isRoot) addBtn.style.marginTop = "10px";
 
     addBtn.addEventListener('click', () => {
         const newMemo = { name: "新規メモ", value: "", pass: null, field: [] };
-        Object.defineProperty(newMemo, '_isOpen', {
-            value: true,
-            writable: true,
-            enumerable: false,
-            configurable: true
-        });
+        Object.defineProperty(newMemo, '_isOpen', { value: true, writable: true, enumerable: false, configurable: true });
         sheetsArray.push(newMemo);
-
         renderSheets(sheetsArray, parentElement, isRoot);
         applyEditMode();
         updateSheetsContainerVisibility();
@@ -662,14 +617,14 @@ function renderSheets(sheetsArray, parentElement, isRoot = true) {
     parentElement.appendChild(addBtn);
 }
 
-// === プロフィール（名前・画像・プライバシー設定）の描画 ===
+// === プロフィール描画 ===
 function renderProfile() {
     const data = characterData.data;
     document.getElementById('profile-container').style.display = 'block';
 
     const imgEl = document.getElementById('chara-image');
     const nameEl = document.getElementById('chara-name');
-    const rubyEl = document.getElementById('chara-ruby'); // ★追加
+    const rubyEl = document.getElementById('chara-ruby');
     const imgInput = document.getElementById('chara-image-input');
     const privacySelect = document.getElementById('chara-privacy-select');
 
@@ -677,19 +632,20 @@ function renderProfile() {
 
     nameEl.className = 'editable-title editable-area';
     nameEl.textContent = data.name;
-    rubyEl.textContent = data.ruby || ""; // ★追加：ふりがなを表示
-    imgInput.value = data.iconUrl || "";
+    rubyEl.textContent = data.ruby || "";
+    imgInput.innerText = data.iconUrl || "";
 
-    // プライバシー設定の値とイベントを紐付け
     privacySelect.value = data.privacy;
     privacySelect.onchange = (e) => { data.privacy = parseInt(e.target.value, 10); };
 
     nameEl.oninput = (e) => { data.name = e.target.innerText; };
-    rubyEl.oninput = (e) => { data.ruby = e.target.innerText; }; // ★追加：ふりがなの入力反映
-    imgInput.onchange = (e) => {
-        data.iconUrl = e.target.value;
-        imgEl.src = e.target.value;
+    rubyEl.oninput = (e) => { data.ruby = e.target.innerText; };
+
+    imgInput.oninput = (e) => {
+        data.iconUrl = e.target.innerText.trim();
+        imgEl.src = data.iconUrl;
     };
+    imgInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') e.preventDefault(); });
 }
 
 function updateSheetsContainerVisibility() {
@@ -709,12 +665,11 @@ editBtn.addEventListener('click', async () => {
     if (isEditing) {
         editBtn.textContent = "保存";
         exportBtn.style.display = 'none';
-        checkAndRender(); // 編集UIを表示するため再描画
+        checkAndRender();
     } else {
         editBtn.textContent = "保存中...";
         applyEditMode();
 
-        // ▼ ★追加・変更：ベースのひな形に対して、現在のデータを上書き（マージ）することでキーの欠落を防ぐ
         const baseData = getDefaultData(characterData.data.owner);
         characterData.data = { ...baseData, ...characterData.data };
         characterData.data.date = Date.now();
@@ -724,7 +679,7 @@ editBtn.addEventListener('click', async () => {
             editBtn.textContent = "編集";
             exportBtn.style.display = 'block';
             alert("保存しました！");
-            checkAndRender(); // 編集UIを隠すため再描画
+            checkAndRender();
         } catch (error) {
             console.error("Error saving document: ", error);
             alert("保存に失敗しました。");
@@ -735,7 +690,7 @@ editBtn.addEventListener('click', async () => {
     }
 });
 
-// === 認証・ログアウト処理 ===
+// === 認証・ログアウト ===
 const loggedOutUI = document.getElementById('logged-out-ui');
 const loggedInUI = document.getElementById('logged-in-ui');
 const googleLoginBtn = document.getElementById('google-login-btn');
@@ -758,7 +713,6 @@ logoutBtn.addEventListener('click', async () => {
     alert("ログアウトしました。");
     mainElement.classList.remove('edit-mode');
     editBtn.textContent = "編集";
-    // ログアウト後は onAuthStateChanged が発火し、自動的に checkAndRender で権限が再評価されます
 });
 
 // === 新規作成 ===
@@ -769,7 +723,6 @@ createCharaBtn.addEventListener('click', async () => {
     createCharaBtn.textContent = "作成中...";
     createCharaBtn.disabled = true;
 
-    // ▼ ★変更：関数からベースデータを取得するようにスッキリ書き換え
     const defaultData = {
         kind: "character",
         data: getDefaultData(user.uid)
@@ -790,7 +743,7 @@ createCharaBtn.addEventListener('click', async () => {
     }
 });
 
-// === ココフォリア駒インポート ===
+// === インポート ===
 importCharaBtn.addEventListener('click', async () => {
     const user = auth.currentUser;
     if (!user) return alert("ログインが必要です");
@@ -810,13 +763,12 @@ importCharaBtn.addEventListener('click', async () => {
         importCharaBtn.textContent = "読み込み中...";
         importCharaBtn.disabled = true;
 
-        // ▼ ★変更：ベースデータに、インポートしたデータを上書き（マージ）して欠損を防ぐ
         const baseData = getDefaultData(user.uid);
         const charaData = { ...baseData, ...importedJson.data };
 
         charaData.owner = user.uid;
         charaData.date = Date.now();
-        if (charaData.privacy === undefined) charaData.privacy = 2; // インポート時は非公開
+        if (charaData.privacy === undefined) charaData.privacy = 2;
 
         const docRef = await addDoc(collection(db, "characters"), {
             kind: "character",
@@ -839,7 +791,7 @@ importCharaBtn.addEventListener('click', async () => {
     }
 });
 
-// === モーダルの処理 ===
+// === モーダル ===
 let currentTargetType = 'sheet';
 let currentTargetPassKey = null;
 let currentTargetSheet = null;
@@ -849,16 +801,20 @@ let currentTargetIndex = null;
 const settingsModal = document.getElementById('settings-modal');
 const modalPassInput = document.getElementById('modal-pass-input');
 
+// Enterで改行されるのを防ぐ
+modalPassInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') e.preventDefault(); });
+
 document.getElementById('modal-cancel-btn').addEventListener('click', () => {
     settingsModal.style.display = 'none';
 });
 
 document.getElementById('modal-save-btn').addEventListener('click', () => {
+    const passVal = modalPassInput.innerText.trim();
     if (currentTargetType === 'sheet') {
-        currentTargetSheet.pass = modalPassInput.value !== "" ? modalPassInput.value : null;
+        currentTargetSheet.pass = passVal !== "" ? passVal : null;
         renderSheets(characterData.data.sheets, container, true, false);
     } else if (currentTargetType === 'special') {
-        characterData.data[currentTargetPassKey] = modalPassInput.value !== "" ? modalPassInput.value : null;
+        characterData.data[currentTargetPassKey] = passVal !== "" ? passVal : null;
         renderSpecialSections();
     }
 
@@ -876,7 +832,7 @@ document.getElementById('modal-delete-btn').addEventListener('click', () => {
     }
 });
 
-// === ココフォリア出力 ===
+// === 出力 ===
 exportBtn.addEventListener('click', async () => {
     if (!characterData) return;
     try {
@@ -889,16 +845,14 @@ exportBtn.addEventListener('click', async () => {
     }
 });
 
-// === 検索機能（入力ごとに自動検索） ===
+// === 検索 ===
 let searchTimeout;
+searchInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') e.preventDefault(); });
 searchInput.addEventListener('input', () => {
     clearTimeout(searchTimeout);
     searchTimeout = setTimeout(() => {
-        if (auth.currentUser) {
-            loadCharacterList(auth.currentUser.uid);
-        }
-    }, 500); // 0.5秒間入力が止まったら検索を実行
+        loadCharacterList(auth.currentUser ? auth.currentUser.uid : null);
+    }, 500);
 });
 
-// 実行
 init();

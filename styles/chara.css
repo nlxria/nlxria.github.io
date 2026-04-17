@@ -416,3 +416,18 @@ main.edit-mode .view-only-ui {
     color: #e74c3c;
     border: 2px solid #e74c3c;
 }
+
+/* --- divのinput化に伴うプレースホルダーの再現 --- */
+div.pass-input[contenteditable="true"]:empty::before {
+    content: attr(placeholder);
+    color: #E0E0E0;
+    pointer-events: none;
+    display: block;
+    /* 高さを維持するため */
+}
+
+/* スマホ等でdivが改行して大きくならないように制限 */
+.param-row .pass-input {
+    white-space: nowrap;
+    overflow: hidden;
+}
