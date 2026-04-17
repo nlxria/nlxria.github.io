@@ -19,7 +19,7 @@ const db = getFirestore(app);
 // グローバル変数
 let characterData = null;
 let characterId = new URLSearchParams(window.location.search).get('id');
-let specialOpenStates = { status: false, params: false, commands: false };
+let specialOpenStates = { memo: false, status: false, params: false, commands: false };
 let isAuthLoaded = false; // 認証ラグ対策
 
 const mainElement = document.getElementById('app-main');
@@ -229,6 +229,9 @@ function renderSpecialSections() {
     const isOwner = auth.currentUser && data.owner === auth.currentUser.uid;
 
     const sections = [
+        // ▼ ★ここに追加：ステータスの上にキャラクターメモを配置
+        { id: 'memo', title: 'キャラクターメモ', dataKey: 'memo', passKey: 'memoPass', render: renderMemoContent, isEmpty: !data.memo || data.memo.trim() === "" },
+
         { id: 'status', title: 'ステータス', dataKey: 'status', passKey: 'statusPass', render: renderStatusContent, isEmpty: !data.status || data.status.length === 0 },
         { id: 'params', title: 'パラメータ', dataKey: 'params', passKey: 'paramsPass', render: renderParamsContent, isEmpty: !data.params || data.params.length === 0 },
         { id: 'commands', title: 'チャットパレット', dataKey: 'commands', passKey: 'commandsPass', render: renderCommandsContent, isEmpty: !data.commands || data.commands.trim() === "" }
@@ -454,6 +457,18 @@ function renderCommandsContent(containerElement, data) {
     textDiv.oninput = (e) => { data.commands = e.target.innerText; };
     containerElement.appendChild(textDiv);
 }
+
+// ▼ ▼ ★ここから丸ごと追加★ ▼ ▼
+function renderMemoContent(containerElement, data) {
+    const textDiv = document.createElement('div');
+    textDiv.className = 'editable-area text-content';
+    if (data.memo !== undefined) {
+        textDiv.textContent = data.memo;
+    }
+    textDiv.oninput = (e) => { data.memo = e.target.innerText; };
+    containerElement.appendChild(textDiv);
+}
+// ▲ ▲ ★ここまで★ ▲ ▲
 
 // === メモの描画 ===
 function renderSheets(sheetsArray, parentElement, isRoot = true) {
@@ -771,7 +786,7 @@ importCharaBtn.addEventListener('click', async () => {
         // ▼ ★変更：ベースデータに、インポートしたデータを上書き（マージ）して欠損を防ぐ
         const baseData = getDefaultData(user.uid);
         const charaData = { ...baseData, ...importedJson.data };
-        
+
         charaData.owner = user.uid;
         charaData.date = Date.now();
         if (charaData.privacy === undefined) charaData.privacy = 2; // インポート時は非公開

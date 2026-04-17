@@ -292,16 +292,19 @@ main.edit-mode .edit-only-ui {
     display: block;
 }
 
-/* キャラクター名の編集ハイライト */
-main.edit-mode .editable-title[contenteditable="true"] {
+/* キャラクター名とふりがなの編集ハイライト */
+main.edit-mode .editable-title[contenteditable="true"],
+main.edit-mode #chara-ruby[contenteditable="true"] {
     outline: 2px dashed #44AEF3;
     background-color: rgba(255, 255, 255, 0.1);
     cursor: text;
     padding: 0 10px;
     display: inline-block;
+    border-radius: 4px;
 }
 
-main.edit-mode .editable-title[contenteditable="true"]:focus {
+main.edit-mode .editable-title[contenteditable="true"]:focus,
+main.edit-mode #chara-ruby[contenteditable="true"]:focus {
     outline: 2px solid #44AEF3;
     background-color: rgba(255, 255, 255, 0.2);
 }
