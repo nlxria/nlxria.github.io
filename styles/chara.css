@@ -258,6 +258,7 @@ details[open]>summary {
 .nested-field.empty-nested {
     border: none;
     padding: 0;
+    margin-top: 0;
 }
 
 /* 子メモ単体の区切り線（リストのように表示） */
