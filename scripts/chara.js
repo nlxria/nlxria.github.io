@@ -19,8 +19,8 @@ const db = getFirestore(app);
 // グローバル変数
 let characterData = null;
 let characterId = new URLSearchParams(window.location.search).get('id');
-// 特殊セクション（ステータス等）の開閉状態を記憶
 let specialOpenStates = { status: false, params: false, commands: false };
+let isAuthLoaded = false; // 認証ラグ対策
 
 const mainElement = document.getElementById('app-main');
 const editBtn = document.getElementById('edit-mode-btn');
@@ -31,13 +31,12 @@ const createCharaBtn = document.getElementById('create-chara-btn');
 const createLoginPrompt = document.getElementById('create-login-prompt');
 const importCharaBtn = document.getElementById('import-ccfolia-btn');
 
-// --- 編集状態を各テキストエリアに適用する補助関数 ---
 function applyEditMode() {
     const isEditing = mainElement.classList.contains('edit-mode');
     document.querySelectorAll('.editable-area').forEach(area => area.setAttribute('contenteditable', isEditing ? 'true' : 'false'));
 }
 
-// === 初期化処理 ===
+// === 初期化とデータ取得 ===
 async function init() {
     if (!characterId) {
         dashboardContainer.style.display = 'block';
@@ -49,24 +48,84 @@ async function init() {
 
     if (docSnap.exists()) {
         characterData = docSnap.data();
-
-        document.getElementById('character-view-area').style.display = 'block';
-        exportBtn.style.display = 'block';
-
-        renderProfile();
-        renderSpecialSections(); // 新規：ステータス・パラメータ・チャパレの描画
-        renderSheets(characterData.data.sheets, container, true, false); // forceOpenLastをfalseにしてバグ修正
-
-        if (auth.currentUser && characterData.data.owner === auth.currentUser.uid) {
-            editBtn.style.display = 'block';
+        
+        // 互換性維持：privacy値がない古いデータは「2(非公開)」として扱う
+        if (characterData.data.privacy === undefined) {
+            characterData.data.privacy = 2; 
         }
-        updateSheetsContainerVisibility();
+
+        if (isAuthLoaded) {
+            checkAndRender();
+        }
     } else {
         alert("キャラクターが見つかりません");
     }
 }
 
-// === キャラクター一覧の取得・描画 ===
+// === 権限チェックと描画の統合関数 ===
+function checkAndRender() {
+    const isOwner = auth.currentUser && characterData.data.owner === auth.currentUser.uid;
+    const privacy = characterData.data.privacy;
+
+    // 非公開(2)かつ、所有者ではない場合はブロックする
+    if (privacy === 2 && !isOwner) {
+        document.getElementById('character-view-area').style.display = 'none';
+        document.getElementById('dashboard-container').style.display = 'none';
+        document.getElementById('private-alert-container').style.display = 'block';
+        exportBtn.style.display = 'none';
+        editBtn.style.display = 'none';
+        return;
+    }
+
+    // 閲覧許可された場合の処理
+    document.getElementById('private-alert-container').style.display = 'none';
+    document.getElementById('character-view-area').style.display = 'block';
+    exportBtn.style.display = 'block';
+
+    renderProfile();
+    renderSpecialSections();
+    renderSheets(characterData.data.sheets, container, true, false);
+
+    if (isOwner) {
+        editBtn.style.display = 'block';
+    } else {
+        editBtn.style.display = 'none';
+    }
+
+    updateSheetsContainerVisibility();
+    applyEditMode();
+}
+
+// === 認証状態の監視 ===
+onAuthStateChanged(auth, (user) => {
+    isAuthLoaded = true;
+    if (user) {
+        loggedOutUI.style.display = 'none';
+        loggedInUI.style.display = 'flex';
+        userEmailDisplay.textContent = user.email;
+        createLoginPrompt.style.display = 'none';
+        createCharaBtn.style.display = 'inline-block';
+        importCharaBtn.style.display = 'inline-block';
+    } else {
+        loggedOutUI.style.display = 'flex';
+        loggedInUI.style.display = 'none';
+        editBtn.style.display = 'none';
+        createLoginPrompt.style.display = 'block';
+        createCharaBtn.style.display = 'none';
+        importCharaBtn.style.display = 'none';
+    }
+
+    // ログイン状態が変わった時に権限を再チェック
+    if (characterData) {
+        checkAndRender();
+    } else if (!characterId) {
+        document.getElementById('character-list-container').style.display = user ? 'block' : 'none';
+        if (user) loadCharacterList(user.uid);
+    }
+});
+
+
+// === キャラクター一覧の取得 ===
 async function loadCharacterList(uid) {
     const listElement = document.getElementById('character-list');
     listElement.innerHTML = '<p style="color: white; text-align: center;">読み込み中...</p>';
@@ -129,42 +188,7 @@ async function loadCharacterList(uid) {
     }
 }
 
-// === 権限チェック (ログイン状態の監視) ===
-onAuthStateChanged(auth, (user) => {
-    if (user) {
-        loggedOutUI.style.display = 'none';
-        loggedInUI.style.display = 'flex';
-        userEmailDisplay.textContent = user.email;
-        createLoginPrompt.style.display = 'none';
-        createCharaBtn.style.display = 'inline-block';
-        importCharaBtn.style.display = 'inline-block';
-
-        if (characterData && characterData.data.owner === user.uid) {
-            editBtn.style.display = 'block';
-            renderSpecialSections();
-            renderSheets(characterData.data.sheets, container, true, false);
-            applyEditMode();
-        } else {
-            editBtn.style.display = 'none';
-        }
-
-        if (!characterId) {
-            document.getElementById('character-list-container').style.display = 'block';
-            loadCharacterList(user.uid);
-        }
-    } else {
-        loggedOutUI.style.display = 'flex';
-        loggedInUI.style.display = 'none';
-        editBtn.style.display = 'none';
-        createLoginPrompt.style.display = 'block';
-        createCharaBtn.style.display = 'none';
-        importCharaBtn.style.display = 'none';
-        document.getElementById('character-list-container').style.display = 'none';
-    }
-});
-
-
-// === 特殊セクション（ステータス・パラメータ・チャパレ）の描画 ===
+// === 特殊セクションの描画 ===
 function renderSpecialSections() {
     const container = document.getElementById('special-sections-container');
     container.innerHTML = '';
@@ -179,7 +203,7 @@ function renderSpecialSections() {
     ];
 
     sections.forEach(sec => {
-        if (sec.isEmpty && !isEditing) return; // 閲覧モードで中身が空なら枠ごと非表示
+        if (sec.isEmpty && !isEditing) return;
 
         const box = document.createElement('div');
         box.className = 'chara-box';
@@ -217,10 +241,10 @@ function renderSpecialSections() {
         settingBtn.className = "setting-btn edit-only-ui";
         settingBtn.addEventListener('click', (e) => {
             e.preventDefault();
-            currentTargetType = 'special'; // 種別を記憶
+            currentTargetType = 'special';
             currentTargetPassKey = sec.passKey;
             modalPassInput.value = data[sec.passKey] || "";
-            document.getElementById('modal-delete-btn').style.display = 'none'; // 大枠は削除させない
+            document.getElementById('modal-delete-btn').style.display = 'none';
             settingsModal.style.display = 'flex';
         });
 
@@ -234,12 +258,9 @@ function renderSpecialSections() {
         const whiteBox = document.createElement('div');
         whiteBox.className = 'sheet-text';
 
-        // 各コンテンツの中身を生成
         sec.render(whiteBox, data);
-
         contentContainer.appendChild(whiteBox);
 
-        // パスワード処理
         if (data[sec.passKey] && !isOwner) {
             const passContainer = document.createElement('div');
             passContainer.className = 'password-container';
@@ -277,7 +298,6 @@ function renderSpecialSections() {
     });
 }
 
-// -- ステータスの描画 (HP 10/10 のような現在値/最大値) --
 function renderStatusContent(containerElement, data) {
     if (!data.status) data.status = [];
     data.status.forEach((st, index) => {
@@ -302,9 +322,7 @@ function renderStatusContent(containerElement, data) {
         valueInput.className = 'pass-input param-input-value edit-only-ui';
         valueInput.value = st.value;
         valueInput.setAttribute('autocomplete', 'off');
-
-        valueInput.style.textAlign = 'right'; // ← ★この1行を追加！
-
+        valueInput.style.textAlign = 'right';
         valueInput.addEventListener('input', (e) => st.value = e.target.value);
 
         const separator = document.createElement('span');
@@ -344,7 +362,6 @@ function renderStatusContent(containerElement, data) {
     containerElement.appendChild(addBtn);
 }
 
-// -- パラメータの描画 (STR 50 のような固定値) --
 function renderParamsContent(containerElement, data) {
     if (!data.params) data.params = [];
     data.params.forEach((param, index) => {
@@ -396,7 +413,6 @@ function renderParamsContent(containerElement, data) {
     containerElement.appendChild(addBtn);
 }
 
-// -- チャットパレットの描画 (テキストエリア) --
 function renderCommandsContent(containerElement, data) {
     const textDiv = document.createElement('div');
     textDiv.className = 'editable-area text-content';
@@ -407,7 +423,7 @@ function renderCommandsContent(containerElement, data) {
     containerElement.appendChild(textDiv);
 }
 
-// === アコーディオンの再帰的描画関数（メモ専用） ===
+// === メモの描画 ===
 function renderSheets(sheetsArray, parentElement, isRoot = true) {
     parentElement.innerHTML = '';
 
@@ -424,7 +440,6 @@ function renderSheets(sheetsArray, parentElement, isRoot = true) {
 
         const details = document.createElement('details');
 
-        // ★バグ修正：データ内に記憶した開閉状態を復元（深さ問わず維持）
         if (sheet._isOpen) {
             details.open = true;
         }
@@ -442,7 +457,6 @@ function renderSheets(sheetsArray, parentElement, isRoot = true) {
 
         details.addEventListener('toggle', () => {
             markSpan.textContent = details.open ? '▲ ' : '▼ ';
-            // 状態をデータに記憶（enumerable: falseでDB保存やJSON出力には含めない安全な目印）
             Object.defineProperty(sheet, '_isOpen', {
                 value: details.open,
                 writable: true,
@@ -503,7 +517,7 @@ function renderSheets(sheetsArray, parentElement, isRoot = true) {
             nestedContainer.classList.add('empty-nested');
         }
 
-        renderSheets(sheet.field, nestedContainer, false); // 子要素も再帰的に描画
+        renderSheets(sheet.field, nestedContainer, false);
 
         whiteBox.appendChild(nestedContainer);
         contentContainer.appendChild(whiteBox);
@@ -558,7 +572,6 @@ function renderSheets(sheetsArray, parentElement, isRoot = true) {
 
     addBtn.addEventListener('click', () => {
         const newMemo = { name: "新規メモ", value: "", pass: null, field: [] };
-        // ★バグ修正：追加時は開いた状態にする（連鎖して他のメモが開かないよう改善）
         Object.defineProperty(newMemo, '_isOpen', {
             value: true,
             writable: true,
@@ -575,7 +588,7 @@ function renderSheets(sheetsArray, parentElement, isRoot = true) {
     parentElement.appendChild(addBtn);
 }
 
-// === プロフィール（名前と画像）の描画 ===
+// === プロフィール（名前・画像・プライバシー設定）の描画 ===
 function renderProfile() {
     const data = characterData.data;
     document.getElementById('profile-container').style.display = 'block';
@@ -583,12 +596,17 @@ function renderProfile() {
     const imgEl = document.getElementById('chara-image');
     const nameEl = document.getElementById('chara-name');
     const imgInput = document.getElementById('chara-image-input');
+    const privacySelect = document.getElementById('chara-privacy-select');
 
     if (data.iconUrl) imgEl.src = data.iconUrl;
 
     nameEl.className = 'editable-title editable-area';
     nameEl.textContent = data.name;
     imgInput.value = data.iconUrl || "";
+
+    // プライバシー設定の値とイベントを紐付け
+    privacySelect.value = data.privacy;
+    privacySelect.onchange = (e) => { data.privacy = parseInt(e.target.value, 10); };
 
     nameEl.oninput = (e) => { data.name = e.target.innerText; };
     imgInput.onchange = (e) => {
@@ -597,7 +615,6 @@ function renderProfile() {
     };
 }
 
-// === 空のメモコンテナを隠す ===
 function updateSheetsContainerVisibility() {
     const isEditing = document.getElementById('app-main').classList.contains('edit-mode');
     const sheetsContainer = document.getElementById('sheets-container');
@@ -608,23 +625,17 @@ function updateSheetsContainerVisibility() {
     }
 }
 
-// === 編集モードの切り替え ===
+// === 編集モード切替 ===
 editBtn.addEventListener('click', async () => {
     const isEditing = mainElement.classList.toggle('edit-mode');
 
     if (isEditing) {
         editBtn.textContent = "保存";
         exportBtn.style.display = 'none';
-
-        // 編集モードに入った時にUIを再描画してボタン等を表示させる
-        renderSpecialSections();
-        renderSheets(characterData.data.sheets, container, true, false);
-        applyEditMode();
-
+        checkAndRender(); // 編集UIを表示するため再描画
     } else {
         editBtn.textContent = "保存中...";
         applyEditMode();
-
         characterData.data.date = Date.now();
 
         try {
@@ -632,11 +643,7 @@ editBtn.addEventListener('click', async () => {
             editBtn.textContent = "編集";
             exportBtn.style.display = 'block';
             alert("保存しました！");
-
-            // 閲覧モードに戻る際、空のセクションを隠すために再描画
-            renderSpecialSections();
-            renderSheets(characterData.data.sheets, container, true, false);
-
+            checkAndRender(); // 編集UIを隠すため再描画
         } catch (error) {
             console.error("Error saving document: ", error);
             alert("保存に失敗しました。");
@@ -645,10 +652,9 @@ editBtn.addEventListener('click', async () => {
             applyEditMode();
         }
     }
-    updateSheetsContainerVisibility();
 });
 
-// === 認証UI・ログイン・ログアウト処理 ===
+// === 認証・ログアウト処理 ===
 const loggedOutUI = document.getElementById('logged-out-ui');
 const loggedInUI = document.getElementById('logged-in-ui');
 const googleLoginBtn = document.getElementById('google-login-btn');
@@ -670,15 +676,8 @@ logoutBtn.addEventListener('click', async () => {
     await signOut(auth);
     alert("ログアウトしました。");
     mainElement.classList.remove('edit-mode');
-    applyEditMode();
     editBtn.textContent = "編集";
-
-    // ログアウト時にUIを閲覧モードにリセット
-    if (characterData) {
-        renderSpecialSections();
-        renderSheets(characterData.data.sheets, container, true, false);
-        updateSheetsContainerVisibility();
-    }
+    // ログアウト後は onAuthStateChanged が発火し、自動的に checkAndRender で権限が再評価されます
 });
 
 // === 新規作成 ===
@@ -706,7 +705,8 @@ createCharaBtn.addEventListener('click', async () => {
             color: "#888888",
             commands: "",
             sheets: [],
-            owner: user.uid
+            owner: user.uid,
+            privacy: 2 // 初期値は非公開
         }
     };
 
@@ -736,10 +736,10 @@ importCharaBtn.addEventListener('click', async () => {
 
         let importedJson;
         try { importedJson = JSON.parse(clipboardText); }
-        catch (e) { return alert("クリップボードの内容が正しいキャラクターデータではありません。"); }
+        catch (e) { return alert("クリップボードの内容が正しいデータではありません。"); }
 
         if (importedJson.kind !== "character" || !importedJson.data) {
-            return alert("ココフォリア互換のキャラクターデータが見つかりませんでした。");
+            return alert("ココフォリア互換のデータが見つかりませんでした。");
         }
 
         importCharaBtn.textContent = "読み込み中...";
@@ -752,6 +752,7 @@ importCharaBtn.addEventListener('click', async () => {
         if (!charaData.sheets) charaData.sheets = [];
         if (!charaData.params) charaData.params = [];
         if (!charaData.status) charaData.status = [];
+        if (charaData.privacy === undefined) charaData.privacy = 2; // インポート時も基本は非公開
 
         const docRef = await addDoc(collection(db, "characters"), {
             kind: "character",
@@ -775,8 +776,8 @@ importCharaBtn.addEventListener('click', async () => {
 });
 
 // === モーダルの処理 ===
-let currentTargetType = 'sheet'; // 'sheet' or 'special'
-let currentTargetPassKey = null; // special用のキー保存
+let currentTargetType = 'sheet';
+let currentTargetPassKey = null;
 let currentTargetSheet = null;
 let currentTargetArray = null;
 let currentTargetIndex = null;
