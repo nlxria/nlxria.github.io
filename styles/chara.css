@@ -96,21 +96,46 @@ header .edit-btn {
     font-size: 2em;
     margin: 0.5em 0;
     transition: background 0.3s;
+
+    /* ▼ 追加：長すぎる名前を枠内で自動的に折り返す */
+    word-break: break-word;
+    overflow-wrap: break-word;
+    white-space: pre-wrap;
+    max-width: 100%;
 }
 
 .param-row {
     display: flex;
-    gap: 10px;
+    gap: 8px;
+    /* スマホ向けに少しだけ隙間を詰める */
     margin-bottom: 10px;
     align-items: center;
+    flex-wrap: wrap;
+    /* ▼ 追加：画面が狭い時は折り返して表示する */
+}
+
+/* ▼ 追加：スマホで入力欄が押し出されないようにサイズと余白を再調整 */
+.param-row .pass-input {
+    margin: 0;
+    min-width: 0;
+    /* これを追加することで画面に合わせて縮小できるようになります */
+    padding: 0.6em;
 }
 
 .param-input-label {
     flex: 1;
+    min-width: 80px;
+    /* 項目名の最低限の幅 */
 }
 
 .param-input-value {
-    width: 80px;
+    width: 3.5em !important;
+    /* スマホでも収まるように文字数基準（約3.5文字分）で固定 */
+}
+
+/* ▼ 追加：折り返した際に「削除」ボタンが綺麗に右端に寄るようにする */
+.param-row .setting-btn {
+    margin-left: auto;
 }
 
 .add-resource-btn {
