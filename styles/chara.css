@@ -234,8 +234,11 @@ details[open]>summary {
     white-space: pre-wrap;
     margin-bottom: 0;
     border: 1px solid white;
-    /* 画像のように白枠を追加 */
     padding: 0.75em;
+
+    /* ▼ 追加：右下の角を外枠と同じ形にカットして重なりを防ぐ */
+    border-bottom-right-radius: 1.5em;
+    corner-bottom-right-shape: bevel;
 }
 
 /* 子メモのグループ枠 */
