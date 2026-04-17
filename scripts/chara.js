@@ -407,19 +407,8 @@ function renderCommandsContent(containerElement, data) {
     containerElement.appendChild(textDiv);
 }
 
-
 // === アコーディオンの再帰的描画関数（メモ専用） ===
-function renderSheets(sheetsArray, parentElement, isRoot = true, forceOpenLast = false) {
-    const openStates = Array.from(parentElement.children).map(child => {
-        if (child.classList.contains('chara-box')) {
-            const det = child.querySelector('details');
-            return det ? det.open : false;
-        } else if (child.tagName === 'DETAILS') {
-            return child.open;
-        }
-        return false;
-    });
-
+function renderSheets(sheetsArray, parentElement, isRoot = true) {
     parentElement.innerHTML = '';
 
     sheetsArray.forEach((sheet, index) => {
@@ -435,10 +424,8 @@ function renderSheets(sheetsArray, parentElement, isRoot = true, forceOpenLast =
 
         const details = document.createElement('details');
 
-        // ★バグ修正：追加ボタンを押した時(forceOpenLast)のみ最後を開く
-        if (index < openStates.length) {
-            details.open = openStates[index];
-        } else if (forceOpenLast && index === sheetsArray.length - 1) {
+        // ★バグ修正：データ内に記憶した開閉状態を復元（深さ問わず維持）
+        if (sheet._isOpen) {
             details.open = true;
         }
 
@@ -452,8 +439,16 @@ function renderSheets(sheetsArray, parentElement, isRoot = true, forceOpenLast =
         const markSpan = document.createElement('span');
         markSpan.textContent = details.open ? '▲ ' : '▼ ';
         markSpan.style.marginRight = '0.5em';
+
         details.addEventListener('toggle', () => {
             markSpan.textContent = details.open ? '▲ ' : '▼ ';
+            // 状態をデータに記憶（enumerable: falseでDB保存やJSON出力には含めない安全な目印）
+            Object.defineProperty(sheet, '_isOpen', {
+                value: details.open,
+                writable: true,
+                enumerable: false,
+                configurable: true
+            });
         });
 
         const titleSpan = document.createElement('span');
@@ -473,12 +468,12 @@ function renderSheets(sheetsArray, parentElement, isRoot = true, forceOpenLast =
         settingBtn.className = "setting-btn edit-only-ui";
         settingBtn.addEventListener('click', (e) => {
             e.preventDefault();
-            currentTargetType = 'sheet'; // 種別を記憶
+            currentTargetType = 'sheet';
             currentTargetSheet = sheet;
             currentTargetArray = sheetsArray;
             currentTargetIndex = index;
             modalPassInput.value = sheet.pass || "";
-            document.getElementById('modal-delete-btn').style.display = 'block'; // メモは削除可能
+            document.getElementById('modal-delete-btn').style.display = 'block';
             settingsModal.style.display = 'flex';
         });
 
@@ -508,7 +503,7 @@ function renderSheets(sheetsArray, parentElement, isRoot = true, forceOpenLast =
             nestedContainer.classList.add('empty-nested');
         }
 
-        renderSheets(sheet.field, nestedContainer, false, forceOpenLast);
+        renderSheets(sheet.field, nestedContainer, false); // 子要素も再帰的に描画
 
         whiteBox.appendChild(nestedContainer);
         contentContainer.appendChild(whiteBox);
@@ -562,9 +557,17 @@ function renderSheets(sheetsArray, parentElement, isRoot = true, forceOpenLast =
     }
 
     addBtn.addEventListener('click', () => {
-        sheetsArray.push({ name: "新規メモ", value: "", pass: null, field: [] });
-        // ★追加した時だけ最後を開く (forceOpenLast = true)
-        renderSheets(sheetsArray, parentElement, isRoot, true);
+        const newMemo = { name: "新規メモ", value: "", pass: null, field: [] };
+        // ★バグ修正：追加時は開いた状態にする（連鎖して他のメモが開かないよう改善）
+        Object.defineProperty(newMemo, '_isOpen', {
+            value: true,
+            writable: true,
+            enumerable: false,
+            configurable: true
+        });
+        sheetsArray.push(newMemo);
+
+        renderSheets(sheetsArray, parentElement, isRoot);
         applyEditMode();
         updateSheetsContainerVisibility();
     });
