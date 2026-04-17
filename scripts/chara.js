@@ -388,7 +388,7 @@ function renderParamsContent(containerElement, data) {
     addBtn.textContent = "パラメータを追加";
     addBtn.className = 'add-resource-btn edit-only-ui';
     addBtn.addEventListener('click', () => {
-        data.params.push({ label: "STR", value: "10" });
+        data.params.push({ label: "NEW", value: "0" });
         specialOpenStates.params = true;
         renderSpecialSections();
         applyEditMode();
