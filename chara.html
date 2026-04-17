@@ -43,7 +43,7 @@
         </header>
         <div class="head"></div>
         <div id="private-alert-container" style="display: none; text-align: center; margin-top: 20vh;">
-            <h2 style="color: lightpink; font-size: 1.5em; margin-bottom: 1em;">このキャラクターは非公開です</h2>
+            <h2 style="color: white; font-size: 2em; margin-bottom: 1em;">このキャラクターは非公開です</h2>
             <a href="/chara" class="edit-btn" style="text-decoration: none;">ホームに戻る</a>
         </div>
         <div id="character-view-area" class="chara-box-wrapper" style="display: none;">
@@ -52,8 +52,9 @@
                     <img id="chara-image" src="" alt="" onerror="this.src='/assets/image/chara-image.png'">
                     <input type="text" id="chara-image-input" class="pass-input edit-only-ui" placeholder="画像URLを入力" style="margin-top: 10px;" autocomplete="off">
                 </div>
+                <div id="chara-ruby" class="editable-area" style="font-size: 1em; margin-bottom: -0.5em; min-height: 1.5em; word-break: break-word;"></div>
                 <h1 id="chara-name" class="editable-title"></h1>
-                <select id="chara-privacy-select" class="pass-input edit-only-ui" style="width: auto; margin: 1em auto 0; display: block; text-align: center; cursor: pointer;">
+                <select id="chara-privacy-select" class="pass-input" style="width: auto; margin: 1em auto 0; display: block; text-align: center; cursor: pointer;">
                     <option value="0">公開</option>
                     <option value="1">限定公開</option>
                     <option value="2">非公開</option>

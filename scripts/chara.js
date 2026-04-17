@@ -31,9 +31,41 @@ const createCharaBtn = document.getElementById('create-chara-btn');
 const createLoginPrompt = document.getElementById('create-login-prompt');
 const importCharaBtn = document.getElementById('import-ccfolia-btn');
 
+// ▼ ★追加：キャラクターのベースとなる完全なデータ構造（ひな形）を生成する関数
+function getDefaultData(uid) {
+    return {
+        name: "新たなキャラクター",
+        ruby: "", // ふりがなを追加
+        memo: "",
+        date: Date.now(),
+        initiative: 0,
+        externalUrl: "",
+        status: [],
+        params: [],
+        iconUrl: "",
+        faces: [],
+        x: 0, y: 0, angle: 0, width: 4, height: 4,
+        active: true, secret: false, invisible: false, hideStatus: false,
+        color: "#888888",
+        commands: "",
+        sheets: [],
+        owner: uid,
+        privacy: 2, // 初期値は非公開
+    };
+}
+
 function applyEditMode() {
     const isEditing = mainElement.classList.contains('edit-mode');
     document.querySelectorAll('.editable-area').forEach(area => area.setAttribute('contenteditable', isEditing ? 'true' : 'false'));
+
+    // ▼ ★追加：編集モードではない時は、プライバシー設定のプルダウンを操作不可にする
+    const privacySelect = document.getElementById('chara-privacy-select');
+    if (privacySelect) {
+        privacySelect.disabled = !isEditing;
+        // 操作不可の時は少しだけ透明にして「押せない感」を出す
+        privacySelect.style.opacity = isEditing ? "1" : "0.8";
+        privacySelect.style.cursor = isEditing ? "pointer" : "default";
+    }
 }
 
 // === 初期化とデータ取得 ===
@@ -48,10 +80,10 @@ async function init() {
 
     if (docSnap.exists()) {
         characterData = docSnap.data();
-        
+
         // 互換性維持：privacy値がない古いデータは「2(非公開)」として扱う
         if (characterData.data.privacy === undefined) {
-            characterData.data.privacy = 2; 
+            characterData.data.privacy = 2;
         }
 
         if (isAuthLoaded) {
@@ -595,6 +627,7 @@ function renderProfile() {
 
     const imgEl = document.getElementById('chara-image');
     const nameEl = document.getElementById('chara-name');
+    const rubyEl = document.getElementById('chara-ruby'); // ★追加
     const imgInput = document.getElementById('chara-image-input');
     const privacySelect = document.getElementById('chara-privacy-select');
 
@@ -602,6 +635,7 @@ function renderProfile() {
 
     nameEl.className = 'editable-title editable-area';
     nameEl.textContent = data.name;
+    rubyEl.textContent = data.ruby || ""; // ★追加：ふりがなを表示
     imgInput.value = data.iconUrl || "";
 
     // プライバシー設定の値とイベントを紐付け
@@ -609,6 +643,7 @@ function renderProfile() {
     privacySelect.onchange = (e) => { data.privacy = parseInt(e.target.value, 10); };
 
     nameEl.oninput = (e) => { data.name = e.target.innerText; };
+    rubyEl.oninput = (e) => { data.ruby = e.target.innerText; }; // ★追加：ふりがなの入力反映
     imgInput.onchange = (e) => {
         data.iconUrl = e.target.value;
         imgEl.src = e.target.value;
@@ -636,6 +671,10 @@ editBtn.addEventListener('click', async () => {
     } else {
         editBtn.textContent = "保存中...";
         applyEditMode();
+
+        // ▼ ★追加・変更：ベースのひな形に対して、現在のデータを上書き（マージ）することでキーの欠落を防ぐ
+        const baseData = getDefaultData(characterData.data.owner);
+        characterData.data = { ...baseData, ...characterData.data };
         characterData.data.date = Date.now();
 
         try {
@@ -688,26 +727,10 @@ createCharaBtn.addEventListener('click', async () => {
     createCharaBtn.textContent = "作成中...";
     createCharaBtn.disabled = true;
 
+    // ▼ ★変更：関数からベースデータを取得するようにスッキリ書き換え
     const defaultData = {
         kind: "character",
-        data: {
-            name: "新たなキャラクター",
-            memo: "",
-            date: Date.now(),
-            initiative: 0,
-            externalUrl: "",
-            status: [],
-            params: [],
-            iconUrl: "",
-            faces: [],
-            x: 0, y: 0, angle: 0, width: 4, height: 4,
-            active: true, secret: false, invisible: false, hideStatus: false,
-            color: "#888888",
-            commands: "",
-            sheets: [],
-            owner: user.uid,
-            privacy: 2 // 初期値は非公開
-        }
+        data: getDefaultData(user.uid)
     };
 
     try {
@@ -745,14 +768,13 @@ importCharaBtn.addEventListener('click', async () => {
         importCharaBtn.textContent = "読み込み中...";
         importCharaBtn.disabled = true;
 
-        const charaData = importedJson.data;
+        // ▼ ★変更：ベースデータに、インポートしたデータを上書き（マージ）して欠損を防ぐ
+        const baseData = getDefaultData(user.uid);
+        const charaData = { ...baseData, ...importedJson.data };
+        
         charaData.owner = user.uid;
         charaData.date = Date.now();
-
-        if (!charaData.sheets) charaData.sheets = [];
-        if (!charaData.params) charaData.params = [];
-        if (!charaData.status) charaData.status = [];
-        if (charaData.privacy === undefined) charaData.privacy = 2; // インポート時も基本は非公開
+        if (charaData.privacy === undefined) charaData.privacy = 2; // インポート時は非公開
 
         const docRef = await addDoc(collection(db, "characters"), {
             kind: "character",
