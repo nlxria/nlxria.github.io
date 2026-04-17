@@ -77,6 +77,10 @@ header .edit-btn {
 
 /* 縦画面のとき（スマホなど：横幅を基準にする） */
 @media screen and (orientation: portrait) {
+    header .title {
+        display: none !important;
+    }
+
     .profile-image-wrapper img {
         width: 50vw;
         height: auto;
