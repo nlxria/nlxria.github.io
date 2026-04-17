@@ -31,6 +31,9 @@ const createCharaBtn = document.getElementById('create-chara-btn');
 const createLoginPrompt = document.getElementById('create-login-prompt');
 const importCharaBtn = document.getElementById('import-ccfolia-btn');
 
+// ▼ ★追加：検索入力欄の取得
+const searchInput = document.getElementById('search-input');
+
 // ▼ ★追加：キャラクターのベースとなる完全なデータ構造（ひな形）を生成する関数
 function getDefaultData(uid) {
     return {
@@ -90,7 +93,7 @@ async function init() {
             checkAndRender();
         }
     } else {
-        alert("キャラクターが見つかりません");
+        alert("キャラクターが見つかりません。");
     }
 }
 
@@ -156,24 +159,44 @@ onAuthStateChanged(auth, (user) => {
     }
 });
 
-
 // === キャラクター一覧の取得 ===
 async function loadCharacterList(uid) {
     const listElement = document.getElementById('character-list');
+    const searchKeyword = searchInput.value.trim().toLowerCase(); // 検索キーワードを取得
     listElement.innerHTML = '<p style="color: white; text-align: center;">読み込み中...</p>';
 
     try {
-        const q = query(collection(db, "characters"), where("data.owner", "==", uid));
+        let q;
+        if (searchKeyword === "") {
+            // ① 検索欄が空の場合：自分がオーナーのキャラを取得
+            q = query(collection(db, "characters"), where("data.owner", "==", uid));
+        } else {
+            // ② 文字がある場合：公開中（privacy === 0）の全キャラを取得
+            q = query(collection(db, "characters"), where("data.privacy", "==", 0));
+        }
+
         const querySnapshot = await getDocs(q);
         listElement.innerHTML = '';
 
-        if (querySnapshot.empty) {
-            listElement.innerHTML = '<p style="color: #E0E0E0; text-align: center;">作成したキャラクターはまだありません。</p>';
+        const charaList = [];
+        querySnapshot.forEach((docSnap) => {
+            const data = docSnap.data().data;
+            if (searchKeyword === "") {
+                charaList.push({ id: docSnap.id, data: data });
+            } else {
+                // ③ JSON全体を文字列にして検索キーワードが含まれるかチェック
+                const jsonStr = JSON.stringify(data).toLowerCase();
+                if (jsonStr.includes(searchKeyword)) {
+                    charaList.push({ id: docSnap.id, data: data });
+                }
+            }
+        });
+
+        if (charaList.length === 0) {
+            listElement.innerHTML = '<p style="color: #E0E0E0; text-align: center;">キャラクターが見つかりません。</p>';
             return;
         }
 
-        const charaList = [];
-        querySnapshot.forEach((docSnap) => charaList.push({ id: docSnap.id, data: docSnap.data().data }));
         charaList.sort((a, b) => (b.data.date || 0) - (a.data.date || 0));
 
         charaList.forEach((chara) => {
@@ -194,24 +217,28 @@ async function loadCharacterList(uid) {
                 </div>
             `;
 
-            const deleteBtn = document.createElement('button');
-            deleteBtn.textContent = '削除';
-            deleteBtn.className = 'chara-delete-btn';
-            deleteBtn.addEventListener('click', async (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                if (confirm("本当にこのキャラクターを削除しますか？")) {
-                    try {
-                        await deleteDoc(doc(db, "characters", charaId));
-                        alert("キャラクターを削除しました。");
-                        loadCharacterList(uid);
-                    } catch (err) {
-                        console.error("削除エラー:", err);
-                        alert("削除に失敗しました。");
+            // ④ 自分がオーナーのキャラクターにのみ削除ボタンを表示する
+            if (data.owner === uid) {
+                const deleteBtn = document.createElement('button');
+                deleteBtn.textContent = '削除';
+                deleteBtn.className = 'chara-delete-btn';
+                deleteBtn.addEventListener('click', async (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (confirm("本当にこのキャラクターを削除しますか？")) {
+                        try {
+                            await deleteDoc(doc(db, "characters", charaId));
+                            alert("キャラクターを削除しました。");
+                            loadCharacterList(uid);
+                        } catch (err) {
+                            console.error("削除エラー:", err);
+                            alert("削除に失敗しました。");
+                        }
                     }
-                }
-            });
-            card.appendChild(deleteBtn);
+                });
+                card.appendChild(deleteBtn);
+            }
+
             listElement.appendChild(card);
         });
     } catch (error) {
@@ -860,6 +887,17 @@ exportBtn.addEventListener('click', async () => {
         console.error("クリップボードコピーエラー:", err);
         alert("コピーに失敗しました。ブラウザのクリップボード権限を確認してください。");
     }
+});
+
+// === 検索機能（入力ごとに自動検索） ===
+let searchTimeout;
+searchInput.addEventListener('input', () => {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+        if (auth.currentUser) {
+            loadCharacterList(auth.currentUser.uid);
+        }
+    }, 500); // 0.5秒間入力が止まったら検索を実行
 });
 
 // 実行

@@ -85,7 +85,13 @@
             <button id="import-ccfolia-btn" class="edit-btn" style="font-size: 1em; padding: 1em; display: none; margin-left: 1em;">ココフォリア駒入力</button>
             <p id="create-login-prompt" style="color: lightpink;">※作成するにはログインしてください</p>
             <div id="character-list-container" style="display: none; margin-top: 3em; text-align: left; max-width: 600px; margin-left: auto; margin-right: auto; padding: 0 4.5vh;">
-                <h3 style="color: white; border-bottom: 2px solid white; padding-bottom: 0.5em;">あなたのキャラクター</h3>
+                <div id="character-list-container" style="display: none; margin-top: 3em; text-align: left; max-width: 600px; margin-left: auto; margin-right: auto; padding: 0 4.5vh;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid white; padding-bottom: 0.5em;">
+                        <h3 style="color: white; margin: 0;">キャラクターの一覧</h3>
+                        <input type="text" id="search-input" class="pass-input" placeholder="検索" autocomplete="off" style="width: 50%; margin: 0; padding: 0.5em; font-size: 0.9em;">
+                    </div>
+                    <div id="character-list" style="display: flex; flex-direction: column; gap: 10px; margin-top: 1em;"></div>
+                </div>
                 <div id="character-list" style="display: flex; flex-direction: column; gap: 10px; margin-top: 1em;"></div>
             </div>
         </div>

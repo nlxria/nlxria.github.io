@@ -299,7 +299,12 @@ main.edit-mode #chara-ruby[contenteditable="true"] {
     background-color: rgba(255, 255, 255, 0.1);
     cursor: text;
     padding: 0 10px;
-    display: inline-block;
+
+    /* ▼ 変更：inline-blockから変更し、幅を文字に合わせつつ中央寄せに */
+    display: block;
+    width: max-content;
+    margin-inline: auto;
+
     border-radius: 4px;
 }
 
