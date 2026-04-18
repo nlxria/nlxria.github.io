@@ -23,6 +23,11 @@ let characterId = new URLSearchParams(window.location.search).get('id');
 let specialOpenStates = { memo: false, status: false, params: false, commands: false };
 let isAuthLoaded = false;
 
+// ▼ ★追加：Firebaseの読み取り回数を劇的に減らすためのキャッシュ変数
+let cachedMyCharacters = null;
+let cachedPublicCharacters = null;
+let isPublicCacheLoading = false;
+
 const mainElement = document.getElementById('app-main');
 const editBtn = document.getElementById('edit-mode-btn');
 const exportBtn = document.getElementById('export-ccfolia-btn');
@@ -143,46 +148,20 @@ onAuthStateChanged(auth, (user) => {
 // === キャラクター一覧の取得 ===
 async function loadCharacterList(uid) {
     const listElement = document.getElementById('character-list');
-    const searchKeyword = searchInput.innerText.trim().toLowerCase(); // valueからinnerTextに変更
-    listElement.innerHTML = '<p style="color: white; text-align: center;">読み込み中...</p>';
+    const searchKeyword = searchInput.innerText.trim().toLowerCase();
 
-    try {
-        let q;
-        if (searchKeyword === "") {
-            // UIDが無い（未ログイン）場合は空文字検索でも何も出さない
-            if (!uid) {
-                listElement.innerHTML = '<p style="color: #E0E0E0; text-align: center;">検索キーワードを入力してください。</p>';
-                return;
-            }
-            q = query(collection(db, "characters"), where("data.owner", "==", uid));
-        } else {
-            q = query(collection(db, "characters"), where("data.privacy", "==", 0));
-        }
-
-        const querySnapshot = await getDocs(q);
+    // 画面にカードを描画する処理（共通化）
+    const renderCards = (charaList) => {
         listElement.innerHTML = '';
-
-        const charaList = [];
-        querySnapshot.forEach((docSnap) => {
-            const data = docSnap.data().data;
-            if (searchKeyword === "") {
-                charaList.push({ id: docSnap.id, data: data });
-            } else {
-                const jsonStr = JSON.stringify(data).toLowerCase();
-                if (jsonStr.includes(searchKeyword)) {
-                    charaList.push({ id: docSnap.id, data: data });
-                }
-            }
-        });
-
         if (charaList.length === 0) {
             listElement.innerHTML = '<p style="color: #E0E0E0; text-align: center;">キャラクターが見つかりません。</p>';
             return;
         }
 
-        charaList.sort((a, b) => (b.data.date || 0) - (a.data.date || 0));
+        // コピーを作成してソート（元の記憶データを書き換えないため）
+        const sortedList = [...charaList].sort((a, b) => (b.data.date || 0) - (a.data.date || 0));
 
-        charaList.forEach((chara) => {
+        sortedList.forEach((chara) => {
             const charaId = chara.id;
             const data = chara.data;
             const card = document.createElement('a');
@@ -211,6 +190,11 @@ async function loadCharacterList(uid) {
                         try {
                             await deleteDoc(doc(db, "characters", charaId));
                             alert("キャラクターを削除しました。");
+
+                            // ▼ ★追加：削除したときもキャッシュをリセット
+                            cachedMyCharacters = null;
+                            cachedPublicCharacters = null;
+
                             loadCharacterList(uid);
                         } catch (err) {
                             console.error("削除エラー:", err);
@@ -222,9 +206,58 @@ async function loadCharacterList(uid) {
             }
             listElement.appendChild(card);
         });
+    };
+
+    try {
+        if (searchKeyword === "") {
+            if (!uid) {
+                listElement.innerHTML = '<p style="color: #E0E0E0; text-align: center;">検索キーワードを入力してください。</p>';
+                return;
+            }
+
+            // ▼ ★自分のキャラのキャッシュ確認
+            if (cachedMyCharacters) {
+                renderCards(cachedMyCharacters);
+                return;
+            }
+
+            listElement.innerHTML = '<p style="color: white; text-align: center;">読み込み中...</p>';
+            const q = query(collection(db, "characters"), where("data.owner", "==", uid));
+            const querySnapshot = await getDocs(q);
+            cachedMyCharacters = [];
+            querySnapshot.forEach((docSnap) => cachedMyCharacters.push({ id: docSnap.id, data: docSnap.data().data }));
+            renderCards(cachedMyCharacters);
+
+        } else {
+            // ▼ ★公開キャラのキャッシュ確認とフィルタリング（ブラウザ内での高速検索）
+            const executeSearch = () => {
+                const filteredList = cachedPublicCharacters.filter(chara => {
+                    const jsonStr = JSON.stringify(chara.data).toLowerCase();
+                    return jsonStr.includes(searchKeyword);
+                });
+                renderCards(filteredList);
+            };
+
+            if (cachedPublicCharacters) {
+                executeSearch();
+            } else {
+                if (isPublicCacheLoading) return; // 既に通信中なら重複してリクエストしない
+                isPublicCacheLoading = true;
+                listElement.innerHTML = '<p style="color: white; text-align: center;">公開データを取得中...</p>';
+
+                const q = query(collection(db, "characters"), where("data.privacy", "==", 0));
+                const querySnapshot = await getDocs(q);
+                cachedPublicCharacters = [];
+                querySnapshot.forEach((docSnap) => cachedPublicCharacters.push({ id: docSnap.id, data: docSnap.data().data }));
+
+                isPublicCacheLoading = false;
+                executeSearch();
+            }
+        }
     } catch (error) {
         console.error("一覧取得エラー:", error);
         listElement.innerHTML = '<p style="color: lightpink; text-align: center;">リストの取得に失敗しました。</p>';
+        isPublicCacheLoading = false;
     }
 }
 
@@ -679,6 +712,11 @@ editBtn.addEventListener('click', async () => {
             editBtn.textContent = "編集";
             exportBtn.style.display = 'block';
             alert("保存しました！");
+
+            // ▼ ★追加：保存したときは情報が変わるのでキャッシュをリセットする
+            cachedMyCharacters = null;
+            cachedPublicCharacters = null;
+
             checkAndRender();
         } catch (error) {
             console.error("Error saving document: ", error);
