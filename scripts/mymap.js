@@ -57,12 +57,11 @@ logoutBtn.addEventListener('click', async () => {
 const map = L.map('map', {
     zoomControl: false,
     attributionControl: false
-}).setView([35.6895, 139.6917], 5); // 座標を固定
+}).setView([35.6895, 139.6917], 5);
 
-// 文字なしダークマップを使用
+// シンプルなダークマップを使用（ガビガビを回避）
 L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png', {
-    subdomains: 'abcd',
-    attribution: '&copy; CARTO'
+    subdomains: 'abcd'
 }).addTo(map);
 
 let currentMarkers = [];

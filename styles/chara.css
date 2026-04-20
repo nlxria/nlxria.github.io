@@ -450,13 +450,15 @@ div.pass-input[contenteditable="true"]:empty::before {
     overflow: hidden;
 }
 
-/* === マイマップ設定（キャラクターシート内） === */
+/* === マイマップ設定 === */
 #chara-map {
     background: #050949 !important;
+    border: 1px solid #47B8FF;
 }
 
 #chara-map .leaflet-tile-pane {
-    filter: brightness(2.5) contrast(3) sepia(100%) hue-rotate(160deg) saturate(600%);
+    /* ガビガビの原因だった brightness/contrast を抑え、色相だけを変更 */
+    filter: sepia(100%) hue-rotate(165deg) saturate(200%) brightness(0.8);
     mix-blend-mode: screen;
 }
 
