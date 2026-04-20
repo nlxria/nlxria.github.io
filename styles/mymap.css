@@ -1,8 +1,9 @@
+/* === mymap.css === */
+
 html,
 body {
     overflow: hidden;
     background-color: #050949;
-    /* ▼ 確実な海の色を一番下に敷く */
 }
 
 .maps {
@@ -12,11 +13,13 @@ body {
     top: calc(9vh - 50px);
     height: calc(109vh + 50px);
     width: 100%;
-    background-color: #050949;
-    /* ▼ ここにも海の色を敷く */
 }
 
-/* ▼ 修正：まずは全体を暗いネイビーの海色（#050949）に馴染ませる */
+/* ▼ ★バグ修正：Leafletが勝手に敷くグレーの背景を強制的にネイビーで塗り潰す！ */
+.leaflet-container {
+    background-color: #050949 !important;
+}
+
 .leaflet-tile-pane {
     /* Googleマップの白や水色を、セピア→青に変換して暗く落とす */
     filter: sepia(100%) hue-rotate(190deg) saturate(200%) brightness(0.4);
@@ -29,25 +32,22 @@ body {
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    /* ピンの枠線と影を明るいシアン(#47B8FF)で発光させる */
     border: 2px solid #47B8FF;
     object-fit: cover;
-    box-shadow: 0 0 10px rgba(71, 184, 255, 0.8);
+    box-shadow: 0 0 10px #47B8FF;
     transition: transform 0.2s;
 }
 
 .custom-chara-icon img:hover {
     transform: scale(1.2);
-    /* ホバー時に少し大きくする */
     z-index: 1000;
 }
 
 /* --- ツールチップ（名前）の装飾 --- */
 .leaflet-tooltip {
     font-weight: bold;
-    /* ツールチップも世界観に合わせてダークネイビー×シアンに */
     color: #47B8FF;
-    background-color: rgba(5, 9, 73, 0.9);
+    background-color: rgba(5, 9, 73, 0.8);
     border: 1px solid #47B8FF;
     box-shadow: 0 0 5px rgba(71, 184, 255, 0.5);
 }

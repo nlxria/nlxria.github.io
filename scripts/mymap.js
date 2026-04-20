@@ -60,7 +60,7 @@ logoutBtn.addEventListener('click', async () => {
 const map = L.map('map', {
     zoomControl: false,
     attributionControl: false
-}).setView([35.681236, 139.767125], 5);
+}).setView([35.6895, 139.6917], 5);
 
 // ▼ 修正：文字（地名、国名など）が含まれないタイルレイヤー（ロードマップ）を使用する設定
 L.tileLayer('https://{s}.google.com/vt/lyrs=r&x={x}&y={y}&z={z}', {
