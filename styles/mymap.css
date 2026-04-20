@@ -1,10 +1,11 @@
 /* === mymap.css === */
 
+/* ▼ 修正1： background-color ではなく background を使い、index.cssのグラデーションごと強制的にネイビー（#050949）で上書きして余白を消し去る */
 html,
 body,
 .maps,
 .leaflet-container {
-    background-color: #050949 !important;
+    background: #050949 !important;
     overflow: hidden;
 }
 
@@ -17,11 +18,14 @@ body,
     width: 100%;
 }
 
-/* 地図タイルの色調補正 */
+/* ▼ 修正2：陸地を確実にシアン（#47B8FF）にし、海を透明（背景のネイビー）にするフィルター */
 .leaflet-tile-pane {
-    /* 陸地を #47B8FF に近づけ、海を黒に沈めるフィルター */
-    filter: sepia(100%) hue-rotate(165deg) saturate(600%) brightness(0.7) contrast(2);
-    /* mix-blend-mode: screen により、タイルの黒い部分（海）を背景色 #050949 に完全に透過させます */
+    /* 1. brightness(2.5) contrast(3) : 海を「完全な黒」に落とし、陸地を「明るい白」に飛ばす
+       2. sepia(100%) hue-rotate(160deg) saturate(600%) : 白くなった陸地だけをシアンに染め上げる
+    */
+    filter: brightness(2.5) contrast(3) sepia(100%) hue-rotate(160deg) saturate(600%);
+
+    /* 黒くなった海を完全に透明化し、奥の #050949 を透かして見せる */
     mix-blend-mode: screen;
 }
 
