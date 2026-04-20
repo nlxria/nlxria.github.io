@@ -708,9 +708,9 @@ function renderMap() {
             attributionControl: false
         }).setView([centerLat, centerLng], hasCoords ? 10 : 5);
 
-        // Stamen Toner（文字なし）に変更
-        L.tileLayer('https://tiles.stadiamaps.com/tiles/stamen_toner_background/{z}/{x}/{y}{r}.png', {
-            attribution: '&copy; Stadia Maps, &copy; Stamen Design'
+        // ライトテーマからダークテーマに変更
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png', {
+            subdomains: 'abcd'
         }).addTo(charaMap);
 
         charaMap.on('click', (e) => {

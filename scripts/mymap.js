@@ -59,9 +59,10 @@ const map = L.map('map', {
     attributionControl: false
 }).setView([35.6895, 139.6917], 5);
 
-// Stamen Toner（文字なし）に変更
-L.tileLayer('https://tiles.stadiamaps.com/tiles/stamen_toner_background/{z}/{x}/{y}{r}.png', {
-    attribution: '&copy; Stadia Maps, &copy; Stamen Design'
+// ライトテーマからダークテーマに変更
+L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png', {
+    subdomains: 'abcd',
+    attribution: '&copy; CARTO'
 }).addTo(map);
 
 // 記憶用配列
