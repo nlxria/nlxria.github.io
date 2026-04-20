@@ -5,31 +5,18 @@ body,
 .maps,
 .leaflet-container {
     background: #050949 !important;
-    /* ベースの深いネイビー */
     overflow: hidden;
 }
 
+/* ▼ 変更：透明度を1に戻し、100%はっきり表示させる */
 .leaflet-tile-pane {
     filter: none !important;
     mix-blend-mode: normal !important;
-    opacity: 0.7;
+    opacity: 1 !important;
 }
 
-/* ▼ 変更：z-indexを450に下げて、アイコンの下に潜り込ませます */
-.maps::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(50, 46, 123, 0.4);
-    /* 透明なシアン色 */
-    pointer-events: none;
-    z-index: 450;
-}
+/* ★ 以前あった .maps::after（青いセロハン）は削除しました */
 
-/* ▼ 追加：念のため、アイコンや名前表示の層を強制的に最前面に引き上げます */
 .leaflet-marker-pane,
 .leaflet-shadow-pane {
     z-index: 1100 !important;
@@ -47,6 +34,6 @@ body,
     border-radius: 50%;
     border: 2px solid #44AEF3;
     object-fit: cover;
-    box-shadow: 0 0 8px rgba(50, 46, 123, 0.4);
+    box-shadow: 0 0 8px rgba(71, 184, 255, 0.6);
     transition: transform 0.2s;
 }

@@ -458,26 +458,16 @@ div.pass-input[contenteditable="true"]:empty::before {
     overflow: hidden;
 }
 
+/* ▼ 変更：透明度を1に戻す */
 #chara-map .leaflet-tile-pane {
     filter: none !important;
     mix-blend-mode: normal !important;
-    opacity: 0.7;
+    opacity: 1 !important;
 }
 
-/* ▼ 変更：キャラシ側のセロハンも、z-indexを450に下げます */
-#chara-map::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(50, 46, 123, 0.4);
-    pointer-events: none;
-    z-index: 450;
-}
+/* ★ 以前あった #chara-map::after（青いセロハン）は削除しました */
 
-/* ▼ 追加：ピンの層を最前面へ引き上げ */
+/* ピンの層を最前面へ引き上げ */
 #chara-map .leaflet-marker-pane,
 #chara-map .leaflet-shadow-pane {
     z-index: 1100 !important;
@@ -495,6 +485,6 @@ div.pass-input[contenteditable="true"]:empty::before {
     border-radius: 50%;
     border: 2px solid #44AEF3;
     object-fit: cover;
-    box-shadow: 0 0 8px rgba(50, 46, 123, 0.4);
+    box-shadow: 0 0 8px rgba(71, 184, 255, 0.6);
     transition: transform 0.2s;
 }
