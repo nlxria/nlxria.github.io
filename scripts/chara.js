@@ -19,6 +19,10 @@ const db = getFirestore(app);
 
 // グローバル変数
 let characterData = null;
+let charaMap = null;
+let charaMarker = null;
+let tempMapX = 0; // 保存ボタンを押すまでの仮の経度
+let tempMapY = 0; // 保存ボタンを押すまでの仮の緯度
 let characterId = new URLSearchParams(window.location.search).get('id');
 let specialOpenStates = { memo: false, status: false, params: false, commands: false };
 let isAuthLoaded = false;
@@ -110,6 +114,7 @@ function checkAndRender() {
     exportBtn.style.display = 'block';
 
     renderProfile();
+    renderMap(); // ← ▼これを追加
     renderSpecialSections();
     renderSheets(characterData.data.sheets, container, true, false);
 
@@ -674,8 +679,80 @@ function renderProfile() {
     imgInput.oninput = (e) => {
         data.iconUrl = e.target.innerText.trim();
         imgEl.src = data.iconUrl;
+
+        // ▼ 追加：マップ上のピン画像も連動して切り替える
+        if (charaMarker) {
+            charaMarker.setIcon(L.divIcon({
+                className: 'custom-chara-icon',
+                html: `<img src="${data.iconUrl}" onerror="this.src='/assets/image/chara-image.png'">`,
+                iconSize: [40, 40],
+                iconAnchor: [20, 20]
+            }));
+        }
     };
     imgInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') e.preventDefault(); });
+}
+
+// === マイマップの描画と操作 ===
+function renderMap() {
+    const data = characterData.data;
+    tempMapX = parseFloat(data.x) || 0;
+    tempMapY = parseFloat(data.y) || 0;
+
+    // 座標が0の場合は初期位置を東京にする（ただしデータ自体は0のまま保持）
+    let centerLat = tempMapY === 0 ? 35.6895 : tempMapY;
+    let centerLng = tempMapX === 0 ? 139.6917 : tempMapX;
+
+    if (!charaMap) {
+        charaMap = L.map('chara-map', {
+            zoomControl: false,
+            attributionControl: false
+        }).setView([centerLat, centerLng], 5);
+
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png', {
+            subdomains: 'abcd',
+            attribution: '&copy; CARTO'
+        }).addTo(charaMap);
+
+        const iconUrl = data.iconUrl || '/assets/image/chara-image.png';
+        const customIcon = L.divIcon({
+            className: 'custom-chara-icon',
+            html: `<img src="${iconUrl}" onerror="this.src='/assets/image/chara-image.png'">`,
+            iconSize: [40, 40],
+            iconAnchor: [20, 20]
+        });
+
+        charaMarker = L.marker([centerLat, centerLng], { icon: customIcon }).addTo(charaMap);
+
+        // ▼ タップでピンを移動（編集モード中のみ）
+        charaMap.on('click', (e) => {
+            if (document.getElementById('app-main').classList.contains('edit-mode')) {
+                tempMapY = e.latlng.lat;
+                tempMapX = e.latlng.lng;
+                charaMarker.setLatLng([tempMapY, tempMapX]);
+            }
+        });
+
+        // ▼ アコーディオンを開いた時の描画バグ修正
+        document.getElementById('map-details').addEventListener('toggle', function () {
+            if (this.open) {
+                setTimeout(() => {
+                    charaMap.invalidateSize();
+                    charaMap.setView([tempMapY === 0 ? 35.6895 : tempMapY, tempMapX === 0 ? 139.6917 : tempMapX]);
+                }, 100);
+            }
+        });
+    } else {
+        const iconUrl = data.iconUrl || '/assets/image/chara-image.png';
+        charaMarker.setIcon(L.divIcon({
+            className: 'custom-chara-icon',
+            html: `<img src="${iconUrl}" onerror="this.src='/assets/image/chara-image.png'">`,
+            iconSize: [40, 40],
+            iconAnchor: [20, 20]
+        }));
+        charaMarker.setLatLng([centerLat, centerLng]);
+        charaMap.setView([centerLat, centerLng]);
+    }
 }
 
 function updateSheetsContainerVisibility() {
@@ -699,6 +776,10 @@ editBtn.addEventListener('click', async () => {
     } else {
         editBtn.textContent = "保存中...";
         applyEditMode();
+
+        // ▼ ★追加：ここで初めて、仮で移動させていた座標をデータに確定させる
+        characterData.data.x = tempMapX;
+        characterData.data.y = tempMapY;
 
         const baseData = getDefaultData(characterData.data.owner);
         characterData.data = { ...baseData, ...characterData.data };

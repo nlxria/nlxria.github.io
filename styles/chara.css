@@ -449,3 +449,23 @@ div.pass-input[contenteditable="true"]:empty::before {
     white-space: nowrap;
     overflow: hidden;
 }
+
+/* === マイマップ設定（キャラクターシート内） === */
+#chara-map {
+    background: #050949 !important;
+}
+
+#chara-map .leaflet-tile-pane {
+    filter: brightness(2.5) contrast(3) sepia(100%) hue-rotate(160deg) saturate(600%);
+    mix-blend-mode: screen;
+}
+
+.custom-chara-icon img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 2px solid #47B8FF;
+    object-fit: cover;
+    box-shadow: 0 0 10px #47B8FF;
+    transition: transform 0.2s;
+}

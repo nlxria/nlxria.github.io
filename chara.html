@@ -5,6 +5,7 @@
         <link rel="icon" href="/assets/favicon.ico">
         <link rel="shortcut icon" href="/assets/favicon.ico">
         <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
         <link rel="stylesheet" href="/styles/index.css">
         <link rel="stylesheet" href="/styles/chara.css">
         <meta charset="utf-8">
@@ -62,6 +63,21 @@
                     <option value="2">非公開</option>
                 </select>
             </div>
+            <div class="chara-box" style="margin-bottom: 2em;">
+                <details id="map-details">
+                    <summary>
+                        <span class="sheet-header-controls" style="display: flex; align-items: center; width: auto;">
+                            <span class="accordion-icon"></span>
+                            <span class="sheet-title-text" style="font-weight: bold;">マイマップ（現在地）</span>
+                        </span>
+                    </summary>
+                    <div class="sheet-content-container">
+                        <p class="edit-only-ui" style="color: #47B8FF; font-size: 0.9em; margin-bottom: 1em; text-align: center;">※編集モード中のみ、地図をタップしてピンを移動できます。</p>
+                        <p class="view-only-ui" style="color: #E0E0E0; font-size: 0.9em; margin-bottom: 1em; text-align: center;">※現在のキャラクターの位置です。</p>
+                        <div id="chara-map" style="height: 40vh; width: 100%; border-radius: 8px; z-index: 1;"></div>
+                    </div>
+                </details>
+            </div>
             <div id="special-sections-container"></div>
             <div id="sheets-container"></div>
         </div>
@@ -98,6 +114,7 @@
             </div>
             
         </div>
+        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
         <script type="module" src="/scripts/chara.js"></script>
     </main></body>
 </html>
