@@ -474,9 +474,9 @@ div.pass-input[contenteditable="true"]:empty::before {
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(68, 174, 243, 0.2);
+    background: rgba(13, 0, 255, 0.8);
     pointer-events: none;
-    z-index: 1000;
+    z-index: 2;
 }
 
 /* ピンのデザイン */
@@ -486,6 +486,6 @@ div.pass-input[contenteditable="true"]:empty::before {
     border-radius: 50%;
     border: 2px solid #44AEF3;
     object-fit: cover;
-    box-shadow: 0 0 8px rgba(68, 174, 243, 0.8);
+    box-shadow: 0 0 8px rgba(13, 0, 255, 0.8);
     transition: transform 0.2s;
 }
