@@ -17,11 +17,9 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// === URLパラメータとモードの取得 ===
 const urlParams = new URLSearchParams(window.location.search);
 const currentMode = urlParams.get('md');
 
-// === 認証UI要素の取得と処理 ===
 const loggedOutUI = document.getElementById('logged-out-ui');
 const loggedInUI = document.getElementById('logged-in-ui');
 const googleLoginBtn = document.getElementById('google-login-btn');
@@ -59,27 +57,16 @@ logoutBtn.addEventListener('click', async () => {
 const map = L.map('map', {
     zoomControl: false,
     attributionControl: false
-}).setView([35.6895, 139.6917], 5); // ← 座標は勝手に変更しません！
+}).setView([35.6895, 139.6917], 5);
 
-// ▼ 修正：マップを確実に2層構造にして重ねます
-
-// 1層目：海と平地のベースマップ（CSSでネイビーに沈めます）
-L.tileLayer('https://{s}.google.com/vt/lyrs=r&x={x}&y={y}&z={z}', {
-    subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
-    attribution: '© Google',
-    className: 'base-layer' // CSSで指定するためのクラス名
+// ▼ 変更：バグの原因だったGoogleマップをやめ、最初から文字のないダークマップを使用します
+L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png', {
+    subdomains: 'abcd',
+    attribution: '&copy; CARTO'
 }).addTo(map);
-
-// 2層目：山の起伏データ（CSSでシアンに光らせます）
-L.tileLayer('https://{s}.google.com/vt/lyrs=t&x={x}&y={y}&z={z}', {
-    subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
-    className: 'mountain-layer' // CSSで指定するためのクラス名
-}).addTo(map);
-
 
 let currentMarkers = [];
 
-// === キャラクターデータの取得 ===
 async function fetchMapCharacters(uid) {
     let publicChars = [];
     let myChars = [];
@@ -111,7 +98,6 @@ async function fetchMapCharacters(uid) {
     return Array.from(charaMap.values());
 }
 
-// === マップにピンを立てる ===
 async function renderMarkers(uid) {
     currentMarkers.forEach(marker => map.removeLayer(marker));
     currentMarkers = [];

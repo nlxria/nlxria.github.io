@@ -15,23 +15,17 @@ body {
     width: 100%;
 }
 
+/* 隙間から見える背景を確実にネイビーにする */
 .leaflet-container {
     background-color: #050949 !important;
 }
 
-/* ▼ 修正：1層目（ベース）を深いダークネイビー（#050949）に沈める */
-.base-layer {
-    filter: grayscale(100%) sepia(100%) hue-rotate(180deg) saturate(400%) brightness(0.4) contrast(1.5);
-    opacity: 0.6;
-}
-
-/* ▼ 修正：2層目（山脈）の起伏だけをシアン（#47B8FF）に発光させる魔法のフィルター */
-.mountain-layer {
-    /* 白い平地を「黒」に、影を「白（光）」に反転させ、シアンに染める */
-    filter: invert(100%) sepia(100%) hue-rotate(155deg) saturate(800%) brightness(1.2) contrast(1.5);
-    /* 黒くなった平地部分を完全に透明化し、光る山の起伏だけを合成する */
-    mix-blend-mode: screen;
-    opacity: 0.85;
+/* ▼ 変更：シンプルで安定した色調補正フィルター */
+.leaflet-tile-pane {
+    /* ダークグレーの地図を、セピア色を経由して鮮やかなシアン(#47B8FF)に染める */
+    filter: sepia(100%) hue-rotate(160deg) saturate(500%) brightness(0.9) contrast(1.2);
+    /* 地図を少し透明にして、背景の深いネイビー(#050949)と馴染ませて海を表現する */
+    opacity: 0.8;
 }
 
 /* --- キャラクターアイコン（ピン）の装飾 --- */
