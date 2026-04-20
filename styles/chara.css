@@ -211,7 +211,7 @@ header .edit-btn {
     cursor: pointer;
 }
 
-/* ▼ 追加：アコーディオンの開閉アイコン（アニメーション付き） */
+/* ▼ 変更：アコーディオンの開閉アイコン（アニメーションなしで瞬時に切り替え） */
 .accordion-icon {
     display: inline-block;
     width: 0.4em;
@@ -220,13 +220,11 @@ header .edit-btn {
     border-bottom: 2px solid white;
     transform: rotate(-45deg);
     /* 閉じている時は右向き ＞ */
-    transition: transform 0.2s ease;
-    /* クルッと回るアニメーション */
     margin-right: 0.8em;
     vertical-align: middle;
 }
 
-/* 開いた時に下向き（∨）に回転する */
+/* 開いた時に下向き（∨）の角度にする */
 details[open]>summary .accordion-icon {
     transform: rotate(45deg);
 }
@@ -450,26 +448,4 @@ div.pass-input[contenteditable="true"]:empty::before {
 .param-row .pass-input {
     white-space: nowrap;
     overflow: hidden;
-}
-
-/* --- 追加：アコーディオン展開時のふんわりアニメーション --- */
-
-/* detailsが開いた時、直下にあるコンテナにアニメーションを適用 */
-details[open]>.sheet-content-container,
-details[open]>.password-container {
-    animation: slideDownFade 0.3s ease-out forwards;
-    transform-origin: top;
-}
-
-/* アニメーションの詳細設定（透明＆少し上から、元の位置へフェードイン） */
-@keyframes slideDownFade {
-    0% {
-        opacity: 0;
-        transform: translateY(-10px);
-    }
-
-    100% {
-        opacity: 1;
-        transform: translateY(0);
-    }
 }
