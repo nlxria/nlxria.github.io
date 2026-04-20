@@ -696,62 +696,69 @@ function renderProfile() {
 // === マイマップの描画と操作 ===
 function renderMap() {
     const data = characterData.data;
-    tempMapX = parseFloat(data.x) || 0;
-    tempMapY = parseFloat(data.y) || 0;
+    const x = parseFloat(data.x) || 0;
+    const y = parseFloat(data.y) || 0;
 
-    // 座標が0の場合は初期位置を東京にする（ただしデータ自体は0のまま保持）
-    let centerLat = tempMapY === 0 ? 35.6895 : tempMapY;
-    let centerLng = tempMapX === 0 ? 139.6917 : tempMapX;
+    // 座標が設定されているかチェック（0,0以外）
+    const hasCoords = (x !== 0 || y !== 0);
+    tempMapX = x;
+    tempMapY = y;
+
+    // 表示の中心点（未設定なら東京）
+    const centerLat = hasCoords ? y : 35.6895;
+    const centerLng = hasCoords ? x : 139.6917;
 
     if (!charaMap) {
         charaMap = L.map('chara-map', {
             zoomControl: false,
             attributionControl: false
-        }).setView([centerLat, centerLng], 5);
+        }).setView([centerLat, centerLng], hasCoords ? 10 : 5);
 
         L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png', {
-            subdomains: 'abcd',
-            attribution: '&copy; CARTO'
+            subdomains: 'abcd'
         }).addTo(charaMap);
 
-        const iconUrl = data.iconUrl || '/assets/image/chara-image.png';
-        const customIcon = L.divIcon({
-            className: 'custom-chara-icon',
-            html: `<img src="${iconUrl}" onerror="this.src='/assets/image/chara-image.png'">`,
-            iconSize: [40, 40],
-            iconAnchor: [20, 20]
-        });
-
-        charaMarker = L.marker([centerLat, centerLng], { icon: customIcon }).addTo(charaMap);
-
-        // ▼ タップでピンを移動（編集モード中のみ）
+        // クリックで位置設定（編集モード中のみ）
         charaMap.on('click', (e) => {
             if (document.getElementById('app-main').classList.contains('edit-mode')) {
                 tempMapY = e.latlng.lat;
                 tempMapX = e.latlng.lng;
-                charaMarker.setLatLng([tempMapY, tempMapX]);
+                updateMarkerPosition(tempMapY, tempMapX);
             }
         });
 
-        // ▼ アコーディオンを開いた時の描画バグ修正
+        // アコーディオン連動バグ修正
         document.getElementById('map-details').addEventListener('toggle', function () {
             if (this.open) {
-                setTimeout(() => {
-                    charaMap.invalidateSize();
-                    charaMap.setView([tempMapY === 0 ? 35.6895 : tempMapY, tempMapX === 0 ? 139.6917 : tempMapX]);
-                }, 100);
+                setTimeout(() => { charaMap.invalidateSize(); }, 100);
             }
         });
+    }
+
+    // ピンの描画制御
+    if (hasCoords) {
+        updateMarkerPosition(y, x);
+    } else if (charaMarker) {
+        charaMap.removeLayer(charaMarker);
+        charaMarker = null;
+    }
+}
+
+// ピンを更新または新規作成する補助関数
+function updateMarkerPosition(lat, lng) {
+    const iconUrl = characterData.data.iconUrl || '/assets/image/chara-image.png';
+    const customIcon = L.divIcon({
+        className: 'custom-chara-icon',
+        html: `<img src="${iconUrl}" onerror="this.src='/assets/image/chara-image.png'">`,
+        iconSize: [40, 40],
+        iconAnchor: [20, 20]
+    });
+
+    if (!charaMarker) {
+        charaMarker = L.marker([lat, lng], { icon: customIcon }).addTo(charaMap);
     } else {
-        const iconUrl = data.iconUrl || '/assets/image/chara-image.png';
-        charaMarker.setIcon(L.divIcon({
-            className: 'custom-chara-icon',
-            html: `<img src="${iconUrl}" onerror="this.src='/assets/image/chara-image.png'">`,
-            iconSize: [40, 40],
-            iconAnchor: [20, 20]
-        }));
-        charaMarker.setLatLng([centerLat, centerLng]);
-        charaMap.setView([centerLat, centerLng]);
+        charaMarker.setLatLng([lat, lng]);
+        charaMarker.setIcon(customIcon);
     }
 }
 
