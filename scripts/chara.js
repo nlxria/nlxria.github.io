@@ -21,13 +21,13 @@ const db = getFirestore(app);
 let characterData = null;
 let charaMap = null;
 let charaMarker = null;
-let tempMapX = 0; // 保存ボタンを押すまでの仮の経度
-let tempMapY = 0; // 保存ボタンを押すまでの仮の緯度
+let tempMapX = 0;
+let tempMapY = 0;
 let characterId = new URLSearchParams(window.location.search).get('id');
 let specialOpenStates = { memo: false, status: false, params: false, commands: false };
 let isAuthLoaded = false;
 
-// ▼ ★追加：Firebaseの読み取り回数を劇的に減らすためのキャッシュ変数
+// キャッシュ変数
 let cachedMyCharacters = null;
 let cachedPublicCharacters = null;
 let isPublicCacheLoading = false;
@@ -114,7 +114,7 @@ function checkAndRender() {
     exportBtn.style.display = 'block';
 
     renderProfile();
-    renderMap(); // ← ▼これを追加
+    renderMap();
     renderSpecialSections();
     renderSheets(characterData.data.sheets, container, true, false);
 
@@ -155,15 +155,13 @@ async function loadCharacterList(uid) {
     const listElement = document.getElementById('character-list');
     const searchKeyword = searchInput.innerText.trim().toLowerCase();
 
-    // 画面にカードを描画する処理（共通化）
     const renderCards = (charaList) => {
-        listElement.textContent = '';
+        listElement.innerHTML = ''; // ▼ 修正：タグを処理するためinnerHTMLに戻す
         if (charaList.length === 0) {
-            listElement.textContent = '<p style="color: #E0E0E0; text-align: center;">キャラクターが見つかりません。</p>';
+            listElement.innerHTML = '<p style="color: #E0E0E0; text-align: center;">キャラクターが見つかりません。</p>';
             return;
         }
 
-        // コピーを作成してソート（元の記憶データを書き換えないため）
         const sortedList = [...charaList].sort((a, b) => (b.data.date || 0) - (a.data.date || 0));
 
         sortedList.forEach((chara) => {
@@ -176,13 +174,15 @@ async function loadCharacterList(uid) {
             const iconUrl = data.iconUrl || '/assets/image/chara-image.png';
             const charCount = JSON.stringify({ kind: "character", data: data }).length;
 
-            card.textContent = `
+            // ▼ 修正：UI構築はinnerHTMLで行い、名前だけは安全にtextContentで後から入れる
+            card.innerHTML = `
                 <img src="${iconUrl}" alt="icon" onerror="this.src='/assets/image/chara-image.png'">
                 <div class="chara-info">
-                    <h4>${data.name || '名無し'}</h4>
+                    <h4 class="card-name-display"></h4>
                     <p>データ量：${charCount}文字</p>
                 </div>
             `;
+            card.querySelector('.card-name-display').textContent = data.name || '名無し';
 
             if (uid && data.owner === uid) {
                 const deleteBtn = document.createElement('button');
@@ -195,11 +195,8 @@ async function loadCharacterList(uid) {
                         try {
                             await deleteDoc(doc(db, "characters", charaId));
                             alert("キャラクターを削除しました。");
-
-                            // ▼ ★追加：削除したときもキャッシュをリセット
                             cachedMyCharacters = null;
                             cachedPublicCharacters = null;
-
                             loadCharacterList(uid);
                         } catch (err) {
                             console.error("削除エラー:", err);
@@ -216,17 +213,16 @@ async function loadCharacterList(uid) {
     try {
         if (searchKeyword === "") {
             if (!uid) {
-                listElement.textContent = '<p style="color: #E0E0E0; text-align: center;">検索キーワードを入力してください。</p>';
+                listElement.innerHTML = '<p style="color: #E0E0E0; text-align: center;">検索キーワードを入力してください。</p>';
                 return;
             }
 
-            // ▼ ★自分のキャラのキャッシュ確認
             if (cachedMyCharacters) {
                 renderCards(cachedMyCharacters);
                 return;
             }
 
-            listElement.textContent = '<p style="color: white; text-align: center;">読み込み中...</p>';
+            listElement.innerHTML = '<p style="color: white; text-align: center;">読み込み中...</p>'; // ▼ 修正
             const q = query(collection(db, "characters"), where("data.owner", "==", uid));
             const querySnapshot = await getDocs(q);
             cachedMyCharacters = [];
@@ -234,7 +230,6 @@ async function loadCharacterList(uid) {
             renderCards(cachedMyCharacters);
 
         } else {
-            // ▼ ★公開キャラのキャッシュ確認とフィルタリング（ブラウザ内での高速検索）
             const executeSearch = () => {
                 const filteredList = cachedPublicCharacters.filter(chara => {
                     const jsonStr = JSON.stringify(chara.data).toLowerCase();
@@ -246,9 +241,9 @@ async function loadCharacterList(uid) {
             if (cachedPublicCharacters) {
                 executeSearch();
             } else {
-                if (isPublicCacheLoading) return; // 既に通信中なら重複してリクエストしない
+                if (isPublicCacheLoading) return;
                 isPublicCacheLoading = true;
-                listElement.textContent = '<p style="color: white; text-align: center;">公開データを取得中...</p>';
+                listElement.innerHTML = '<p style="color: white; text-align: center;">公開データを取得中...</p>'; // ▼ 修正
 
                 const q = query(collection(db, "characters"), where("data.privacy", "==", 0));
                 const querySnapshot = await getDocs(q);
@@ -261,7 +256,7 @@ async function loadCharacterList(uid) {
         }
     } catch (error) {
         console.error("一覧取得エラー:", error);
-        listElement.textContent = '<p style="color: lightpink; text-align: center;">リストの取得に失敗しました。</p>';
+        listElement.innerHTML = '<p style="color: lightpink; text-align: center;">リストの取得に失敗しました。</p>'; // ▼ 修正
         isPublicCacheLoading = false;
     }
 }
@@ -269,7 +264,7 @@ async function loadCharacterList(uid) {
 // === 特殊セクションの描画 ===
 function renderSpecialSections() {
     const container = document.getElementById('special-sections-container');
-    container.textContent = '';
+    container.innerHTML = ''; // ▼ 修正
     const isEditing = mainElement.classList.contains('edit-mode');
     const data = characterData.data;
     const isOwner = auth.currentUser && data.owner === auth.currentUser.uid;
@@ -299,10 +294,9 @@ function renderSpecialSections() {
         headerContainer.style.width = 'auto';
 
         const markSpan = document.createElement('span');
-        markSpan.className = 'accordion-icon'; // ← CSSのアイコンクラスを適用
+        markSpan.className = 'accordion-icon';
 
         details.addEventListener('toggle', () => {
-            // 文字の書き換え処理を削除し、開閉状態の記憶のみ残す
             specialOpenStates[sec.id] = details.open;
         });
 
@@ -341,7 +335,6 @@ function renderSpecialSections() {
             const passContainer = document.createElement('div');
             passContainer.className = 'password-container';
 
-            // ▼ パスワード入力欄をdivに
             const passInput = document.createElement('div');
             passInput.setAttribute('placeholder', 'パスワードを入力');
             passInput.className = 'pass-input';
@@ -389,20 +382,19 @@ function renderStatusContent(containerElement, data) {
         viewText.style.flex = "1";
         viewText.textContent = `${st.label}：${st.value} / ${st.max}`;
 
-        // ▼ inputをdivに変更
         const labelInput = document.createElement('div');
         labelInput.className = 'pass-input param-input-label edit-only-ui';
         labelInput.contentEditable = 'true';
-        labelInput.textContent = st.label;
-        labelInput.addEventListener('input', (e) => st.label = e.target.innerText.trim());
+        labelInput.innerHTML = st.label; // ▼ 修正：改行などを維持
+        labelInput.addEventListener('input', (e) => st.label = e.target.innerHTML.trim());
         labelInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') e.preventDefault(); });
 
         const valueInput = document.createElement('div');
         valueInput.className = 'pass-input param-input-value edit-only-ui';
         valueInput.contentEditable = 'true';
-        valueInput.textContent = st.value;
+        valueInput.innerHTML = st.value; // ▼ 修正
         valueInput.style.textAlign = 'right';
-        valueInput.addEventListener('input', (e) => st.value = e.target.innerText.trim());
+        valueInput.addEventListener('input', (e) => st.value = e.target.innerHTML.trim());
         valueInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') e.preventDefault(); });
 
         const separator = document.createElement('span');
@@ -413,8 +405,8 @@ function renderStatusContent(containerElement, data) {
         const maxInput = document.createElement('div');
         maxInput.className = 'pass-input param-input-value edit-only-ui';
         maxInput.contentEditable = 'true';
-        maxInput.textContent = st.max;
-        maxInput.addEventListener('input', (e) => st.max = e.target.innerText.trim());
+        maxInput.innerHTML = st.max; // ▼ 修正
+        maxInput.addEventListener('input', (e) => st.max = e.target.innerHTML.trim());
         maxInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') e.preventDefault(); });
 
         const delBtn = document.createElement('button');
@@ -457,15 +449,15 @@ function renderParamsContent(containerElement, data) {
         const labelInput = document.createElement('div');
         labelInput.className = 'pass-input param-input-label edit-only-ui';
         labelInput.contentEditable = 'true';
-        labelInput.textContent = param.label;
-        labelInput.addEventListener('input', (e) => param.label = e.target.innerText.trim());
+        labelInput.innerHTML = param.label; // ▼ 修正
+        labelInput.addEventListener('input', (e) => param.label = e.target.innerHTML.trim());
         labelInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') e.preventDefault(); });
 
         const valueInput = document.createElement('div');
         valueInput.className = 'pass-input param-input-value edit-only-ui';
         valueInput.contentEditable = 'true';
-        valueInput.textContent = param.value;
-        valueInput.addEventListener('input', (e) => param.value = e.target.innerText.trim());
+        valueInput.innerHTML = param.value; // ▼ 修正
+        valueInput.addEventListener('input', (e) => param.value = e.target.innerHTML.trim());
         valueInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') e.preventDefault(); });
 
         const delBtn = document.createElement('button');
@@ -496,22 +488,22 @@ function renderParamsContent(containerElement, data) {
 function renderCommandsContent(containerElement, data) {
     const textDiv = document.createElement('div');
     textDiv.className = 'editable-area text-content';
-    if (data.commands !== undefined) textDiv.textContent = data.commands;
-    textDiv.oninput = (e) => { data.commands = e.target.innerText; };
+    if (data.commands !== undefined) textDiv.innerHTML = data.commands; // ▼ 修正：改行を保持するためinnerHTMLに
+    textDiv.oninput = (e) => { data.commands = e.target.innerHTML; };
     containerElement.appendChild(textDiv);
 }
 
 function renderMemoContent(containerElement, data) {
     const textDiv = document.createElement('div');
     textDiv.className = 'editable-area text-content';
-    if (data.memo !== undefined) textDiv.textContent = data.memo;
-    textDiv.oninput = (e) => { data.memo = e.target.innerText; };
+    if (data.memo !== undefined) textDiv.innerHTML = data.memo; // ▼ 修正
+    textDiv.oninput = (e) => { data.memo = e.target.innerHTML; };
     containerElement.appendChild(textDiv);
 }
 
 // === メモの描画 ===
 function renderSheets(sheetsArray, parentElement, isRoot = true) {
-    parentElement.textContent = '';
+    parentElement.innerHTML = ''; // ▼ 修正
 
     sheetsArray.forEach((sheet, index) => {
         let targetParent = parentElement;
@@ -538,17 +530,16 @@ function renderSheets(sheetsArray, parentElement, isRoot = true) {
         headerContainer.style.width = 'auto';
 
         const markSpan = document.createElement('span');
-        markSpan.className = 'accordion-icon'; // ← CSSのアイコンクラスを適用
+        markSpan.className = 'accordion-icon';
 
         details.addEventListener('toggle', () => {
-            // 文字の書き換え処理を削除し、開閉状態の記憶のみ残す
             Object.defineProperty(sheet, '_isOpen', { value: details.open, writable: true, enumerable: false, configurable: true });
         });
 
         const titleSpan = document.createElement('span');
         titleSpan.className = 'sheet-title-text editable-area';
-        titleSpan.textContent = sheet.name;
-        titleSpan.oninput = (e) => { sheet.name = e.target.innerText; };
+        titleSpan.innerHTML = sheet.name; // ▼ 修正
+        titleSpan.oninput = (e) => { sheet.name = e.target.innerHTML; };
 
         titleSpan.addEventListener('click', (e) => {
             if (titleSpan.getAttribute('contenteditable') === 'true') e.preventDefault();
@@ -582,8 +573,8 @@ function renderSheets(sheetsArray, parentElement, isRoot = true) {
 
         const textDiv = document.createElement('div');
         textDiv.className = 'editable-area text-content';
-        if (sheet.value !== undefined && sheet.value !== "") textDiv.textContent = sheet.value;
-        textDiv.oninput = (e) => { sheet.value = e.target.innerText; };
+        if (sheet.value !== undefined && sheet.value !== "") textDiv.innerHTML = sheet.value; // ▼ 修正
+        textDiv.oninput = (e) => { sheet.value = e.target.innerHTML; };
         whiteBox.appendChild(textDiv);
 
         if (!sheet.field) sheet.field = [];
@@ -666,21 +657,20 @@ function renderProfile() {
     if (data.iconUrl) imgEl.src = data.iconUrl;
 
     nameEl.className = 'editable-title editable-area';
-    nameEl.textContent = data.name;
-    rubyEl.textContent = data.ruby || "";
-    imgInput.innerText = data.iconUrl || "";
+    nameEl.innerHTML = data.name; // ▼ 修正
+    rubyEl.innerHTML = data.ruby || ""; // ▼ 修正
+    imgInput.innerText = data.iconUrl || ""; // 画像URLはタグを含まないのでinnerTextのまま
 
     privacySelect.value = data.privacy;
     privacySelect.onchange = (e) => { data.privacy = parseInt(e.target.value, 10); };
 
-    nameEl.oninput = (e) => { data.name = e.target.innerText; };
-    rubyEl.oninput = (e) => { data.ruby = e.target.innerText; };
+    nameEl.oninput = (e) => { data.name = e.target.innerHTML; }; // ▼ 修正
+    rubyEl.oninput = (e) => { data.ruby = e.target.innerHTML; }; // ▼ 修正
 
     imgInput.oninput = (e) => {
         data.iconUrl = e.target.innerText.trim();
         imgEl.src = data.iconUrl;
 
-        // ▼ 変更：マップ上のピン画像も連動（新しいサイズ計算関数を通す）
         if (charaMarker && typeof updateMarkerPosition === 'function') {
             updateMarkerPosition(tempMapY, tempMapX);
         }
@@ -689,7 +679,6 @@ function renderProfile() {
 }
 
 // === マイマップの描画と操作 ===
-
 function renderMap() {
     const data = characterData.data;
     const x = parseFloat(data.x) || 0;
@@ -708,8 +697,7 @@ function renderMap() {
             attributionControl: false
         }).setView([centerLat, centerLng], hasCoords ? 10 : 5);
 
-        // ライトテーマからダークテーマに変更
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png', {
             subdomains: 'abcd'
         }).addTo(charaMap);
 
@@ -721,7 +709,6 @@ function renderMap() {
             }
         });
 
-        // ▼ 追加：ズーム完了時にピンのサイズを再計算する
         charaMap.on('zoomend', () => {
             if (charaMarker) updateMarkerPosition(tempMapY, tempMapX);
         });
@@ -741,19 +728,17 @@ function renderMap() {
     }
 }
 
-// ▼ 変更：ズームレベルに応じて大きさを計算する
 function updateMarkerPosition(lat, lng) {
     const iconUrl = characterData.data.iconUrl || '/assets/image/chara-image.png';
     const zoom = charaMap ? charaMap.getZoom() : 5;
 
-    // ズーム×8で計算し、最小20px〜最大120pxに制限する
     const size = Math.max(20, Math.min(120, zoom * 8));
 
     const customIcon = L.divIcon({
         className: 'custom-chara-icon',
         html: `<img src="${iconUrl}" onerror="this.src='/assets/image/chara-image.png'">`,
         iconSize: [size, size],
-        iconAnchor: [size / 2, size / 2] // 常に中心を基準にする
+        iconAnchor: [size / 2, size / 2]
     });
 
     if (!charaMarker) {
@@ -786,7 +771,6 @@ editBtn.addEventListener('click', async () => {
         editBtn.textContent = "保存中...";
         applyEditMode();
 
-        // ▼ ★追加：ここで初めて、仮で移動させていた座標をデータに確定させる
         characterData.data.x = tempMapX;
         characterData.data.y = tempMapY;
 
@@ -800,7 +784,6 @@ editBtn.addEventListener('click', async () => {
             exportBtn.style.display = 'block';
             alert("保存しました！");
 
-            // ▼ ★追加：保存したときは情報が変わるのでキャッシュをリセットする
             cachedMyCharacters = null;
             cachedPublicCharacters = null;
 
@@ -893,7 +876,7 @@ importCharaBtn.addEventListener('click', async () => {
 
         charaData.owner = user.uid;
         charaData.date = Date.now();
-        charaData.privacy = 2; // ▼ 変更：外部データに関わらず、インポート時は必ず「非公開(2)」に強制リセットする！
+        charaData.privacy = 2;
 
         const docRef = await addDoc(collection(db, "characters"), {
             kind: "character",
@@ -926,7 +909,6 @@ let currentTargetIndex = null;
 const settingsModal = document.getElementById('settings-modal');
 const modalPassInput = document.getElementById('modal-pass-input');
 
-// Enterで改行されるのを防ぐ
 modalPassInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') e.preventDefault(); });
 
 document.getElementById('modal-cancel-btn').addEventListener('click', () => {
