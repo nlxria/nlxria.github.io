@@ -53,19 +53,38 @@ logoutBtn.addEventListener('click', async () => {
     alert("ログアウトしました。");
 });
 
+// === マップの初期化 ===
 const map = L.map('map', {
     zoomControl: false,
     attributionControl: false
 }).setView([35.6895, 139.6917], 5);
 
-// ▼ 変更：ライトテーマのタイルに変更
+// ライトテーマのタイルを使用
 L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
     subdomains: 'abcd',
     attribution: '&copy; CARTO'
 }).addTo(map);
 
+// 記憶用配列
 let currentMarkers = [];
 
+// ▼ ズーム完了時にすべてのピンのサイズを一斉に再計算する
+map.on('zoomend', () => {
+    const zoom = map.getZoom();
+    const size = Math.max(20, Math.min(120, zoom * 8));
+
+    currentMarkers.forEach(item => {
+        const customIcon = L.divIcon({
+            className: 'custom-chara-icon',
+            html: `<img src="${item.iconUrl}" onerror="this.src='/assets/image/chara-image.png'">`,
+            iconSize: [size, size],
+            iconAnchor: [size / 2, size / 2]
+        });
+        item.marker.setIcon(customIcon);
+    });
+});
+
+// === キャラクターデータの取得 ===
 async function fetchMapCharacters(uid) {
     let publicChars = [];
     let myChars = [];
@@ -97,13 +116,18 @@ async function fetchMapCharacters(uid) {
     return Array.from(charaMap.values());
 }
 
+// === マップにピンを立てる ===
 async function renderMarkers(uid) {
-    currentMarkers.forEach(marker => map.removeLayer(marker));
+    currentMarkers.forEach(item => map.removeLayer(item.marker));
     currentMarkers = [];
 
     if (currentMode !== 'earth') return;
 
     const characters = await fetchMapCharacters(uid);
+
+    // 初回描画時のサイズ計算
+    const zoom = map.getZoom();
+    const size = Math.max(20, Math.min(120, zoom * 8));
 
     characters.forEach(chara => {
         const data = chara.data;
@@ -119,20 +143,18 @@ async function renderMarkers(uid) {
         const customIcon = L.divIcon({
             className: 'custom-chara-icon',
             html: `<img src="${iconUrl}" onerror="this.src='/assets/image/chara-image.png'">`,
-            iconSize: [40, 40],
-            iconAnchor: [20, 20]
+            iconSize: [size, size],
+            iconAnchor: [size / 2, size / 2]
         });
 
         const marker = L.marker([lat, lng], { icon: customIcon }).addTo(map);
 
-        // ★ 変更：bindTooltip（ホバー時の名前表示）を削除しました
-
+        // ▼ クリックで別タブ（新規タブ）で開く
         marker.on('click', () => {
-            // ▼ 変更：新規タブ（_blank）でキャラシを開く
             window.open(`/chara?id=${chara.id}`, '_blank');
         });
 
-        currentMarkers.push(marker);
+        currentMarkers.push({ marker: marker, iconUrl: iconUrl });
     });
 }
 

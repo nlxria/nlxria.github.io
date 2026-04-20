@@ -464,14 +464,13 @@ div.pass-input[contenteditable="true"]:empty::before {
     mix-blend-mode: normal;
 }
 
-/* ピンのデザイン（枠線を馴染ませる） */
+/* ▼ 変更：widthとheightを 40px から 100% に変更 */
 .custom-chara-icon img {
-    width: 2em;
-    height: 2em;
+    width: 100%;
+    height: 100%;
     border-radius: 50%;
-    border: 2px solid #322E7B;
-    /* ライトテーマに合う少し濃い青枠に */
+    /* （chara.cssは青色、mymap.cssは白色など、線の色はそのまま維持してください） */
     object-fit: cover;
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 0 5px rgba(0,0,0,0.5);
     transition: transform 0.25s;
 }

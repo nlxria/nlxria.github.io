@@ -680,20 +680,15 @@ function renderProfile() {
         data.iconUrl = e.target.innerText.trim();
         imgEl.src = data.iconUrl;
 
-        // ▼ 追加：マップ上のピン画像も連動して切り替える
-        if (charaMarker) {
-            charaMarker.setIcon(L.divIcon({
-                className: 'custom-chara-icon',
-                html: `<img src="${data.iconUrl}" onerror="this.src='/assets/image/chara-image.png'">`,
-                iconSize: [40, 40],
-                iconAnchor: [20, 20]
-            }));
+        // ▼ 変更：マップ上のピン画像も連動（新しいサイズ計算関数を通す）
+        if (charaMarker && typeof updateMarkerPosition === 'function') {
+            updateMarkerPosition(tempMapY, tempMapX);
         }
     };
     imgInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') e.preventDefault(); });
 }
 
-// === マイマップの描画と操作（chara.js / renderMap関数内） ===
+// === マイマップの描画と操作 ===
 
 function renderMap() {
     const data = characterData.data;
@@ -713,7 +708,6 @@ function renderMap() {
             attributionControl: false
         }).setView([centerLat, centerLng], hasCoords ? 10 : 5);
 
-        // ▼ 変更：ライトテーマのタイルに変更
         L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
             subdomains: 'abcd'
         }).addTo(charaMap);
@@ -724,6 +718,11 @@ function renderMap() {
                 tempMapX = e.latlng.lng;
                 updateMarkerPosition(tempMapY, tempMapX);
             }
+        });
+
+        // ▼ 追加：ズーム完了時にピンのサイズを再計算する
+        charaMap.on('zoomend', () => {
+            if (charaMarker) updateMarkerPosition(tempMapY, tempMapX);
         });
 
         document.getElementById('map-details').addEventListener('toggle', function () {
@@ -741,18 +740,23 @@ function renderMap() {
     }
 }
 
+// ▼ 変更：ズームレベルに応じて大きさを計算する
 function updateMarkerPosition(lat, lng) {
     const iconUrl = characterData.data.iconUrl || '/assets/image/chara-image.png';
+    const zoom = charaMap ? charaMap.getZoom() : 5;
+
+    // ズーム×8で計算し、最小20px〜最大120pxに制限する
+    const size = Math.max(20, Math.min(120, zoom * 8));
+
     const customIcon = L.divIcon({
         className: 'custom-chara-icon',
         html: `<img src="${iconUrl}" onerror="this.src='/assets/image/chara-image.png'">`,
-        iconSize: [40, 40],
-        iconAnchor: [20, 20]
+        iconSize: [size, size],
+        iconAnchor: [size / 2, size / 2] // 常に中心を基準にする
     });
 
     if (!charaMarker) {
         charaMarker = L.marker([lat, lng], { icon: customIcon }).addTo(charaMap);
-        // ★ 変更：bindTooltip（ホバー時の名前表示）を削除しました
     } else {
         charaMarker.setLatLng([lat, lng]);
         charaMarker.setIcon(customIcon);
