@@ -697,7 +697,7 @@ function renderMap() {
             attributionControl: false
         }).setView([centerLat, centerLng], hasCoords ? 10 : 5);
 
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png', {
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
             subdomains: 'abcd'
         }).addTo(charaMap);
 
