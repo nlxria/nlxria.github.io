@@ -59,7 +59,7 @@ const map = L.map('map', {
     attributionControl: false
 }).setView([35.6895, 139.6917], 5);
 
-// ライトテーマのタイルを使用
+// ライトテーマからダークテーマに変更
 L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png', {
     subdomains: 'abcd',
     attribution: '&copy; CARTO'

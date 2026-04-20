@@ -202,7 +202,7 @@ header .edit-btn {
 }
 
 .setting-btn {
-    padding: 0.5em;
+    padding: 0 0.5em;
     background: #466398;
     color: white;
     border: none;
@@ -452,25 +452,40 @@ div.pass-input[contenteditable="true"]:empty::before {
 
 /* === マイマップ設定（chara.css） === */
 #chara-map {
+    position: relative;
+    /* セロハンをぴったり重ねるための基準 */
     background: #050949 !important;
-    border: 1px solid #47B8FF;
-    /* ▼ 修正：謎のスクロールバーを消去 */
+    border: 1px solid #44AEF3;
     overflow: hidden;
 }
 
+/* フィルター撤廃・透明度のみ */
 #chara-map .leaflet-tile-pane {
-    /* ▼ 修正：ライトテーマにするためフィルターを解除し、ブレンドモードを戻す */
-    filter: none;
-    mix-blend-mode: normal;
+    filter: none !important;
+    mix-blend-mode: normal !important;
+    opacity: 0.7;
 }
 
-/* ▼ 変更：widthとheightを 40px から 100% に変更 */
+/* キャラシ側にも青いセロハンを被せる */
+#chara-map::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(71, 184, 255, 0.15);
+    pointer-events: none;
+    z-index: 1000;
+}
+
+/* ピンのデザイン */
 .custom-chara-icon img {
     width: 100%;
     height: 100%;
     border-radius: 50%;
-    /* （chara.cssは青色、mymap.cssは白色など、線の色はそのまま維持してください） */
+    border: 2px solid #44AEF3;
     object-fit: cover;
-    box-shadow: 0 0 5px rgba(0,0,0,0.5);
-    transition: transform 0.25s;
+    box-shadow: 0 0 8px rgba(68, 174, 243, 0.6);
+    transition: transform 0.2s;
 }

@@ -708,9 +708,9 @@ function renderMap() {
             attributionControl: false
         }).setView([centerLat, centerLng], hasCoords ? 10 : 5);
 
+        // ライトテーマからダークテーマに変更
         L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png', {
-            subdomains: 'abcd',
-            attribution: '&copy; CARTO'
+            subdomains: 'abcd'
         }).addTo(charaMap);
 
         charaMap.on('click', (e) => {

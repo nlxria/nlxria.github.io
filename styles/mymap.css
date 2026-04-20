@@ -5,22 +5,44 @@ body,
 .maps,
 .leaflet-container {
     background: #050949 !important;
+    /* ベースの深いネイビー */
     overflow: hidden;
 }
 
-/* タイル設定：フィルターを解除してライトテーマに */
+/* ▼ 変更：フィルターを一切使わず、透明度で奥のネイビーを透かせるだけ */
 .leaflet-tile-pane {
-    filter: none;
-    mix-blend-mode: normal;
+    filter: none !important;
+    mix-blend-mode: normal !important;
+    opacity: 0.7;
 }
 
-/* ▼ 変更：widthとheightを 40px から 100% に変更 */
+/* ▼ 追加：青いセロハン（オーバーレイ）をマップ全体に被せる魔法 */
+.maps::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(71, 184, 255, 0.15);
+    /* 透明なシアン色 */
+    pointer-events: none;
+    /* ★重要：クリックやスワイプを一切邪魔しない設定 */
+    z-index: 1000;
+}
+
+/* ピンのデザイン */
 .custom-chara-icon img {
     width: 100%;
     height: 100%;
     border-radius: 50%;
-    /* （chara.cssは青色、mymap.cssは白色など、線の色はそのまま維持してください） */
+    border: 2px solid #44AEF3;
     object-fit: cover;
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
-    transition: transform 0.25s;
+    box-shadow: 0 0 8px rgba(68, 174, 243, 0.6);
+    transition: transform 0.2s;
+}
+
+.custom-chara-icon img:hover {
+    transform: scale(1.2);
+    z-index: 1000;
 }
