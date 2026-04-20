@@ -24,7 +24,7 @@ body,
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(71, 184, 255, 0.15);
+    background: rgba(68, 174, 243, 0.2);
     /* 透明なシアン色 */
     pointer-events: none;
     /* ★重要：クリックやスワイプを一切邪魔しない設定 */
@@ -38,7 +38,7 @@ body,
     border-radius: 50%;
     border: 2px solid #44AEF3;
     object-fit: cover;
-    box-shadow: 0 0 8px rgba(68, 174, 243, 0.6);
+    box-shadow: 0 0 8px rgba(68, 174, 243, 0.8);
     transition: transform 0.2s;
 }
 
