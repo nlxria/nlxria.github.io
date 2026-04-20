@@ -304,7 +304,6 @@ function renderSpecialSections() {
         const titleSpan = document.createElement('span');
         titleSpan.className = 'sheet-title-text';
         titleSpan.textContent = sec.title;
-        titleSpan.style.fontWeight = "bold";
 
         const lockSpan = document.createElement('span');
         if (data[sec.passKey]) lockSpan.textContent = " [ロック中]";
