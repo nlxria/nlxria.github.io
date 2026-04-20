@@ -451,3 +451,25 @@ div.pass-input[contenteditable="true"]:empty::before {
     white-space: nowrap;
     overflow: hidden;
 }
+
+/* --- 追加：アコーディオン展開時のふんわりアニメーション --- */
+
+/* detailsが開いた時、直下にあるコンテナにアニメーションを適用 */
+details[open]>.sheet-content-container,
+details[open]>.password-container {
+    animation: slideDownFade 0.3s ease-out forwards;
+    transform-origin: top;
+}
+
+/* アニメーションの詳細設定（透明＆少し上から、元の位置へフェードイン） */
+@keyframes slideDownFade {
+    0% {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
