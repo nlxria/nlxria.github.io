@@ -61,10 +61,19 @@ const map = L.map('map', {
     attributionControl: false
 }).setView([35.6895, 139.6917], 5);
 
-// ▼ 変更：地形データ（lyrs=t）を読み込むことで、山の高低差が描画されるようにします
+// ▼ 変更：マップを2層構造（ベース＋山脈）にして重ねます
+
+// 1層目：海と平地のベース（文字なしロードマップ）
+L.tileLayer('https://{s}.google.com/vt/lyrs=r&x={x}&y={y}&z={z}', {
+    subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+    attribution: '© Google',
+    className: 'base-layer' // CSSで個別に色を操作するための名前
+}).addTo(map);
+
+// 2層目：山の起伏データ（陰影のみ・文字なし）
 L.tileLayer('https://{s}.google.com/vt/lyrs=t&x={x}&y={y}&z={z}', {
     subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
-    attribution: '© Google'
+    className: 'mountain-layer' // CSSで個別に色を操作するための名前
 }).addTo(map);
 
 let currentMarkers = [];

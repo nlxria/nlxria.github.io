@@ -4,10 +4,8 @@ html,
 body {
     overflow: hidden;
     background-color: #050949;
-    /* ページ全体の背景 */
 }
 
-/* マップコンテナの設定 */
 .maps {
     position: absolute;
     z-index: 0;
@@ -17,29 +15,23 @@ body {
     width: 100%;
 }
 
-/* ▼ ★最重要：Leafletが勝手に敷く明るい背景を、海の色で強制上書き！ */
 .leaflet-container {
     background-color: #050949 !important;
 }
 
-/* ▼ 修正：山の高い場所を #47B8FF に近づけ、低くなるほど暗くするフィルター */
-.leaflet-tile-pane {
-    /* 1. invert(100%): 地形の影を明るく、明るい部分を暗く反転。
-       2. sepia(100%): 全体を一度セピア色（黄色系）に染める。
-       3. hue-rotate(155deg): 黄色からシアン（#47B8FF）へ色相を回転。
-       4. saturate(800%): 発光感を出すために彩度を極限まで上げる。
-       5. brightness(0.6) contrast(1.2): 
-          ピークを明るく、谷底を急激に暗くしてグラデーションを作る。
-    */
-    filter: invert(100%) sepia(100%) hue-rotate(155deg) saturate(800%) brightness(0.6) contrast(1.2);
-
-    /* タイルを少し透かして、下の背景色(#050949)とブレンドさせます */
-    opacity: 0.7;
+/* ▼ 変更：1層目（ベース）を深いダークネイビー（#050949）に沈める */
+.base-layer {
+    filter: grayscale(100%) sepia(100%) hue-rotate(180deg) saturate(400%) brightness(0.4) contrast(1.5);
+    opacity: 0.6;
 }
 
-/* ★ バグ防止：タイルが重なる部分で色が変にならないように設定 */
-.leaflet-tile {
+/* ▼ 変更：2層目（山脈）の起伏だけをシアン（#47B8FF）に発光させる魔法のフィルター */
+.mountain-layer {
+    /* 白い平地を「黒（透明）」に、影を「白（光）」に反転させ、シアンに染める */
+    filter: invert(100%) sepia(100%) hue-rotate(155deg) saturate(800%) brightness(1.2) contrast(1.5);
+    /* 黒い部分を完全に透明化し、光る山の起伏だけを下のベースマップに合成する */
     mix-blend-mode: screen;
+    opacity: 0.85;
 }
 
 /* --- キャラクターアイコン（ピン）の装飾 --- */
