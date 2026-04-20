@@ -24,11 +24,11 @@ body,
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(50, 46, 123, 0.8);
+    background: rgba(50, 46, 123, 0.4);
     /* 透明なシアン色 */
     pointer-events: none;
     /* ★重要：クリックやスワイプを一切邪魔しない設定 */
-    z-index: 2;
+    z-index: 1000;
 }
 
 /* ピンのデザイン */
@@ -38,6 +38,6 @@ body,
     border-radius: 50%;
     border: 2px solid #44AEF3;
     object-fit: cover;
-    box-shadow: 0 0 8px rgba(50, 46, 123, 0.8);
+    box-shadow: 0 0 8px rgba(50, 46, 123, 0.4);
     transition: transform 0.2s;
 }
