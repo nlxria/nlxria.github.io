@@ -56,13 +56,14 @@ logoutBtn.addEventListener('click', async () => {
 });
 
 // === マップの初期化 ===
-// ▼ 変更：zoomControlをfalseに設定してナビゲーションを廃止
+// 日本（東京）を中心にマップを描画
 const map = L.map('map', {
     zoomControl: false,
-    attributionControl: false // 右下のクレジット表記も消してスッキリさせる場合
+    attributionControl: false
 }).setView([35.681236, 139.767125], 5);
 
-L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
+// ▼ 修正：文字（地名、国名など）が含まれないタイルレイヤー（ロードマップ）を使用する設定
+L.tileLayer('https://{s}.google.com/vt/lyrs=r&x={x}&y={y}&z={z}', {
     subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
     attribution: '© Google'
 }).addTo(map);
