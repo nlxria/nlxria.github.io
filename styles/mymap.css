@@ -1,10 +1,8 @@
-/* === mymap.css === */
-
 html,
 body {
     overflow: hidden;
     background-color: #050949;
-    /* 全体の背景色を海の色に設定 */
+    /* ▼ 確実な海の色を一番下に敷く */
 }
 
 .maps {
@@ -15,15 +13,15 @@ body {
     height: calc(109vh + 50px);
     width: 100%;
     background-color: #050949;
-    /* マップの下の背景色も海の色に設定 */
+    /* ▼ ここにも海の色を敷く */
 }
 
-/* ▼ 修正：Googleマップのタイルをダーク＆シアンのグラデーションにする特殊フィルター */
+/* ▼ 修正：まずは全体を暗いネイビーの海色（#050949）に馴染ませる */
 .leaflet-tile-pane {
-    /* 反転して色調整し、陆地をシアン(#47B8FF)に、海を暗くする */
-    filter: invert(100%) grayscale(0%) sepia(0%) hue-rotate(195deg) saturate(500%) brightness(0.5) contrast(1.4);
-    /* 透明度を調整して、下の背景色(#050949)とブレンドさせ、海をネイビーにする */
-    opacity: 0.8;
+    /* Googleマップの白や水色を、セピア→青に変換して暗く落とす */
+    filter: sepia(100%) hue-rotate(190deg) saturate(200%) brightness(0.4);
+    /* 地図を少し透明にして、下に敷いた本物の #050949 を透かして見せる */
+    opacity: 0.7;
 }
 
 /* --- キャラクターアイコン（ピン）の装飾 --- */
