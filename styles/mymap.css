@@ -9,14 +9,13 @@ body,
     overflow: hidden;
 }
 
-/* ▼ 変更：フィルターを一切使わず、透明度で奥のネイビーを透かせるだけ */
 .leaflet-tile-pane {
     filter: none !important;
     mix-blend-mode: normal !important;
     opacity: 0.7;
 }
 
-/* ▼ 追加：青いセロハン（オーバーレイ）をマップ全体に被せる魔法 */
+/* ▼ 変更：z-indexを450に下げて、アイコンの下に潜り込ませます */
 .maps::after {
     content: "";
     position: absolute;
@@ -27,8 +26,18 @@ body,
     background: rgba(50, 46, 123, 0.4);
     /* 透明なシアン色 */
     pointer-events: none;
-    /* ★重要：クリックやスワイプを一切邪魔しない設定 */
-    z-index: 1000;
+    z-index: 450;
+}
+
+/* ▼ 追加：念のため、アイコンや名前表示の層を強制的に最前面に引き上げます */
+.leaflet-marker-pane,
+.leaflet-shadow-pane {
+    z-index: 1100 !important;
+}
+
+.leaflet-tooltip-pane,
+.leaflet-popup-pane {
+    z-index: 1200 !important;
 }
 
 /* ピンのデザイン */

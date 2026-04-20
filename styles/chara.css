@@ -450,23 +450,21 @@ div.pass-input[contenteditable="true"]:empty::before {
     overflow: hidden;
 }
 
-/* === マイマップ設定（chara.css） === */
+/* === マイマップ設定 === */
 #chara-map {
     position: relative;
-    /* セロハンをぴったり重ねるための基準 */
     background: #050949 !important;
     border: 1px solid #44AEF3;
     overflow: hidden;
 }
 
-/* フィルター撤廃・透明度のみ */
 #chara-map .leaflet-tile-pane {
     filter: none !important;
     mix-blend-mode: normal !important;
     opacity: 0.7;
 }
 
-/* キャラシ側にも青いセロハンを被せる */
+/* ▼ 変更：キャラシ側のセロハンも、z-indexを450に下げます */
 #chara-map::after {
     content: "";
     position: absolute;
@@ -476,7 +474,18 @@ div.pass-input[contenteditable="true"]:empty::before {
     bottom: 0;
     background: rgba(50, 46, 123, 0.4);
     pointer-events: none;
-    z-index: 1000;
+    z-index: 450;
+}
+
+/* ▼ 追加：ピンの層を最前面へ引き上げ */
+#chara-map .leaflet-marker-pane,
+#chara-map .leaflet-shadow-pane {
+    z-index: 1100 !important;
+}
+
+#chara-map .leaflet-tooltip-pane,
+#chara-map .leaflet-popup-pane {
+    z-index: 1200 !important;
 }
 
 /* ピンのデザイン */
