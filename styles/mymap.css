@@ -1,11 +1,18 @@
-/* === mymap.css === */
-
 html,
 body,
 .maps,
 .leaflet-container {
     background: #050949 !important;
     overflow: hidden;
+}
+
+.maps {
+    position: absolute;
+    z-index: 0;
+    bottom: 0;
+    top: calc(9vh - 50px);
+    height: calc(109vh + 50px);
+    width: 100%;
 }
 
 /* ▼ 変更：透明度を1に戻し、100%はっきり表示させる */
