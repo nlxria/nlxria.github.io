@@ -294,11 +294,10 @@ function renderSpecialSections() {
         headerContainer.style.width = 'auto';
 
         const markSpan = document.createElement('span');
-        markSpan.textContent = details.open ? '▲ ' : '▼ ';
-        markSpan.style.marginRight = '8px';
+        markSpan.className = 'accordion-icon'; // ← CSSのアイコンクラスを適用
 
         details.addEventListener('toggle', () => {
-            markSpan.textContent = details.open ? '▲ ' : '▼ ';
+            // 文字の書き換え処理を削除し、開閉状態の記憶のみ残す
             specialOpenStates[sec.id] = details.open;
         });
 
@@ -535,11 +534,10 @@ function renderSheets(sheetsArray, parentElement, isRoot = true) {
         headerContainer.style.width = 'auto';
 
         const markSpan = document.createElement('span');
-        markSpan.textContent = details.open ? '▲ ' : '▼ ';
-        markSpan.style.marginRight = '0.5em';
+        markSpan.className = 'accordion-icon'; // ← CSSのアイコンクラスを適用
 
         details.addEventListener('toggle', () => {
-            markSpan.textContent = details.open ? '▲ ' : '▼ ';
+            // 文字の書き換え処理を削除し、開閉状態の記憶のみ残す
             Object.defineProperty(sheet, '_isOpen', { value: details.open, writable: true, enumerable: false, configurable: true });
         });
 

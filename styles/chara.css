@@ -211,6 +211,26 @@ header .edit-btn {
     cursor: pointer;
 }
 
+/* ▼ 追加：アコーディオンの開閉アイコン（アニメーション付き） */
+.accordion-icon {
+    display: inline-block;
+    width: 0.4em;
+    height: 0.4em;
+    border-right: 2px solid white;
+    border-bottom: 2px solid white;
+    transform: rotate(-45deg);
+    /* 閉じている時は右向き ＞ */
+    transition: transform 0.2s ease;
+    /* クルッと回るアニメーション */
+    margin-right: 0.8em;
+    vertical-align: middle;
+}
+
+/* 開いた時に下向き（∨）に回転する */
+details[open]>summary .accordion-icon {
+    transform: rotate(45deg);
+}
+
 /* アコーディオンが開いている時、タイトル下に直線を引く */
 details[open]>summary {
     border-bottom: 1px solid white;
