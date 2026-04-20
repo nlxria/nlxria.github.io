@@ -711,7 +711,7 @@ function renderMap() {
         L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png', {
             subdomains: 'abcd',
             attribution: '&copy; CARTO'
-        }).addTo(map);
+        }).addTo(charaMap);
 
         charaMap.on('click', (e) => {
             if (document.getElementById('app-main').classList.contains('edit-mode')) {
