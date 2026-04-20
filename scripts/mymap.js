@@ -59,22 +59,23 @@ logoutBtn.addEventListener('click', async () => {
 const map = L.map('map', {
     zoomControl: false,
     attributionControl: false
-}).setView([35.6895, 139.6917], 5);
+}).setView([35.6895, 139.6917], 5); // ← 座標は勝手に変更しません！
 
-// ▼ 変更：マップを2層構造（ベース＋山脈）にして重ねます
+// ▼ 修正：マップを確実に2層構造にして重ねます
 
-// 1層目：海と平地のベース（文字なしロードマップ）
+// 1層目：海と平地のベースマップ（CSSでネイビーに沈めます）
 L.tileLayer('https://{s}.google.com/vt/lyrs=r&x={x}&y={y}&z={z}', {
     subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
     attribution: '© Google',
-    className: 'base-layer' // CSSで個別に色を操作するための名前
+    className: 'base-layer' // CSSで指定するためのクラス名
 }).addTo(map);
 
-// 2層目：山の起伏データ（陰影のみ・文字なし）
+// 2層目：山の起伏データ（CSSでシアンに光らせます）
 L.tileLayer('https://{s}.google.com/vt/lyrs=t&x={x}&y={y}&z={z}', {
     subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
-    className: 'mountain-layer' // CSSで個別に色を操作するための名前
+    className: 'mountain-layer' // CSSで指定するためのクラス名
 }).addTo(map);
+
 
 let currentMarkers = [];
 

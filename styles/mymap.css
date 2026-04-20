@@ -19,17 +19,17 @@ body {
     background-color: #050949 !important;
 }
 
-/* ▼ 変更：1層目（ベース）を深いダークネイビー（#050949）に沈める */
+/* ▼ 修正：1層目（ベース）を深いダークネイビー（#050949）に沈める */
 .base-layer {
     filter: grayscale(100%) sepia(100%) hue-rotate(180deg) saturate(400%) brightness(0.4) contrast(1.5);
     opacity: 0.6;
 }
 
-/* ▼ 変更：2層目（山脈）の起伏だけをシアン（#47B8FF）に発光させる魔法のフィルター */
+/* ▼ 修正：2層目（山脈）の起伏だけをシアン（#47B8FF）に発光させる魔法のフィルター */
 .mountain-layer {
-    /* 白い平地を「黒（透明）」に、影を「白（光）」に反転させ、シアンに染める */
+    /* 白い平地を「黒」に、影を「白（光）」に反転させ、シアンに染める */
     filter: invert(100%) sepia(100%) hue-rotate(155deg) saturate(800%) brightness(1.2) contrast(1.5);
-    /* 黒い部分を完全に透明化し、光る山の起伏だけを下のベースマップに合成する */
+    /* 黒くなった平地部分を完全に透明化し、光る山の起伏だけを合成する */
     mix-blend-mode: screen;
     opacity: 0.85;
 }
@@ -40,7 +40,6 @@ body {
     height: 40px;
     border-radius: 50%;
     border: 2px solid #47B8FF;
-    /* 陸地の色に合わせたネオン枠 */
     object-fit: cover;
     box-shadow: 0 0 10px #47B8FF;
     transition: transform 0.2s;
@@ -56,7 +55,6 @@ body {
     font-weight: bold;
     color: #47B8FF;
     background-color: rgba(5, 9, 73, 0.9);
-    /* 背景に馴染むネイビー */
     border: 1px solid #47B8FF;
     box-shadow: 0 0 5px rgba(71, 184, 255, 0.5);
 }
