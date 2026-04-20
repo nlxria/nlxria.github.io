@@ -1,9 +1,11 @@
 /* === mymap.css === */
 
 html,
-body {
+body,
+.maps,
+.leaflet-container {
+    background-color: #050949 !important;
     overflow: hidden;
-    background-color: #050949;
 }
 
 .maps {
@@ -15,17 +17,12 @@ body {
     width: 100%;
 }
 
-/* 隙間から見える背景を確実にネイビーにする */
-.leaflet-container {
-    background-color: #050949 !important;
-}
-
-/* ▼ 変更：シンプルで安定した色調補正フィルター */
+/* 地図タイルの色調補正 */
 .leaflet-tile-pane {
-    /* ダークグレーの地図を、セピア色を経由して鮮やかなシアン(#47B8FF)に染める */
-    filter: sepia(100%) hue-rotate(160deg) saturate(500%) brightness(0.9) contrast(1.2);
-    /* 地図を少し透明にして、背景の深いネイビー(#050949)と馴染ませて海を表現する */
-    opacity: 0.8;
+    /* 陸地を #47B8FF に近づけ、海を黒に沈めるフィルター */
+    filter: sepia(100%) hue-rotate(165deg) saturate(600%) brightness(0.7) contrast(2);
+    /* mix-blend-mode: screen により、タイルの黒い部分（海）を背景色 #050949 に完全に透過させます */
+    mix-blend-mode: screen;
 }
 
 /* --- キャラクターアイコン（ピン）の装飾 --- */

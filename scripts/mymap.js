@@ -57,9 +57,9 @@ logoutBtn.addEventListener('click', async () => {
 const map = L.map('map', {
     zoomControl: false,
     attributionControl: false
-}).setView([35.6895, 139.6917], 5);
+}).setView([35.6895, 139.6917], 5); // 座標を固定
 
-// ▼ 変更：バグの原因だったGoogleマップをやめ、最初から文字のないダークマップを使用します
+// 文字なしダークマップを使用
 L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png', {
     subdomains: 'abcd',
     attribution: '&copy; CARTO'
