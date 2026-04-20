@@ -60,8 +60,9 @@ const map = L.map('map', {
 }).setView([35.6895, 139.6917], 5);
 
 // ライトテーマのタイルを使用
-L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
-    attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ'
+L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png', {
+    subdomains: 'abcd',
+    attribution: '&copy; CARTO'
 }).addTo(map);
 
 // 記憶用配列
