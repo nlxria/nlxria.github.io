@@ -1,6 +1,5 @@
 // 注意: 実際のFirebase設定情報に書き換えてください
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-// ▼ 変更：ログイン処理に必要な関数（signOut, GoogleAuthProvider, signInWithPopup）を追加
 import { getAuth, onAuthStateChanged, signOut, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
 import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
@@ -18,13 +17,27 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// === 認証UI要素の取得とログイン・ログアウト処理 ===
+// === URLパラメータとモードの取得 ===
+const urlParams = new URLSearchParams(window.location.search);
+const currentMode = urlParams.get('md');
+
+// === 認証UI要素の取得と処理 ===
 const loggedOutUI = document.getElementById('logged-out-ui');
 const loggedInUI = document.getElementById('logged-in-ui');
 const googleLoginBtn = document.getElementById('google-login-btn');
 const logoutBtn = document.getElementById('logout-btn');
 const userEmailDisplay = document.getElementById('user-email-display');
 const provider = new GoogleAuthProvider();
+
+let memoryCachePublic = null;
+let memoryCacheMine = null;
+
+function updateHeaderTitle() {
+    const titleEl = document.querySelector('header .title');
+    if (titleEl && currentMode === 'earth') {
+        titleEl.textContent = '世界地図';
+    }
+}
 
 googleLoginBtn.addEventListener('click', async () => {
     try {
@@ -38,48 +51,47 @@ googleLoginBtn.addEventListener('click', async () => {
 
 logoutBtn.addEventListener('click', async () => {
     await signOut(auth);
+    memoryCacheMine = null;
     alert("ログアウトしました。");
 });
 
-
 // === マップの初期化 ===
-const map = L.map('map').setView([35.681236, 139.767125], 5);
+// ▼ 変更：zoomControlをfalseに設定してナビゲーションを廃止
+const map = L.map('map', {
+    zoomControl: false,
+    attributionControl: false // 右下のクレジット表記も消してスッキリさせる場合
+}).setView([35.681236, 139.767125], 5);
 
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; OpenStreetMap contributors'
+L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
+    subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+    attribution: '© Google'
 }).addTo(map);
 
-// ▼ 追加：現在マップに表示されているピンを記憶する配列（重複防止用）
 let currentMarkers = [];
 
-
-// === キャラクターデータの取得（キャッシュ付き） ===
+// === キャラクターデータの取得 ===
 async function fetchMapCharacters(uid) {
-    const CACHE_KEY = 'map_public_chars_cache';
-    const CACHE_TIME = 5 * 60 * 1000;
-
     let publicChars = [];
     let myChars = [];
 
-    const cachedData = sessionStorage.getItem(CACHE_KEY);
-    if (cachedData) {
-        const parsed = JSON.parse(cachedData);
-        if (Date.now() - parsed.timestamp < CACHE_TIME) {
-            publicChars = parsed.data;
-        }
-    }
-
-    if (publicChars.length === 0) {
+    if (memoryCachePublic !== null) {
+        publicChars = memoryCachePublic;
+    } else {
         const q = query(collection(db, "characters"), where("data.privacy", "==", 0));
         const snap = await getDocs(q);
         snap.forEach(doc => publicChars.push({ id: doc.id, data: doc.data().data }));
-        sessionStorage.setItem(CACHE_KEY, JSON.stringify({ timestamp: Date.now(), data: publicChars }));
+        memoryCachePublic = publicChars;
     }
 
     if (uid) {
-        const q2 = query(collection(db, "characters"), where("data.owner", "==", uid));
-        const snap2 = await getDocs(q2);
-        snap2.forEach(doc => myChars.push({ id: doc.id, data: doc.data().data }));
+        if (memoryCacheMine !== null) {
+            myChars = memoryCacheMine;
+        } else {
+            const q2 = query(collection(db, "characters"), where("data.owner", "==", uid));
+            const snap2 = await getDocs(q2);
+            snap2.forEach(doc => myChars.push({ id: doc.id, data: doc.data().data }));
+            memoryCacheMine = myChars;
+        }
     }
 
     const charaMap = new Map();
@@ -89,19 +101,24 @@ async function fetchMapCharacters(uid) {
     return Array.from(charaMap.values());
 }
 
-
-// === マップにピン（アイコン）を立てる ===
+// === マップにピンを立てる ===
 async function renderMarkers(uid) {
-    // ▼ 追加：新しいピンを立てる前に、古いピンをすべてマップから消去する
     currentMarkers.forEach(marker => map.removeLayer(marker));
     currentMarkers = [];
+
+    if (currentMode !== 'earth') return;
 
     const characters = await fetchMapCharacters(uid);
 
     characters.forEach(chara => {
         const data = chara.data;
-        const lat = parseFloat(data.y) || 0;
-        const lng = parseFloat(data.x) || 0;
+        const x = parseFloat(data.x) || 0;
+        const y = parseFloat(data.y) || 0;
+
+        if (currentMode === 'earth' && x === 0 && y === 0) return;
+
+        const lat = y;
+        const lng = x;
         const iconUrl = data.iconUrl || '/assets/image/chara-image.png';
 
         const customIcon = L.divIcon({
@@ -117,15 +134,11 @@ async function renderMarkers(uid) {
             window.location.href = `/chara?id=${chara.id}`;
         });
 
-        // ▼ 追加：立てたピンを配列に記憶しておく
         currentMarkers.push(marker);
     });
 }
 
-
-// === 認証状態が確定したらUI切り替え＆描画スタート ===
 onAuthStateChanged(auth, (user) => {
-    // ▼ 追加：ログイン・ログアウトのUI表示切り替え
     if (user) {
         loggedOutUI.style.display = 'none';
         loggedInUI.style.display = 'flex';
@@ -135,6 +148,6 @@ onAuthStateChanged(auth, (user) => {
         loggedInUI.style.display = 'none';
     }
 
-    // マップの描画を実行
+    updateHeaderTitle();
     renderMarkers(user ? user.uid : null);
 });

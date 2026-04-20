@@ -3,6 +3,8 @@
 html,
 body {
     overflow: hidden;
+    background-color: #050949;
+    /* 全体の背景も暗く */
 }
 
 .maps {
@@ -12,6 +14,19 @@ body {
     top: calc(9vh - 50px);
     height: calc(109vh + 50px);
     width: 100%;
+    /* ▼ 追加：ベースの海側の色を暗いネイビーに指定 */
+    background-color: #050949;
+}
+
+/* ▼ 追加：Googleマップのタイルをダーク＆シアンに染める特殊フィルター */
+.leaflet-tile-pane {
+    /* invert(100%): 白黒を反転し、海を暗く、道路・建物を明るくする
+       grayscale -> sepia -> hue-rotate: 全体を鮮やかなシアン(#47B8FF)に変える
+       brightness -> contrast: ネオンのように建物を光らせる
+    */
+    filter: invert(100%) grayscale(100%) sepia(100%) hue-rotate(180deg) saturate(700%) brightness(0.8) contrast(1.5);
+    /* 少し透明にして、下のベースカラー(#050949)とブレンドしグラデーションを作る */
+    opacity: 0.85;
 }
 
 /* --- キャラクターアイコン（ピン）の装飾 --- */
@@ -19,9 +34,10 @@ body {
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    border: 2px solid white;
+    /* ▼ 変更：ピンの枠線や影も明るいシアン(#47B8FF)に合わせて発光させる */
+    border: 2px solid #47B8FF;
     object-fit: cover;
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 0 10px #47B8FF;
     transition: transform 0.2s;
 }
 
@@ -34,5 +50,9 @@ body {
 /* --- ツールチップ（名前）の装飾 --- */
 .leaflet-tooltip {
     font-weight: bold;
-    color: #322E7B;
+    /* ▼ 変更：ツールチップも世界観に合わせてダークネイビー×シアンに */
+    color: #47B8FF;
+    background-color: rgba(5, 9, 73, 0.8);
+    border: 1px solid #47B8FF;
+    box-shadow: 0 0 5px rgba(71, 184, 255, 0.5);
 }
