@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ja">
+    <head>
+        <title>キャラクターマップ</title>
+        <link rel="icon" href="/assets/favicon.ico">
+        <link rel="shortcut icon" href="/assets/favicon.ico">
+        <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
+        <link rel="stylesheet" href="/styles/index.css">
+        <link rel="stylesheet" href="/styles/mymap.css">
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width,initial-scale=1">
+        <meta name="description" content="デモ版です。">
+        <meta name="theme-color" content="#44AEF3">
+        <meta property="og:title" content="キャラクターマップ">
+        <meta property="og:description" content="デモ版です。">
+        <meta property="og:type" content="website">
+        <meta property="og:locale" content="ja_JP">
+        <meta property="og:url" content="https://nlxria.github.io/mymap">
+        <meta property="og:image" content="https://raw.githubusercontent.com/nlxria/nlxria.github.io/main/assets/favicon.png">
+        <meta property="og:deteminer" content="クトゥルフ神話TRPG">
+        <meta property="og:site_name" content="クトゥルフ神話TRPG">
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:site" content="@cthulhumasters">
+        <meta name="twitter:creator" content="@nlxria">
+        <meta name="twitter:title" content="キャラクターマップ">
+        <meta name="twitter:description" content="デモ版です。">
+        <style>html,body {overflow:hidden;} .maps {position:absolute;z-index:0;bottom:0;top:calc(9vh - 50px);height:calc(109vh + 50px);width:100%;}</style>
+    </head>
+    <body><main>
+        <header><a class="back" href="/">←</a><a class="title" href="/mymap">キャラクターマップ</a>
+            <div>
+                <div id="auth-container" style="display: flex; align-items: center; gap: 1em;">
+                    <div id="logged-out-ui" style="display: flex; gap: 1em; margin: 0;">
+                        <button id="google-login-btn" class="edit-btn" style="background: #4285F4;">ログイン</button>
+                    </div>
+                    <div id="logged-in-ui" style="display: none; gap: 1em; margin: 0;">
+                        <span id="user-email-display" style="display: none;"></span>
+                        <button id="logout-btn" class="edit-btn" style="background: #e74c3c;">ログアウト</button>
+                    </div>
+                </div>
+            </div>
+        </header><div class="head"></div>
+        <div id="map" class="maps"></div>
+        <script type="module" src="/scripts/mymap.js"></script>
+        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    </main></body>
+</html>

@@ -1,0 +1,38 @@
+/* === mymap.css === */
+
+html,
+body {
+    overflow: hidden;
+}
+
+.maps {
+    position: absolute;
+    z-index: 0;
+    bottom: 0;
+    top: calc(9vh - 50px);
+    height: calc(109vh + 50px);
+    width: 100%;
+}
+
+/* --- キャラクターアイコン（ピン）の装飾 --- */
+.custom-chara-icon img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 2px solid white;
+    object-fit: cover;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+    transition: transform 0.2s;
+}
+
+.custom-chara-icon img:hover {
+    transform: scale(1.2);
+    /* ホバー時に少し大きくする */
+    z-index: 1000;
+}
+
+/* --- ツールチップ（名前）の装飾 --- */
+.leaflet-tooltip {
+    font-weight: bold;
+    color: #322E7B;
+}
