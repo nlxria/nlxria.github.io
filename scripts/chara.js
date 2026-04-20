@@ -693,18 +693,17 @@ function renderProfile() {
     imgInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') e.preventDefault(); });
 }
 
-// === マイマップの描画と操作 ===
+// === マイマップの描画と操作（chara.js / renderMap関数内） ===
+
 function renderMap() {
     const data = characterData.data;
     const x = parseFloat(data.x) || 0;
     const y = parseFloat(data.y) || 0;
 
-    // 座標が設定されているかチェック（0,0以外）
     const hasCoords = (x !== 0 || y !== 0);
     tempMapX = x;
     tempMapY = y;
 
-    // 表示の中心点（未設定なら東京）
     const centerLat = hasCoords ? y : 35.6895;
     const centerLng = hasCoords ? x : 139.6917;
 
@@ -714,11 +713,11 @@ function renderMap() {
             attributionControl: false
         }).setView([centerLat, centerLng], hasCoords ? 10 : 5);
 
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png', {
+        // ▼ 変更：ライトテーマのタイルに変更
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
             subdomains: 'abcd'
         }).addTo(charaMap);
 
-        // クリックで位置設定（編集モード中のみ）
         charaMap.on('click', (e) => {
             if (document.getElementById('app-main').classList.contains('edit-mode')) {
                 tempMapY = e.latlng.lat;
@@ -727,7 +726,6 @@ function renderMap() {
             }
         });
 
-        // アコーディオン連動バグ修正
         document.getElementById('map-details').addEventListener('toggle', function () {
             if (this.open) {
                 setTimeout(() => { charaMap.invalidateSize(); }, 100);
@@ -735,7 +733,6 @@ function renderMap() {
         });
     }
 
-    // ピンの描画制御
     if (hasCoords) {
         updateMarkerPosition(y, x);
     } else if (charaMarker) {
@@ -744,7 +741,6 @@ function renderMap() {
     }
 }
 
-// ピンを更新または新規作成する補助関数
 function updateMarkerPosition(lat, lng) {
     const iconUrl = characterData.data.iconUrl || '/assets/image/chara-image.png';
     const customIcon = L.divIcon({
@@ -756,6 +752,7 @@ function updateMarkerPosition(lat, lng) {
 
     if (!charaMarker) {
         charaMarker = L.marker([lat, lng], { icon: customIcon }).addTo(charaMap);
+        // ★ 変更：bindTooltip（ホバー時の名前表示）を削除しました
     } else {
         charaMarker.setLatLng([lat, lng]);
         charaMarker.setIcon(customIcon);

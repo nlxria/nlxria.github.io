@@ -450,24 +450,28 @@ div.pass-input[contenteditable="true"]:empty::before {
     overflow: hidden;
 }
 
-/* === マイマップ設定 === */
+/* === マイマップ設定（chara.css） === */
 #chara-map {
     background: #050949 !important;
     border: 1px solid #47B8FF;
+    /* ▼ 修正：謎のスクロールバーを消去 */
+    overflow: hidden;
 }
 
 #chara-map .leaflet-tile-pane {
-    /* ガビガビの原因だった brightness/contrast を抑え、色相だけを変更 */
-    filter: sepia(100%) hue-rotate(165deg) saturate(200%) brightness(0.8);
-    mix-blend-mode: screen;
+    /* ▼ 修正：ライトテーマにするためフィルターを解除し、ブレンドモードを戻す */
+    filter: none;
+    mix-blend-mode: normal;
 }
 
+/* ピンのデザイン（枠線を馴染ませる） */
 .custom-chara-icon img {
-    width: 40px;
-    height: 40px;
+    width: 2em;
+    height: 2em;
     border-radius: 50%;
-    border: 2px solid #47B8FF;
+    border: 2px solid #322E7B;
+    /* ライトテーマに合う少し濃い青枠に */
     object-fit: cover;
-    box-shadow: 0 0 10px #47B8FF;
-    transition: transform 0.2s;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+    transition: transform 0.25s;
 }

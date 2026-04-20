@@ -1,3 +1,5 @@
+/* === mymap.css === */
+
 html,
 body,
 .maps,
@@ -6,41 +8,19 @@ body,
     overflow: hidden;
 }
 
-.maps {
-    position: absolute;
-    z-index: 0;
-    bottom: 0;
-    top: calc(9vh - 50px);
-    height: calc(109vh + 50px);
-    width: 100%;
-}
-
-/* タイル設定：高品質なダークテーマ */
+/* タイル設定：フィルターを解除してライトテーマに */
 .leaflet-tile-pane {
-    /* 以前の極端なフィルターを廃止。目に優しいネオンブルーに。 */
-    filter: sepia(100%) hue-rotate(165deg) saturate(200%) brightness(0.8);
-    mix-blend-mode: screen;
+    filter: none;
+    mix-blend-mode: normal;
 }
 
-/* ピンのデザイン */
+/* ツールチップは使用しなくなりましたが、ピンのデザインは調整 */
 .custom-chara-icon img {
-    width: 40px;
-    height: 40px;
+    width: 2em;
+    height: 2em;
     border-radius: 50%;
-    border: 2px solid #47B8FF;
+    border: 2px solid white;
     object-fit: cover;
-    box-shadow: 0 0 10px #47B8FF;
-    transition: transform 0.2s;
-}
-
-.custom-chara-icon img:hover {
-    transform: scale(1.2);
-    z-index: 1000;
-}
-
-.leaflet-tooltip {
-    font-weight: bold;
-    color: #47B8FF;
-    background-color: rgba(5, 9, 73, 0.9);
-    border: 1px solid #47B8FF;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
+    transition: transform 0.25s;
 }

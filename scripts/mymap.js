@@ -53,15 +53,15 @@ logoutBtn.addEventListener('click', async () => {
     alert("ログアウトしました。");
 });
 
-// === マップの初期化 ===
 const map = L.map('map', {
     zoomControl: false,
     attributionControl: false
 }).setView([35.6895, 139.6917], 5);
 
-// シンプルなダークマップを使用（ガビガビを回避）
-L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png', {
-    subdomains: 'abcd'
+// ▼ 変更：ライトテーマのタイルに変更
+L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
+    subdomains: 'abcd',
+    attribution: '&copy; CARTO'
 }).addTo(map);
 
 let currentMarkers = [];
@@ -124,9 +124,12 @@ async function renderMarkers(uid) {
         });
 
         const marker = L.marker([lat, lng], { icon: customIcon }).addTo(map);
-        marker.bindTooltip(data.name || '名無し', { direction: 'top', offset: [0, -20] });
+
+        // ★ 変更：bindTooltip（ホバー時の名前表示）を削除しました
+
         marker.on('click', () => {
-            window.location.href = `/chara?id=${chara.id}`;
+            // ▼ 変更：新規タブ（_blank）でキャラシを開く
+            window.open(`/chara?id=${chara.id}`, '_blank');
         });
 
         currentMarkers.push(marker);
