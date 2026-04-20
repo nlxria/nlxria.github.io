@@ -157,9 +157,9 @@ async function loadCharacterList(uid) {
 
     // 画面にカードを描画する処理（共通化）
     const renderCards = (charaList) => {
-        listElement.innerHTML = '';
+        listElement.textContent = '';
         if (charaList.length === 0) {
-            listElement.innerHTML = '<p style="color: #E0E0E0; text-align: center;">キャラクターが見つかりません。</p>';
+            listElement.textContent = '<p style="color: #E0E0E0; text-align: center;">キャラクターが見つかりません。</p>';
             return;
         }
 
@@ -176,7 +176,7 @@ async function loadCharacterList(uid) {
             const iconUrl = data.iconUrl || '/assets/image/chara-image.png';
             const charCount = JSON.stringify({ kind: "character", data: data }).length;
 
-            card.innerHTML = `
+            card.textContent = `
                 <img src="${iconUrl}" alt="icon" onerror="this.src='/assets/image/chara-image.png'">
                 <div class="chara-info">
                     <h4>${data.name || '名無し'}</h4>
@@ -216,7 +216,7 @@ async function loadCharacterList(uid) {
     try {
         if (searchKeyword === "") {
             if (!uid) {
-                listElement.innerHTML = '<p style="color: #E0E0E0; text-align: center;">検索キーワードを入力してください。</p>';
+                listElement.textContent = '<p style="color: #E0E0E0; text-align: center;">検索キーワードを入力してください。</p>';
                 return;
             }
 
@@ -226,7 +226,7 @@ async function loadCharacterList(uid) {
                 return;
             }
 
-            listElement.innerHTML = '<p style="color: white; text-align: center;">読み込み中...</p>';
+            listElement.textContent = '<p style="color: white; text-align: center;">読み込み中...</p>';
             const q = query(collection(db, "characters"), where("data.owner", "==", uid));
             const querySnapshot = await getDocs(q);
             cachedMyCharacters = [];
@@ -248,7 +248,7 @@ async function loadCharacterList(uid) {
             } else {
                 if (isPublicCacheLoading) return; // 既に通信中なら重複してリクエストしない
                 isPublicCacheLoading = true;
-                listElement.innerHTML = '<p style="color: white; text-align: center;">公開データを取得中...</p>';
+                listElement.textContent = '<p style="color: white; text-align: center;">公開データを取得中...</p>';
 
                 const q = query(collection(db, "characters"), where("data.privacy", "==", 0));
                 const querySnapshot = await getDocs(q);
@@ -261,7 +261,7 @@ async function loadCharacterList(uid) {
         }
     } catch (error) {
         console.error("一覧取得エラー:", error);
-        listElement.innerHTML = '<p style="color: lightpink; text-align: center;">リストの取得に失敗しました。</p>';
+        listElement.textContent = '<p style="color: lightpink; text-align: center;">リストの取得に失敗しました。</p>';
         isPublicCacheLoading = false;
     }
 }
@@ -269,7 +269,7 @@ async function loadCharacterList(uid) {
 // === 特殊セクションの描画 ===
 function renderSpecialSections() {
     const container = document.getElementById('special-sections-container');
-    container.innerHTML = '';
+    container.textContent = '';
     const isEditing = mainElement.classList.contains('edit-mode');
     const data = characterData.data;
     const isOwner = auth.currentUser && data.owner === auth.currentUser.uid;
@@ -511,7 +511,7 @@ function renderMemoContent(containerElement, data) {
 
 // === メモの描画 ===
 function renderSheets(sheetsArray, parentElement, isRoot = true) {
-    parentElement.innerHTML = '';
+    parentElement.textContent = '';
 
     sheetsArray.forEach((sheet, index) => {
         let targetParent = parentElement;
