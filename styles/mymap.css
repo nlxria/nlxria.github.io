@@ -4,8 +4,10 @@ html,
 body {
     overflow: hidden;
     background-color: #050949;
+    /* ページ全体の背景 */
 }
 
+/* マップコンテナの設定 */
 .maps {
     position: absolute;
     z-index: 0;
@@ -15,16 +17,21 @@ body {
     width: 100%;
 }
 
-/* ▼ ★バグ修正：Leafletが勝手に敷くグレーの背景を強制的にネイビーで塗り潰す！ */
+/* ▼ ★最重要：Leafletが勝手に敷く明るい背景を、海の色で強制上書き！ */
 .leaflet-container {
     background-color: #050949 !important;
 }
 
+/* 地図タイル（画像）の設定 */
 .leaflet-tile-pane {
-    /* Googleマップの白や水色を、セピア→青に変換して暗く落とす */
-    filter: sepia(100%) hue-rotate(190deg) saturate(200%) brightness(0.4);
-    /* 地図を少し透明にして、下に敷いた本物の #050949 を透かして見せる */
-    opacity: 0.7;
+    /* 1. invert(100%): 白黒反転。元の海（白っぽい水色）が暗くなります。
+       2. hue-rotate: 色相を調整して、陸地をシアン（#47B8FF）に寄せます。
+       3. brightness/contrast: 陸地の建物を発光させ、海をさらに沈ませます。
+    */
+    filter: invert(100%) hue-rotate(185deg) brightness(0.4) contrast(1.5);
+
+    /* ▼ ★海を透明に見せる魔法：地図画像の透明度を下げ、下の #050949 を透かします */
+    opacity: 0.65;
 }
 
 /* --- キャラクターアイコン（ピン）の装飾 --- */
@@ -33,6 +40,7 @@ body {
     height: 40px;
     border-radius: 50%;
     border: 2px solid #47B8FF;
+    /* 陸地の色に合わせたネオン枠 */
     object-fit: cover;
     box-shadow: 0 0 10px #47B8FF;
     transition: transform 0.2s;
@@ -47,7 +55,8 @@ body {
 .leaflet-tooltip {
     font-weight: bold;
     color: #47B8FF;
-    background-color: rgba(5, 9, 73, 0.8);
+    background-color: rgba(5, 9, 73, 0.9);
+    /* 背景に馴染むネイビー */
     border: 1px solid #47B8FF;
     box-shadow: 0 0 5px rgba(71, 184, 255, 0.5);
 }

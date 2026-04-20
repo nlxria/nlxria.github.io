@@ -56,13 +56,12 @@ logoutBtn.addEventListener('click', async () => {
 });
 
 // === マップの初期化 ===
-// 日本（東京）を中心にマップを描画
 const map = L.map('map', {
     zoomControl: false,
     attributionControl: false
 }).setView([35.6895, 139.6917], 5);
 
-// ▼ 修正：文字（地名、国名など）が含まれないタイルレイヤー（ロードマップ）を使用する設定
+// ▼ 文字なし（lyrs=r）のタイルを使用
 L.tileLayer('https://{s}.google.com/vt/lyrs=r&x={x}&y={y}&z={z}', {
     subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
     attribution: '© Google'
