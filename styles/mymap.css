@@ -22,16 +22,24 @@ body {
     background-color: #050949 !important;
 }
 
-/* 地図タイル（画像）の設定 */
+/* ▼ 修正：山の高い場所を #47B8FF に近づけ、低くなるほど暗くするフィルター */
 .leaflet-tile-pane {
-    /* 1. invert(100%): 白黒反転。元の海（白っぽい水色）が暗くなります。
-       2. hue-rotate: 色相を調整して、陸地をシアン（#47B8FF）に寄せます。
-       3. brightness/contrast: 陸地の建物を発光させ、海をさらに沈ませます。
+    /* 1. invert(100%): 地形の影を明るく、明るい部分を暗く反転。
+       2. sepia(100%): 全体を一度セピア色（黄色系）に染める。
+       3. hue-rotate(155deg): 黄色からシアン（#47B8FF）へ色相を回転。
+       4. saturate(800%): 発光感を出すために彩度を極限まで上げる。
+       5. brightness(0.6) contrast(1.2): 
+          ピークを明るく、谷底を急激に暗くしてグラデーションを作る。
     */
-    filter: invert(100%) hue-rotate(185deg) brightness(0.4) contrast(1.5);
+    filter: invert(100%) sepia(100%) hue-rotate(155deg) saturate(800%) brightness(0.6) contrast(1.2);
 
-    /* ▼ ★海を透明に見せる魔法：地図画像の透明度を下げ、下の #050949 を透かします */
-    opacity: 0.65;
+    /* タイルを少し透かして、下の背景色(#050949)とブレンドさせます */
+    opacity: 0.7;
+}
+
+/* ★ バグ防止：タイルが重なる部分で色が変にならないように設定 */
+.leaflet-tile {
+    mix-blend-mode: screen;
 }
 
 /* --- キャラクターアイコン（ピン）の装飾 --- */

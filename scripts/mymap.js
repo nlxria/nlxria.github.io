@@ -61,8 +61,8 @@ const map = L.map('map', {
     attributionControl: false
 }).setView([35.6895, 139.6917], 5);
 
-// ▼ 文字なし（lyrs=r）のタイルを使用
-L.tileLayer('https://{s}.google.com/vt/lyrs=r&x={x}&y={y}&z={z}', {
+// ▼ 変更：地形データ（lyrs=t）を読み込むことで、山の高低差が描画されるようにします
+L.tileLayer('https://{s}.google.com/vt/lyrs=t&x={x}&y={y}&z={z}', {
     subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
     attribution: '© Google'
 }).addTo(map);
