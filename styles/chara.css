@@ -465,19 +465,6 @@ div.pass-input[contenteditable="true"]:empty::before {
     opacity: 1 !important;
 }
 
-/* ★ 以前あった #chara-map::after（青いセロハン）は削除しました */
-
-/* ピンの層を最前面へ引き上げ */
-#chara-map .leaflet-marker-pane,
-#chara-map .leaflet-shadow-pane {
-    z-index: 1100 !important;
-}
-
-#chara-map .leaflet-tooltip-pane,
-#chara-map .leaflet-popup-pane {
-    z-index: 1200 !important;
-}
-
 /* ピンのデザイン */
 .custom-chara-icon img {
     width: 100%;

@@ -17,16 +17,6 @@ body,
 
 /* ★ 以前あった .maps::after（青いセロハン）は削除しました */
 
-.leaflet-marker-pane,
-.leaflet-shadow-pane {
-    z-index: 1100 !important;
-}
-
-.leaflet-tooltip-pane,
-.leaflet-popup-pane {
-    z-index: 1200 !important;
-}
-
 /* ピンのデザイン */
 .custom-chara-icon img {
     width: 100%;
