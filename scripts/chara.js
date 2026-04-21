@@ -239,10 +239,9 @@ async function loadCharacterList(uid) {
             renderCards(cachedMyCharacters);
 
         } else {
-            // ▼ 変更：公開キャラクターの検索（1件のまとめファイルを読み込む）
+            // 公開キャラクターの検索
             const executeSearch = () => {
                 const filteredList = cachedPublicCharacters.filter(chara => {
-                    // 事前に結合された searchText の中でキーワードを探す
                     const textToSearch = chara.searchText || JSON.stringify(chara.data).toLowerCase();
                     return textToSearch.includes(searchKeyword);
                 });
@@ -256,11 +255,25 @@ async function loadCharacterList(uid) {
                 isPublicCacheLoading = true;
                 listElement.innerHTML = '<p style="color: white; text-align: center;">公開データを取得中...</p>';
 
-                // ▼ 変更点：全件ダウンロードをやめ、「検索インデックス」1件だけを取得
-                const indexDoc = await getDoc(doc(db, "search_meta", "public_index"));
-                cachedPublicCharacters = [];
-                if (indexDoc.exists() && indexDoc.data().index) {
-                    cachedPublicCharacters = indexDoc.data().index;
+                try {
+                    // ① まずは軽量な「まとめファイル（インデックス）」を探しに行く
+                    const indexDoc = await getDoc(doc(db, "search_meta", "public_index"));
+                    cachedPublicCharacters = [];
+
+                    if (indexDoc.exists() && indexDoc.data().index) {
+                        cachedPublicCharacters = indexDoc.data().index;
+                    } else {
+                        // ② ★安全装置★ まとめファイルがない場合は、従来通り直接取りに行く
+                        console.warn("検索インデックスが見つからないため、直接データを取得します");
+                        const q = query(collection(db, "characters"), where("data.privacy", "==", 0));
+                        const querySnapshot = await getDocs(q);
+                        querySnapshot.forEach((docSnap) => {
+                            const d = docSnap.data();
+                            if (d && d.data) cachedPublicCharacters.push({ id: docSnap.id, data: d.data });
+                        });
+                    }
+                } catch (e) {
+                    console.error("公開データの取得エラー:", e);
                 }
 
                 isPublicCacheLoading = false;
