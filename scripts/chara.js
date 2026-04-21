@@ -176,7 +176,7 @@ async function loadCharacterList(uid) {
         }
 
         // 自分のキャラ一覧の時は日付順にしたいので、dateがあればソート
-        const sortedList = [...charaList].sort((a, b) => (b.data.date || 0) - (a.data.date || 0));
+        const sortedList = [...charaList].sort((a, b) => (b.data?.date || 0) - (a.data?.date || 0));
 
         sortedList.forEach((chara) => {
             const charaId = chara.id;
@@ -187,7 +187,7 @@ async function loadCharacterList(uid) {
 
             const iconUrl = data.iconUrl || '/assets/image/chara-image.png';
 
-            // ▼ 変更：事前に計算された文字数があればそれを使い、無ければその場で計算
+            // ▼ 事前に計算された文字数があればそれを使い、無ければその場で計算
             const charCount = chara.charCount || JSON.stringify({ kind: "character", data: data }).length;
 
             card.innerHTML = `
@@ -224,7 +224,7 @@ async function loadCharacterList(uid) {
 
     try {
         if (searchKeyword === "") {
-            // 自分のキャラクター一覧（これは件数が少ないので従来通り直接取得でOK）
+            // 自分のキャラクター一覧（従来通り直接取得）
             if (!uid) {
                 listElement.innerHTML = '<p style="color: #E0E0E0; text-align: center;">検索キーワードを入力してください。</p>';
                 return;
@@ -243,7 +243,8 @@ async function loadCharacterList(uid) {
             const executeSearch = () => {
                 const filteredList = cachedPublicCharacters.filter(chara => {
                     // 事前に結合された searchText の中でキーワードを探す
-                    return chara.searchText && chara.searchText.includes(searchKeyword);
+                    const textToSearch = chara.searchText || JSON.stringify(chara.data).toLowerCase();
+                    return textToSearch.includes(searchKeyword);
                 });
                 renderCards(filteredList);
             };
@@ -258,8 +259,8 @@ async function loadCharacterList(uid) {
                 // ▼ 変更点：全件ダウンロードをやめ、「検索インデックス」1件だけを取得
                 const indexDoc = await getDoc(doc(db, "search_meta", "public_index"));
                 cachedPublicCharacters = [];
-                if (indexDoc.exists()) {
-                    cachedPublicCharacters = indexDoc.data().index || [];
+                if (indexDoc.exists() && indexDoc.data().index) {
+                    cachedPublicCharacters = indexDoc.data().index;
                 }
 
                 isPublicCacheLoading = false;
@@ -267,7 +268,7 @@ async function loadCharacterList(uid) {
             }
         }
     } catch (error) {
-        console.error(error);
+        console.error("検索エラー:", error);
         listElement.innerHTML = '<p style="color: lightpink; text-align: center;">リストの取得に失敗しました。</p>';
         isPublicCacheLoading = false;
     }
