@@ -232,7 +232,7 @@ async function renderNetwork(uid) {
             if (targetExists) {
                 // ▼ 追加：矢印ごとにランダムな明るいネオンカラー（HSL）を生成する
                 const hue = Math.floor(Math.random() * 360); // 0〜360のランダムな色相
-                const randomColor = `hsl(${hue}, 100%, 65%)`; // 鮮やかさ100%、明るさ65%で固定
+                const randomColor = `hsl(${hue}, 100%, 75%)`; // 鮮やかさ100%、明るさ65%で固定
 
                 // scripts/mymap.js の renderNetwork 関数内
 
@@ -240,12 +240,12 @@ async function renderNetwork(uid) {
                     from: chara.id,
                     to: targetId,
                     label: relationText || '',
-                    arrows: { to: { enabled: true, scaleFactor: 1 } },
+                    arrows: { to: { enabled: true, scaleFactor: 0.75 } },
                     width: 5,
                     color: { color: randomColor, highlight: '#FFF' },
                     font: {
                         align: 'horizontal',
-                        color: randomColor,
+                        color: '#FFF',
                         strokeWidth: 5,
                         strokeColor: '#050949',
                         size: 25,
@@ -263,12 +263,12 @@ async function renderNetwork(uid) {
         physics: {
             solver: 'repulsion',
             repulsion: {
-                nodeDistance: 250,
-                springLength: 250
+                nodeDistance: 200,
+                springLength: 300
             },
             stabilization: {
                 enabled: true,
-                iterations: 250
+                iterations: 300
             }
         },
         interaction: {
