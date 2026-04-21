@@ -33,10 +33,3 @@ body,
     box-shadow: 0 0 8px rgba(71, 184, 255, 0.6);
     transition: transform 0.2s;
 }
-
-.vis-network canvas {
-    -webkit-tap-highlight-color: transparent;
-    /* タップ時の青い枠を消す */
-    outline: none;
-    /* フォーカス時の枠線を消す */
-}
