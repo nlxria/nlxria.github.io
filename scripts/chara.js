@@ -525,9 +525,9 @@ function renderHumanRelations() {
     const humanData = characterData.data.mymaps.human || {};
 
     // オブジェクトのキー(対象ID)ごとに描画
+    // オブジェクトのキー(対象ID)ごとに描画
     Object.keys(humanData).forEach(targetId => {
         const relationText = humanData[targetId];
-        // ▼ 変更：ステータス枠と全く同じ param-row の横並びスタイルに統一
         const row = document.createElement('div');
         row.className = 'param-row relation-edit-row';
 
@@ -535,16 +535,24 @@ function renderHumanRelations() {
         viewText.className = 'view-only-ui';
         viewText.style.color = "white";
         viewText.style.flex = "1";
-        viewText.textContent = `➡ 読込中... （関係：${relationText}）`;
+        // ▼ 変更：改行を <br> に変更
+        viewText.innerHTML = `読込中...<br>　→　${relationText}`;
 
         if (targetId) {
             getDoc(doc(db, "characters", targetId)).then(snap => {
-                viewText.textContent = snap.exists() ? `${snap.data().data.name || '名無し'}\n　→　${relationText}` : `[非公開または削除済]\n　→　${relationText}`;
-            }).catch(() => { viewText.textContent = `[エラー]`; });
+                if (snap.exists()) {
+                    const targetName = snap.data().data.name || '名無し';
+                    // ▼ 変更：相手のキャラ名と、クリック可能なリンク（別タブで開く）を表示
+                    viewText.innerHTML = `${targetName}<br>　→　<a href="?id=${targetId}" target="_blank" style="color: lightpink;">${relationText}</a>`;
+                } else {
+                    viewText.innerHTML = `[非公開または削除済]<br>　→　${relationText}`;
+                }
+            }).catch(() => { viewText.innerHTML = `[エラー]<br>　→　${relationText}`; });
         }
 
-        // ▼ 変更：入力枠も flex で横幅ピッタリに
+        // --- これより下の idInput などの処理はそのまま ---
         const idInput = document.createElement('div');
+        // ... (省略)
         idInput.className = 'pass-input rel-id-input edit-only-ui';
         idInput.style.flex = "1";
         idInput.contentEditable = 'true';
