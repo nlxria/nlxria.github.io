@@ -539,8 +539,8 @@ function renderHumanRelations() {
 
         if (targetId) {
             getDoc(doc(db, "characters", targetId)).then(snap => {
-                viewText.textContent = snap.exists() ? `➡ ${snap.data().data.name || '名無し'} （関係：${relationText}）` : `➡ [非公開または削除済] （関係：${relationText}）`;
-            }).catch(() => { viewText.textContent = `➡ [取得エラー]`; });
+                viewText.textContent = snap.exists() ? `${snap.data().data.name || '名無し'}\n　→　${relationText}` : `[非公開または削除済]\n　→　${relationText}`;
+            }).catch(() => { viewText.textContent = `[エラー]`; });
         }
 
         // ▼ 変更：入力枠も flex で横幅ピッタリに
@@ -548,7 +548,7 @@ function renderHumanRelations() {
         idInput.className = 'pass-input rel-id-input edit-only-ui';
         idInput.style.flex = "1";
         idInput.contentEditable = 'true';
-        idInput.setAttribute('placeholder', '相手のキャラID');
+        idInput.setAttribute('placeholder', 'ID');
         idInput.textContent = targetId;
         idInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') e.preventDefault(); });
 
@@ -556,7 +556,7 @@ function renderHumanRelations() {
         relInput.className = 'pass-input rel-text-input edit-only-ui';
         relInput.style.flex = "1.5";
         relInput.contentEditable = 'true';
-        relInput.setAttribute('placeholder', '関係（例：相棒）');
+        relInput.setAttribute('placeholder', '関係');
         relInput.textContent = relationText;
         relInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') e.preventDefault(); });
 
