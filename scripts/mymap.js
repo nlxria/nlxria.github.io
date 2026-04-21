@@ -104,14 +104,19 @@ async function fetchMapCharacters(uid) {
     let publicChars = [];
     let myChars = [];
 
-    // ▼ 変更：公開キャラは「集約された1つのファイル」を1回読むだけで全員分取得！
+    // ▼ 変更：公開キャラは「集約された1つのファイル」を1回読むだけで全員分取得する
     if (memoryCachePublic !== null) {
         publicChars = memoryCachePublic;
     } else {
         try {
             const metaDoc = await getDoc(doc(db, "map_meta", "public_pins"));
-            if (metaDoc.exists()) {
-                publicChars = metaDoc.data().pins || [];
+            if (metaDoc.exists() && metaDoc.data().pins) {
+                publicChars = metaDoc.data().pins;
+            } else {
+                console.warn("マップ用インデックスがないため、直接取得します");
+                const q = query(collection(db, "characters"), where("data.privacy", "==", 0));
+                const snap = await getDocs(q);
+                snap.forEach(docSnap => publicChars.push({ id: docSnap.id, data: docSnap.data().data }));
             }
             memoryCachePublic = publicChars;
         } catch (e) {
@@ -141,7 +146,7 @@ async function fetchMapCharacters(uid) {
         }
     }
 
-    // マージして重複排除（自分が作った公開キャラが2重に表示されないようにする）
+    // マージして重複排除
     const charaMap = new Map();
     publicChars.forEach(c => charaMap.set(c.id, c));
     myChars.forEach(c => charaMap.set(c.id, c));
