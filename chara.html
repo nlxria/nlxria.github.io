@@ -42,12 +42,10 @@
                 <button id="export-ccfolia-btn" class="edit-btn" style="display: none;">出力</button>
             </div>
         </header><div class="head"></div>
-        
         <div id="private-alert-container" style="display: none; text-align: center; margin-top: 20vh;">
             <h2 style="color: white; font-size: 2em; margin-bottom: 1em;">このキャラクターは非公開です</h2>
             <a href="/chara" class="edit-btn" style="text-decoration: none;">ホームに戻る</a>
         </div>
-        
         <div id="character-view-area" class="chara-box-wrapper" style="display: none;">
             <div id="profile-container" class="chara-box" style="display: none; padding: 4.5vh; text-align: center;">
                 <div class="profile-image-wrapper">
@@ -56,7 +54,6 @@
                 </div>
                 <div id="chara-ruby" class="editable-area" style="font-size: 1em; margin-top: 0.5em; margin-bottom: -0.5em; min-height: 1.5em; word-break: break-word;"></div>
                 <h1 id="chara-name" class="editable-title"></h1>
-                
                 <select id="chara-privacy-select" class="pass-input" style="width: auto; margin: 1em auto 0; display: block; text-align: center; cursor: pointer;">
                     <option value="0">公開</option>
                     <option value="1">限定公開</option>
@@ -71,36 +68,42 @@
                             <span class="sheet-title-text">マイマップ</span>
                         </span>
                     </summary>
-                    <div class="sheet-content-container" style="padding-top: 1em;">
-                        <details id="map-earth-details" style="margin-bottom: 1em; border-left: 2px solid #466398; padding-left: 10px;">
-                            <summary>
-                                <span class="sheet-header-controls" style="display: flex; align-items: center; width: auto;">
-                                    <span class="accordion-icon"></span>
-                                    <span class="sheet-title-text">世界地図</span>
-                                </span>
-                            </summary>
-                            <div style="margin-top: 1em;">
-                                <p class="edit-only-ui" style="color: #47B8FF; font-size: 0.9em; margin-bottom: 1em; text-align: center;">※編集モード中のみ、地図をタップしてピンを移動できます。</p>
-                                <div id="chara-map" style="height: 40vh; width: 100%; border-radius: 8px; z-index: 1;"></div>
+                    <div class="sheet-content-container">
+                        <div class="sheet-text">
+                            <div class="nested-field">
+                                <details id="map-earth-details">
+                                    <summary>
+                                        <span class="sheet-header-controls" style="display: flex; align-items: center; width: auto;">
+                                            <span class="accordion-icon"></span>
+                                            <span class="sheet-title-text">世界地図</span>
+                                        </span>
+                                    </summary>
+                                    <div class="sheet-content-container">
+                                        <div class="sheet-text">
+                                            <div id="chara-map" style="height: 40vh; width: 100%; z-index: 2;"></div>
+                                        </div>
+                                    </div>
+                                </details>
+                                <details id="map-human-details">
+                                    <summary>
+                                        <span class="sheet-header-controls" style="display: flex; align-items: center; width: auto;">
+                                            <span class="accordion-icon"></span>
+                                            <span class="sheet-title-text">人間関係</span>
+                                        </span>
+                                    </summary>
+                                    <div class="sheet-content-container">
+                                        <div class="sheet-text" id="human-relations-container">
+                                            </div>
+                                    </div>
+                                </details>
                             </div>
-                        </details>
-                        <details id="map-human-details" style="border-left: 2px solid #FF47B8; padding-left: 10px;">
-                            <summary>
-                                <span class="sheet-header-controls" style="display: flex; align-items: center; width: auto;">
-                                    <span class="accordion-icon"></span>
-                                    <span class="sheet-title-text">相関関係</span>
-                                </span>
-                            </summary>
-                            <div id="human-relations-container" style="margin-top: 1em;">
-                                </div>
-                        </details>
+                        </div>
                     </div>
                 </details>
             </div>
             <div id="special-sections-container"></div>
             <div id="sheets-container"></div>
         </div>
-
         <div id="settings-modal" class="modal-overlay" style="display: none;">
             <div class="modal-content">
                 <h3>設定</h3>
@@ -117,7 +120,6 @@
                 </div>
             </div>
         </div>
-
         <div id="dashboard-container" style="display: none; text-align: center; margin-top: 9vh; margin-bottom: 9vh;">
             <h2 style="color: white; font-size: 2em; margin-bottom: 1em;">キャラクターシート</h2>
             <button id="create-chara-btn" class="edit-btn" style="font-size: 1em; padding: 1em; display: none;">キャラクターを作成</button>
@@ -131,7 +133,6 @@
                 </div>
                 <div id="character-list" style="display: flex; flex-direction: column; gap: 10px; margin-top: 1em;"></div>
             </div>
-            
         </div>
         <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
         <script type="module" src="/scripts/chara.js"></script>

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
     <head>
-        <title>キャラクターマップ</title>
+        <title>マイマップ</title>
         <link rel="icon" href="/assets/favicon.ico">
         <link rel="shortcut icon" href="/assets/favicon.ico">
         <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
@@ -14,7 +14,7 @@
         <meta name="viewport" content="width=device-width,initial-scale=1">
         <meta name="description" content="キャラクターの現在地がわかる共有マップ。地図から各キャラのプロフィールへダイレクトにアクセス。">
         <meta name="theme-color" content="#44AEF3">
-        <meta property="og:title" content="キャラクターマップ">
+        <meta property="og:title" content="マイマップ">
         <meta property="og:description" content="キャラクターの現在地がわかる共有マップ。地図から各キャラのプロフィールへダイレクトにアクセス。">
         <meta property="og:type" content="website">
         <meta property="og:locale" content="ja_JP">
@@ -25,11 +25,11 @@
         <meta name="twitter:card" content="summary_large_image">
         <meta name="twitter:site" content="@cthulhumasters">
         <meta name="twitter:creator" content="@nlxria">
-        <meta name="twitter:title" content="キャラクターマップ">
+        <meta name="twitter:title" content="マイマップ">
         <meta name="twitter:description" content="キャラクターの現在地がわかる共有マップ。地図から各キャラのプロフィールへダイレクトにアクセス。">
     </head>
     <body><main>
-        <header><a class="back" href="/mymap">←</a><a class="title" href="/mymap">キャラクターマップ</a>
+        <header><a class="back" href="/mymap">←</a><a class="title" href="/mymap">マイマップ</a>
             <div>
                 <div id="auth-container" style="display: flex; align-items: center; gap: 1em;">
                     <div id="logged-out-ui" style="display: flex; gap: 1em; margin: 0;">
@@ -43,10 +43,10 @@
             </div>
         </header><div class="head"></div>
         <div id="home-menu" style="display: none; padding-top: 20vh; text-align: center; z-index: 10; position: relative;">
-            <h2 style="color: white; font-size: 2.5em; margin-bottom: 1.5em; text-shadow: 0 0 10px #47B8FF;">マイマップ</h2>
+            <h2 style="color: white; font-size: 2em; margin-bottom: 1em;">マイマップ</h2>
             <div style="display: flex; gap: 30px; justify-content: center;">
-                <a href="?md=earth" class="edit-btn" style="text-decoration: none; padding: 1.5em 3em; font-size: 1.2em; border: 2px solid #47B8FF; box-shadow: 0 0 10px rgba(71, 184, 255, 0.5);">世界地図</a>
-                <a href="?md=human" class="edit-btn" style="text-decoration: none; padding: 1.5em 3em; font-size: 1.2em; border: 2px solid #FF47B8; box-shadow: 0 0 10px rgba(255, 71, 184, 0.5);">人間関係</a>
+                <a href="?md=earth" class="edit-btn" style="font-size: 1em; padding: 1em;">世界地図</a>
+                <a href="?md=human" class="edit-btn" style="font-size: 1em; padding: 1em;">人間関係</a>
             </div>
         </div>
         <div id="map" class="maps"></div>
