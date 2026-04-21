@@ -53,17 +53,54 @@ logoutBtn.addEventListener('click', async () => {
     alert("ログアウトしました。");
 });
 
-// === マップの初期化 ===
-const map = L.map('map', {
-    zoomControl: false,
-    attributionControl: false
-}).setView([35.6895, 139.6917], 5);
+// === マップの初期化と表示切り替え ===
+let map = null;
+let currentMarkers = [];
+const mapContainer = document.getElementById('map');
+const homeMenu = document.getElementById('home-menu');
 
-// ライトテーマからダークテーマに変更
-L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
-    subdomains: 'abcd',
-    attribution: '&copy; CARTO'
-}).addTo(map);
+if (currentMode === 'earth') {
+    // 【世界地図モード】
+    mapContainer.style.display = 'block';
+    if (homeMenu) homeMenu.style.display = 'none';
+
+    map = L.map('map', {
+        zoomControl: false,
+        attributionControl: false
+    }).setView([35.6895, 139.6917], 5);
+
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
+        subdomains: 'abcd',
+        attribution: '&copy; CARTO'
+    }).addTo(map);
+
+    map.on('zoomend', () => {
+        const zoom = map.getZoom();
+        const size = Math.max(20, Math.min(120, zoom * 8));
+
+        currentMarkers.forEach(item => {
+            const isPremium = localStorage.getItem('isPremium') === 'true';
+            const iconClassName = isPremium ? 'custom-chara-icon premium-icon' : 'custom-chara-icon';
+            const customIcon = L.divIcon({
+                className: iconClassName,
+                html: `<img src="${item.iconUrl}" onerror="this.src='/assets/image/chara-image.png'">`,
+                iconSize: [size, size],
+                iconAnchor: [size / 2, size / 2]
+            });
+            item.marker.setIcon(customIcon);
+        });
+    });
+
+} else if (currentMode === 'human') {
+    // 【相関図モード】（※ここからこれから作っていきます）
+    mapContainer.style.display = 'none'; // 一旦Leaflet用のコンテナは隠す
+    if (homeMenu) homeMenu.style.display = 'none';
+
+} else {
+    // 【ホーム画面（パラメータなし）】
+    mapContainer.style.display = 'none';
+    if (homeMenu) homeMenu.style.display = 'block';
+}
 
 // 記憶用配列
 let currentMarkers = [];
@@ -118,6 +155,8 @@ async function fetchMapCharacters(uid) {
 
 // === マップにピンを立てる ===
 async function renderMarkers(uid) {
+    if (currentMode !== 'earth' || !map) return; // ▼ ここを厳格に弾くように修正
+
     currentMarkers.forEach(item => map.removeLayer(item.marker));
     currentMarkers = [];
 
