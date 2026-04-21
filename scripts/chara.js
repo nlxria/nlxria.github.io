@@ -429,7 +429,7 @@ function renderMap() {
 
     if (!charaMap) {
         charaMap = L.map('chara-map', { zoomControl: false, attributionControl: false }).setView([centerLat, centerLng], hasCoords ? 10 : 5);
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', { subdomains: 'abcd' }).addTo(charaMap);
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', { subdomains: 'abcd', attribution: '&copy; CARTO' }).addTo(charaMap);
 
         charaMap.on('click', (e) => {
             if (document.getElementById('app-main').classList.contains('edit-mode')) {
