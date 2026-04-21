@@ -63,16 +63,37 @@
                     <option value="2">非公開</option>
                 </select>
             </div>
-            <div class="chara-box" style="margin-bottom: 2em;">
-                <details id="map-details">
+            <div class="chara-box" id="mymaps-box-container" style="margin-bottom: 2em; display: none;">
+                <details id="mymaps-root-details">
                     <summary>
                         <span class="sheet-header-controls" style="display: flex; align-items: center; width: auto;">
                             <span class="accordion-icon"></span>
                             <span class="sheet-title-text">マイマップ</span>
                         </span>
                     </summary>
-                    <div class="sheet-content-container" style="padding: 0;">
-                        <div id="chara-map" style="height: 50vh; width: 100%; border: none; z-index: 1;"></div>
+                    <div class="sheet-content-container" style="padding-top: 1em;">
+                        <details id="map-earth-details" style="margin-bottom: 1em; border-left: 2px solid #466398; padding-left: 10px;">
+                            <summary>
+                                <span class="sheet-header-controls" style="display: flex; align-items: center; width: auto;">
+                                    <span class="accordion-icon"></span>
+                                    <span class="sheet-title-text">世界地図</span>
+                                </span>
+                            </summary>
+                            <div style="margin-top: 1em;">
+                                <p class="edit-only-ui" style="color: #47B8FF; font-size: 0.9em; margin-bottom: 1em; text-align: center;">※編集モード中のみ、地図をタップしてピンを移動できます。</p>
+                                <div id="chara-map" style="height: 40vh; width: 100%; border-radius: 8px; z-index: 1;"></div>
+                            </div>
+                        </details>
+                        <details id="map-human-details" style="border-left: 2px solid #FF47B8; padding-left: 10px;">
+                            <summary>
+                                <span class="sheet-header-controls" style="display: flex; align-items: center; width: auto;">
+                                    <span class="accordion-icon"></span>
+                                    <span class="sheet-title-text">相関関係</span>
+                                </span>
+                            </summary>
+                            <div id="human-relations-container" style="margin-top: 1em;">
+                                </div>
+                        </details>
                     </div>
                 </details>
             </div>

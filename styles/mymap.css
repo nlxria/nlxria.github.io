@@ -2,7 +2,6 @@ html,
 body,
 .maps,
 .leaflet-container {
-    background: #050949 !important;
     overflow: hidden;
 }
 

@@ -46,10 +46,12 @@
             <h2 style="color: white; font-size: 2.5em; margin-bottom: 1.5em; text-shadow: 0 0 10px #47B8FF;">マイマップ</h2>
             <div style="display: flex; gap: 30px; justify-content: center;">
                 <a href="?md=earth" class="edit-btn" style="text-decoration: none; padding: 1.5em 3em; font-size: 1.2em; border: 2px solid #47B8FF; box-shadow: 0 0 10px rgba(71, 184, 255, 0.5);">世界地図</a>
-                <a href="?md=human" class="edit-btn" style="text-decoration: none; padding: 1.5em 3em; font-size: 1.2em; border: 2px solid #FF47B8; box-shadow: 0 0 10px rgba(255, 71, 184, 0.5);">相関図</a>
+                <a href="?md=human" class="edit-btn" style="text-decoration: none; padding: 1.5em 3em; font-size: 1.2em; border: 2px solid #FF47B8; box-shadow: 0 0 10px rgba(255, 71, 184, 0.5);">人間関係</a>
             </div>
         </div>
         <div id="map" class="maps"></div>
+        <div id="network-map" class="maps" style="display: none;"></div>
+        <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
         <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
         <script type="module" src="/scripts/mymap.js"></script>
     </main></body>
