@@ -163,25 +163,33 @@ onAuthStateChanged(auth, (user) => {
     }
 });
 
-// ... (loadCharacterList, renderSpecialSections, status, params, commands, memo, sheets の各関数は前回と同じなので省略せずそのまま配置します) ...
+// === キャラクター一覧の取得と検索（超軽量化版） ===
 async function loadCharacterList(uid) {
     const listElement = document.getElementById('character-list');
     const searchKeyword = searchInput.innerText.trim().toLowerCase();
+
     const renderCards = (charaList) => {
         listElement.innerHTML = '';
         if (charaList.length === 0) {
             listElement.innerHTML = '<p style="color: #E0E0E0; text-align: center;">キャラクターが見つかりません。</p>';
             return;
         }
+
+        // 自分のキャラ一覧の時は日付順にしたいので、dateがあればソート
         const sortedList = [...charaList].sort((a, b) => (b.data.date || 0) - (a.data.date || 0));
+
         sortedList.forEach((chara) => {
             const charaId = chara.id;
             const data = chara.data;
             const card = document.createElement('a');
             card.href = `?id=${charaId}`;
             card.className = 'chara-list-card';
+
             const iconUrl = data.iconUrl || '/assets/image/chara-image.png';
-            const charCount = JSON.stringify({ kind: "character", data: data }).length;
+
+            // ▼ 変更：事前に計算された文字数があればそれを使い、無ければその場で計算
+            const charCount = chara.charCount || JSON.stringify({ kind: "character", data: data }).length;
+
             card.innerHTML = `
                 <img src="${iconUrl}" alt="icon" onerror="this.src='/assets/image/chara-image.png'">
                 <div class="chara-info">
@@ -190,6 +198,7 @@ async function loadCharacterList(uid) {
                 </div>
             `;
             card.querySelector('.card-name-display').textContent = data.name || '名無し';
+
             if (uid && data.owner === uid) {
                 const deleteBtn = document.createElement('button');
                 deleteBtn.textContent = '削除';
@@ -212,37 +221,56 @@ async function loadCharacterList(uid) {
             listElement.appendChild(card);
         });
     };
+
     try {
         if (searchKeyword === "") {
+            // 自分のキャラクター一覧（これは件数が少ないので従来通り直接取得でOK）
             if (!uid) {
                 listElement.innerHTML = '<p style="color: #E0E0E0; text-align: center;">検索キーワードを入力してください。</p>';
                 return;
             }
             if (cachedMyCharacters) return renderCards(cachedMyCharacters);
+
             listElement.innerHTML = '<p style="color: white; text-align: center;">読み込み中...</p>';
             const q = query(collection(db, "characters"), where("data.owner", "==", uid));
             const querySnapshot = await getDocs(q);
             cachedMyCharacters = [];
             querySnapshot.forEach((docSnap) => cachedMyCharacters.push({ id: docSnap.id, data: docSnap.data().data }));
             renderCards(cachedMyCharacters);
+
         } else {
+            // ▼ 変更：公開キャラクターの検索（1件のまとめファイルを読み込む）
             const executeSearch = () => {
-                const filteredList = cachedPublicCharacters.filter(chara => JSON.stringify(chara.data).toLowerCase().includes(searchKeyword));
+                const filteredList = cachedPublicCharacters.filter(chara => {
+                    // 事前に結合された searchText の中でキーワードを探す
+                    return chara.searchText && chara.searchText.includes(searchKeyword);
+                });
                 renderCards(filteredList);
             };
-            if (cachedPublicCharacters) { executeSearch(); } else {
+
+            if (cachedPublicCharacters) {
+                executeSearch();
+            } else {
                 if (isPublicCacheLoading) return;
                 isPublicCacheLoading = true;
                 listElement.innerHTML = '<p style="color: white; text-align: center;">公開データを取得中...</p>';
-                const q = query(collection(db, "characters"), where("data.privacy", "==", 0));
-                const querySnapshot = await getDocs(q);
+
+                // ▼ 変更点：全件ダウンロードをやめ、「検索インデックス」1件だけを取得
+                const indexDoc = await getDoc(doc(db, "search_meta", "public_index"));
                 cachedPublicCharacters = [];
-                querySnapshot.forEach((docSnap) => cachedPublicCharacters.push({ id: docSnap.id, data: docSnap.data().data }));
+                if (indexDoc.exists()) {
+                    cachedPublicCharacters = indexDoc.data().index || [];
+                }
+
                 isPublicCacheLoading = false;
                 executeSearch();
             }
         }
-    } catch (error) { listElement.innerHTML = '<p style="color: lightpink; text-align: center;">リストの取得に失敗しました。</p>'; isPublicCacheLoading = false; }
+    } catch (error) {
+        console.error(error);
+        listElement.innerHTML = '<p style="color: lightpink; text-align: center;">リストの取得に失敗しました。</p>';
+        isPublicCacheLoading = false;
+    }
 }
 
 function renderSpecialSections() {

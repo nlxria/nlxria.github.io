@@ -1,7 +1,7 @@
 // 注意: 実際のFirebase設定情報に書き換えてください
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+import { getFirestore, collection, query, where, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyBP17_hAR-NO_OT0MWDvtISiM20fjg1eO4",
@@ -99,31 +99,49 @@ if (currentMode === 'earth') {
     if (homeMenu) homeMenu.style.display = 'block';
 }
 
-// === キャラクターデータの取得 ===
+// === キャラクターデータの取得（超軽量化版） ===
 async function fetchMapCharacters(uid) {
     let publicChars = [];
     let myChars = [];
 
+    // ▼ 変更：公開キャラは「集約された1つのファイル」を1回読むだけで全員分取得！
     if (memoryCachePublic !== null) {
         publicChars = memoryCachePublic;
     } else {
-        const q = query(collection(db, "characters"), where("data.privacy", "==", 0));
-        const snap = await getDocs(q);
-        snap.forEach(doc => publicChars.push({ id: doc.id, data: doc.data().data }));
-        memoryCachePublic = publicChars;
+        try {
+            const metaDoc = await getDoc(doc(db, "map_meta", "public_pins"));
+            if (metaDoc.exists()) {
+                publicChars = metaDoc.data().pins || [];
+            }
+            memoryCachePublic = publicChars;
+        } catch (e) {
+            console.error("集約データの取得エラー:", e);
+        }
     }
 
+    // 自分のキャラクターの取得（従来通り、自分の分だけ取得）
     if (uid) {
         if (memoryCacheMine !== null) {
             myChars = memoryCacheMine;
         } else {
             const q2 = query(collection(db, "characters"), where("data.owner", "==", uid));
             const snap2 = await getDocs(q2);
-            snap2.forEach(doc => myChars.push({ id: doc.id, data: doc.data().data }));
+            snap2.forEach(docSnap => {
+                const d = docSnap.data().data;
+                myChars.push({
+                    id: docSnap.id,
+                    data: {
+                        name: d.name || "名無し",
+                        iconUrl: d.iconUrl || "/assets/image/chara-image.png",
+                        mymaps: d.mymaps || { earth: [0, 0], human: {} }
+                    }
+                });
+            });
             memoryCacheMine = myChars;
         }
     }
 
+    // マージして重複排除（自分が作った公開キャラが2重に表示されないようにする）
     const charaMap = new Map();
     publicChars.forEach(c => charaMap.set(c.id, c));
     myChars.forEach(c => charaMap.set(c.id, c));
