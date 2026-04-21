@@ -454,7 +454,6 @@ div.pass-input[contenteditable="true"]:empty::before {
 #chara-map {
     position: relative;
     background: #050949 !important;
-    border: 1px solid #44AEF3;
     overflow: hidden;
 }
 
