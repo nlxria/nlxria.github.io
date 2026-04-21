@@ -219,7 +219,7 @@ async function renderNetwork(uid) {
                 border: '#44AEF3',
                 background: '#050949'
             },
-            font: { color: '#FFF', strokeWidth: 5, strokeColor: '#050949', size: 25 }
+            font: { color: '#FFF', strokeWidth: 5, strokeColor: '#050949', size: 25, face: 'ShinMaruGo' }
         });
 
         // エッジ（関係性）の作成
