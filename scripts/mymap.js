@@ -210,13 +210,13 @@ async function renderNetwork(uid) {
             shape: 'circularImage',
             image: data.iconUrl || '/assets/image/chara-image.png',
             brokenImage: '/assets/image/chara-image.png', // ★追加：画像読み込みエラー時はこれを表示し、処理を止めない
-            size: 35,
-            borderWidth: 2,
+            size: 50,
+            borderWidth: 5,
             color: {
                 border: '#44AEF3',
                 background: '#050949'
             },
-            font: { color: '#FFF', strokeWidth: 3, strokeColor: '#050949', size: 16 }
+            font: { color: '#FFF', strokeWidth: 5, strokeColor: '#050949', size: 25 }
         });
 
         // エッジ（関係性）の作成
@@ -231,14 +231,23 @@ async function renderNetwork(uid) {
                 const hue = Math.floor(Math.random() * 360); // 0〜360のランダムな色相
                 const randomColor = `hsl(${hue}, 100%, 65%)`; // 鮮やかさ100%、明るさ65%で固定
 
+                // scripts/mymap.js の renderNetwork 関数内
+
                 edges.push({
                     from: chara.id,
                     to: targetId,
                     label: relationText || '',
                     arrows: { to: { enabled: true, scaleFactor: 0.7 } },
-                    // ▼ 変更：線と文字の色をランダムカラーに設定
+                    width: 5,
                     color: { color: randomColor, highlight: '#FFF' },
-                    font: { align: 'horizontal', color: randomColor, strokeWidth: 3, strokeColor: '#050949', size: 14 }
+                    font: {
+                        align: 'horizontal',
+                        color: randomColor,
+                        strokeWidth: 5,
+                        strokeColor: '#050949',
+                        size: 20,
+                        face: 'ShinMaruGo' // ★ここを追加
+                    }
                 });
             }
         });
