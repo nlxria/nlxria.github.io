@@ -124,25 +124,23 @@ async function fetchMapCharacters(uid) {
         }
     }
 
-    // 自分のキャラクターの取得（従来通り、自分の分だけ取得）
+    // mymap.js 内 fetchMapCharacters の抜粋
     if (uid) {
         if (memoryCacheMine !== null) {
             myChars = memoryCacheMine;
         } else {
-            const q2 = query(collection(db, "characters"), where("data.owner", "==", uid));
-            const snap2 = await getDocs(q2);
-            snap2.forEach(docSnap => {
-                const d = docSnap.data().data;
-                myChars.push({
-                    id: docSnap.id,
-                    data: {
-                        name: d.name || "名無し",
-                        iconUrl: d.iconUrl || "/assets/image/chara-image.png",
-                        mymaps: d.mymaps || { earth: [0, 0], human: {} }
-                    }
-                });
-            });
-            memoryCacheMine = myChars;
+            try {
+                const myIndexDoc = await getDoc(doc(db, `users/${uid}/meta/index`));
+                if (myIndexDoc.exists()) {
+                    myChars = myIndexDoc.data().index || [];
+                } else {
+                    // フォールバック
+                    const q2 = query(collection(db, "characters"), where("data.owner", "==", uid));
+                    const snap2 = await getDocs(q2);
+                    snap2.forEach(docSnap => myChars.push({ id: docSnap.id, data: docSnap.data().data }));
+                }
+                memoryCacheMine = myChars;
+            } catch (e) { console.error(e); }
         }
     }
 

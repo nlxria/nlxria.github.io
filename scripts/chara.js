@@ -223,21 +223,29 @@ async function loadCharacterList(uid) {
     };
 
     try {
+        // chara.js 内 loadCharacterList の抜粋
         if (searchKeyword === "") {
-            // 自分のキャラクター一覧（従来通り直接取得）
-            if (!uid) {
-                listElement.innerHTML = '<p style="color: #E0E0E0; text-align: center;">検索キーワードを入力してください。</p>';
-                return;
-            }
+            if (!uid) { /* ログイン案内... */ return; }
             if (cachedMyCharacters) return renderCards(cachedMyCharacters);
 
             listElement.innerHTML = '<p style="color: white; text-align: center;">読み込み中...</p>';
-            const q = query(collection(db, "characters"), where("data.owner", "==", uid));
-            const querySnapshot = await getDocs(q);
-            cachedMyCharacters = [];
-            querySnapshot.forEach((docSnap) => cachedMyCharacters.push({ id: docSnap.id, data: docSnap.data().data }));
-            renderCards(cachedMyCharacters);
 
+            try {
+                // ▼ 修正：全件取得(getDocs)をやめ、専用インデックスを1件だけ読む(getDoc)
+                const myIndexDoc = await getDoc(doc(db, `users/${uid}/meta/index`));
+                if (myIndexDoc.exists()) {
+                    cachedMyCharacters = myIndexDoc.data().index || [];
+                } else {
+                    // インデックスがない場合のフォールバック（初回など）
+                    const q = query(collection(db, "characters"), where("data.owner", "==", uid));
+                    const querySnapshot = await getDocs(q);
+                    cachedMyCharacters = [];
+                    querySnapshot.forEach((docSnap) => cachedMyCharacters.push({ id: docSnap.id, data: docSnap.data().data }));
+                }
+                renderCards(cachedMyCharacters);
+            } catch (e) {
+                console.error("個人リスト取得エラー:", e);
+            }
         } else {
             // 公開キャラクターの検索
             const executeSearch = () => {
