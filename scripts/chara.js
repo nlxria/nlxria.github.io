@@ -423,20 +423,26 @@ function renderProfile() {
     const imgInput = document.getElementById('chara-image-input');
     const privacySelect = document.getElementById('chara-privacy-select');
 
+    // ▼ 追加：画像エラー時の安全装置（クラッシュを防ぎ、デフォルト画像に差し替える）
+    imgEl.onerror = function () {
+        this.onerror = null; // 無限ループ防止
+        this.src = '/assets/image/chara-image.png';
+    };
+
     if (data.iconUrl) imgEl.src = data.iconUrl;
+    else imgEl.src = '/assets/image/chara-image.png';
 
     nameEl.className = 'editable-title editable-area';
     nameEl.innerHTML = data.name;
     rubyEl.innerHTML = data.ruby || "";
     imgInput.innerText = data.iconUrl || "";
 
-    // ▼ 名前クリックでIDをコピー（編集モード外のみ）
     nameEl.title = "クリックでキャラIDをコピー";
     nameEl.style.cursor = "pointer";
     nameEl.onclick = (e) => {
         if (!mainElement.classList.contains('edit-mode')) {
             navigator.clipboard.writeText(characterId).then(() => {
-                alert("このキャラクターのIDをコピーしました！\n相関図の登録などに使用できます。\n【 ID: " + characterId + " 】");
+                alert("このキャラクターのIDをコピーしました！\n人間関係の登録などに使用できます。\nID：" + characterId);
             });
         }
     };
@@ -512,29 +518,24 @@ function updateMarkerPosition(lat, lng) {
     else { charaMarker.setLatLng([lat, lng]); charaMarker.setIcon(customIcon); }
 }
 
-// === マイマップ：相関関係 ===
+// === マイマップ：相関関係（レイアウト修正版） ===
 function renderHumanRelations() {
     const container = document.getElementById('human-relations-container');
     container.innerHTML = '';
     const humanData = characterData.data.mymaps.human || {};
 
-    const hint = document.createElement('p');
-    hint.className = 'edit-only-ui';
-    hint.style.color = '#47B8FF';
-    hint.style.fontSize = '0.85em';
-    hint.style.marginBottom = '1em';
-    hint.innerHTML = '※関係を結びたい相手の<strong>キャラID</strong>を入力してください。<br>（IDは相手のキャラ名をクリックすることでコピーできます）';
-    container.appendChild(hint);
-
     // オブジェクトのキー(対象ID)ごとに描画
     Object.keys(humanData).forEach(targetId => {
         const relationText = humanData[targetId];
+        // ▼ 変更：ステータス枠と全く同じ param-row の横並びスタイルに統一
         const row = document.createElement('div');
         row.className = 'param-row relation-edit-row';
-        row.style.display = 'flex'; row.style.flexDirection = 'column'; row.style.gap = '10px'; row.style.marginBottom = '15px'; row.style.borderBottom = '1px dashed #322E7B'; row.style.paddingBottom = '15px';
 
         const viewText = document.createElement('span');
-        viewText.className = 'view-only-ui'; viewText.style.color = "white"; viewText.textContent = `➡ 読込中... （関係：${relationText}）`;
+        viewText.className = 'view-only-ui';
+        viewText.style.color = "white";
+        viewText.style.flex = "1";
+        viewText.textContent = `➡ 読込中... （関係：${relationText}）`;
 
         if (targetId) {
             getDoc(doc(db, "characters", targetId)).then(snap => {
@@ -542,46 +543,69 @@ function renderHumanRelations() {
             }).catch(() => { viewText.textContent = `➡ [取得エラー]`; });
         }
 
-        const inputContainer = document.createElement('div');
-        inputContainer.className = 'edit-only-ui'; inputContainer.style.display = 'flex'; inputContainer.style.gap = '10px';
-
+        // ▼ 変更：入力枠も flex で横幅ピッタリに
         const idInput = document.createElement('div');
-        idInput.className = 'pass-input rel-id-input'; idInput.style.flex = "1"; idInput.style.margin = "0"; idInput.contentEditable = 'true';
-        idInput.setAttribute('placeholder', '相手のキャラID'); idInput.textContent = targetId;
+        idInput.className = 'pass-input rel-id-input edit-only-ui';
+        idInput.style.flex = "1";
+        idInput.contentEditable = 'true';
+        idInput.setAttribute('placeholder', '相手のキャラID');
+        idInput.textContent = targetId;
         idInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') e.preventDefault(); });
 
         const relInput = document.createElement('div');
-        relInput.className = 'pass-input rel-text-input'; relInput.style.flex = "1.5"; relInput.style.margin = "0"; relInput.contentEditable = 'true';
-        relInput.setAttribute('placeholder', '関係（例：相棒）'); relInput.textContent = relationText;
+        relInput.className = 'pass-input rel-text-input edit-only-ui';
+        relInput.style.flex = "1.5";
+        relInput.contentEditable = 'true';
+        relInput.setAttribute('placeholder', '関係（例：相棒）');
+        relInput.textContent = relationText;
         relInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') e.preventDefault(); });
 
         const delBtn = document.createElement('button');
-        delBtn.textContent = "削除"; delBtn.className = 'setting-btn';
+        delBtn.textContent = "削除";
+        delBtn.className = 'setting-btn edit-only-ui';
         delBtn.addEventListener('click', () => { row.remove(); applyEditMode(); });
 
-        inputContainer.append(idInput, relInput, delBtn);
-        row.append(viewText, inputContainer);
+        row.append(viewText, idInput, relInput, delBtn);
         container.appendChild(row);
     });
 
     const addBtn = document.createElement('button');
-    addBtn.textContent = "関係を追加"; addBtn.className = 'add-resource-btn edit-only-ui';
+    addBtn.textContent = "関係を追加";
+    addBtn.className = 'add-resource-btn edit-only-ui';
     addBtn.addEventListener('click', () => {
-        // 一時的に空の入力枠を追加する
         const row = document.createElement('div');
         row.className = 'param-row relation-edit-row edit-only-ui';
-        row.style.display = 'flex'; row.style.flexDirection = 'column'; row.style.gap = '10px'; row.style.marginBottom = '15px'; row.style.borderBottom = '1px dashed #322E7B'; row.style.paddingBottom = '15px';
-        const inputContainer = document.createElement('div'); inputContainer.style.display = 'flex'; inputContainer.style.gap = '10px';
-        const idInput = document.createElement('div'); idInput.className = 'pass-input rel-id-input'; idInput.style.flex = "1"; idInput.style.margin = "0"; idInput.contentEditable = 'true'; idInput.setAttribute('placeholder', '相手のキャラID'); idInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') e.preventDefault(); });
-        const relInput = document.createElement('div'); relInput.className = 'pass-input rel-text-input'; relInput.style.flex = "1.5"; relInput.style.margin = "0"; relInput.contentEditable = 'true'; relInput.setAttribute('placeholder', '関係（例：相棒）'); relInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') e.preventDefault(); });
-        const delBtn = document.createElement('button'); delBtn.textContent = "削除"; delBtn.className = 'setting-btn'; delBtn.addEventListener('click', () => { row.remove(); applyEditMode(); });
-        inputContainer.append(idInput, relInput, delBtn); row.appendChild(inputContainer);
+
+        const viewText = document.createElement('span');
+        viewText.className = 'view-only-ui';
+        viewText.style.color = "white";
+        viewText.style.flex = "1";
+
+        const idInput = document.createElement('div');
+        idInput.className = 'pass-input rel-id-input edit-only-ui';
+        idInput.style.flex = "1";
+        idInput.contentEditable = 'true';
+        idInput.setAttribute('placeholder', 'ID');
+        idInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') e.preventDefault(); });
+
+        const relInput = document.createElement('div');
+        relInput.className = 'pass-input rel-text-input edit-only-ui';
+        relInput.style.flex = "1.5";
+        relInput.contentEditable = 'true';
+        relInput.setAttribute('placeholder', '関係');
+        relInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') e.preventDefault(); });
+
+        const delBtn = document.createElement('button');
+        delBtn.textContent = "削除";
+        delBtn.className = 'setting-btn edit-only-ui';
+        delBtn.addEventListener('click', () => { row.remove(); applyEditMode(); });
+
+        row.append(viewText, idInput, relInput, delBtn);
         container.insertBefore(row, addBtn);
         applyEditMode();
     });
     container.appendChild(addBtn);
 }
-
 
 function updateSheetsContainerVisibility() {
     const isEditing = document.getElementById('app-main').classList.contains('edit-mode');

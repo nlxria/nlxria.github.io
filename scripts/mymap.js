@@ -175,7 +175,8 @@ async function renderMarkers(uid) {
 
         const customIcon = L.divIcon({
             className: 'custom-chara-icon',
-            html: `<img src="${iconUrl}" onerror="this.src='/assets/image/chara-image.png'">`,
+            // ▼ 変更： onerror で無限ループ防止の null 処理を追加
+            html: `<img src="${iconUrl}" onerror="this.src='/assets/image/chara-image.png'; this.onerror=null;">`,
             iconSize: [size, size],
             iconAnchor: [size / 2, size / 2]
         });
@@ -208,10 +209,11 @@ async function renderNetwork(uid) {
             label: data.name || '名無し',
             shape: 'circularImage',
             image: data.iconUrl || '/assets/image/chara-image.png',
+            brokenImage: '/assets/image/chara-image.png', // ★追加：画像読み込みエラー時はこれを表示し、処理を止めない
             size: 35,
             borderWidth: 2,
             color: {
-                border: '#47B8FF', // クリーンなネオンブルーで統一
+                border: '#44AEF3',
                 background: '#050949'
             },
             font: { color: '#FFF', strokeWidth: 3, strokeColor: '#050949', size: 16 }
@@ -225,19 +227,24 @@ async function renderNetwork(uid) {
 
             const targetExists = characters.find(c => c.id === targetId);
             if (targetExists) {
+                // ▼ 追加：矢印ごとにランダムな明るいネオンカラー（HSL）を生成する
+                const hue = Math.floor(Math.random() * 360); // 0〜360のランダムな色相
+                const randomColor = `hsl(${hue}, 100%, 65%)`; // 鮮やかさ100%、明るさ65%で固定
+
                 edges.push({
                     from: chara.id,
                     to: targetId,
                     label: relationText || '',
                     arrows: { to: { enabled: true, scaleFactor: 0.7 } },
-                    color: { color: '#FF47B8', highlight: '#FFF' },
-                    font: { align: 'horizontal', color: '#FF47B8', strokeWidth: 3, strokeColor: '#050949', size: 14 }
+                    // ▼ 変更：線と文字の色をランダムカラーに設定
+                    color: { color: randomColor, highlight: '#FFF' },
+                    font: { align: 'horizontal', color: randomColor, strokeWidth: 3, strokeColor: '#050949', size: 14 }
                 });
             }
         });
     });
 
-    networkContainer.innerHTML = ''; // ロード文字を消去
+    networkContainer.innerHTML = '';
 
     const graphData = { nodes: new vis.DataSet(nodes), edges: new vis.DataSet(edges) };
     const options = {
