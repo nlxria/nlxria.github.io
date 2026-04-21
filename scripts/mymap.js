@@ -209,14 +209,14 @@ async function renderNetwork(uid) {
         // ノードの作成
         nodes.push({
             id: chara.id,
-            label: data.name || '名無し',
+            label: '',
             shape: 'circularImage',
             image: data.iconUrl || '/assets/image/chara-image.png',
             brokenImage: '/assets/image/chara-image.png', // ★追加：画像読み込みエラー時はこれを表示し、処理を止めない
             size: 50,
             borderWidth: 5,
             color: {
-                border: '#44AEF3',
+                border: '#FFF',
                 background: '#050949'
             },
             font: { color: '#FFF', strokeWidth: 5, strokeColor: '#050949', size: 25, face: 'ShinMaruGo' }
@@ -240,7 +240,7 @@ async function renderNetwork(uid) {
                     from: chara.id,
                     to: targetId,
                     label: relationText || '',
-                    arrows: { to: { enabled: true, scaleFactor: 0.7 } },
+                    arrows: { to: { enabled: true, scaleFactor: 1 } },
                     width: 5,
                     color: { color: randomColor, highlight: '#FFF' },
                     font: {
@@ -248,7 +248,7 @@ async function renderNetwork(uid) {
                         color: randomColor,
                         strokeWidth: 5,
                         strokeColor: '#050949',
-                        size: 20,
+                        size: 25,
                         face: 'ShinMaruGo' // ★ここを追加
                     }
                 });
@@ -264,11 +264,11 @@ async function renderNetwork(uid) {
             solver: 'repulsion',
             repulsion: {
                 nodeDistance: 250,
-                springLength: 200
+                springLength: 250
             },
             stabilization: {
                 enabled: true,
-                iterations: 200
+                iterations: 250
             }
         },
         interaction: {
