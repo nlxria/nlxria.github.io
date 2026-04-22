@@ -230,28 +230,36 @@ async function renderNetwork(uid) {
 
             const targetExists = characters.find(c => c.id === targetId);
             if (targetExists) {
-                // ▼ 追加：矢印ごとにランダムな明るいネオンカラー（HSL）を生成する
-                const hue = Math.floor(Math.random() * 360); // 0〜360のランダムな色相
-                const randomColor = `hsl(${hue}, 100%, 75%)`; // 鮮やかさ100%、明るさ65%で固定
+                const labelText = relationText || '';
 
-                // scripts/mymap.js の renderNetwork 関数内
+                // ★追加: 逆方向のエッジ（相手→自分）で、かつ同じラベル名がすでに存在するか探す
+                const existingReverseEdge = edges.find(e => e.from === targetId && e.to === chara.id && e.label === labelText);
 
-                edges.push({
-                    from: chara.id,
-                    to: targetId,
-                    label: relationText || '',
-                    arrows: { to: { enabled: true, scaleFactor: 0.75 } },
-                    width: 5,
-                    color: { color: randomColor, highlight: '#FFF' },
-                    font: {
-                        align: 'horizontal',
-                        color: '#FFF',
-                        strokeWidth: 5,
-                        strokeColor: '#050949',
-                        size: 25,
-                        face: 'ShinMaruGo' // ★ここを追加
-                    }
-                });
+                if (existingReverseEdge) {
+                    // ★追加: 存在する場合は、既存の矢印を「双方向」に更新して終了（新規追加しない）
+                    existingReverseEdge.arrows.from = { enabled: true, scaleFactor: 0.7 };
+                } else {
+                    // 存在しない場合は通常通り新規追加
+                    const hue = Math.floor(Math.random() * 360); // 0〜360のランダムな色相
+                    const randomColor = `hsl(${hue}, 100%, 75%)`; // 鮮やかさ100%、明るさ75%で固定
+
+                    edges.push({
+                        from: chara.id,
+                        to: targetId,
+                        label: labelText,
+                        arrows: { to: { enabled: true, scaleFactor: 0.75 } },
+                        width: 5,
+                        color: { color: randomColor, highlight: '#FFF' },
+                        font: {
+                            align: 'horizontal',
+                            color: '#FFF',
+                            strokeWidth: 5,
+                            strokeColor: '#050949',
+                            size: 25,
+                            face: 'ShinMaruGo'
+                        }
+                    });
+                }
             }
         });
     });
