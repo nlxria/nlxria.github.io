@@ -210,9 +210,17 @@ async function loadCharacterList(uid) {
                         try {
                             await deleteDoc(doc(db, "characters", charaId));
                             alert("キャラクターを削除しました。");
-                            cachedMyCharacters = null;
-                            cachedPublicCharacters = null;
-                            loadCharacterList(uid);
+
+                            // ★修正: キャッシュをクリアして再読み込みするのではなく、
+                            // ローカルの配列から直接該当キャラを削除して再描画する（タイムラグ対策）
+                            if (cachedMyCharacters) {
+                                cachedMyCharacters = cachedMyCharacters.filter(c => c.id !== charaId);
+                            }
+                            if (cachedPublicCharacters) {
+                                cachedPublicCharacters = cachedPublicCharacters.filter(c => c.id !== charaId);
+                            }
+                            renderCards(cachedMyCharacters); // 即座に再描画
+
                         } catch (err) { alert("削除に失敗しました。"); }
                     }
                 });
